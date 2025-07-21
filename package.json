@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "drizzle-kit introspect",
+    "db:push": "supabase db push",
+    "new-migration": "supabase migration new"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.10.0",
