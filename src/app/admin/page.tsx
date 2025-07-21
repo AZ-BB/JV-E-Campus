@@ -1,7 +1,18 @@
-export default function Admin() {
+import UserTable from '@/components/UserTable';
+import { getAdminUsers, getStaffUsers } from '@/actions/users';
+
+export default async function Admin() {
+  const adminUsers = await getAdminUsers();
+  const staffUsers = await getStaffUsers();
   return (
-    <div className="flex h-screen items-center justify-center bg-gray-900 text-white">
-      <h1 className="text-4xl font-bold">Admin Page</h1>
+    <div className="min-h-screen bg-gray-900 text-white">
+      <div className="container mx-auto py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-gray-400">Manage users and system settings</p>
+        </div>
+        <UserTable adminUsers={adminUsers} staffUsers={staffUsers} />
+      </div>
     </div>
   )
 }

@@ -54,6 +54,13 @@ export default function SignIn() {
         // Redirect based on role
         const role = data.user.user_metadata?.role;
         console.log('User signed in with role:', role);
+        if (role === 'ADMIN') {
+          router.push('/admin');
+        } else if (role === 'STAFF') {
+          router.push('/staff');
+        } else {
+          router.push('/');
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred');
