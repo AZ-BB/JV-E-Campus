@@ -38,8 +38,8 @@ export default function RolesStats({ rolesStats }: { rolesStats: GeneralActionRe
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Branches Statistics</h1>
-        <p className="text-gray-400">Overview of your branches</p>
+        <h1 className="text-3xl font-bold text-white mb-2">Roles</h1>
+        <p className="text-gray-400">Overview of system roles</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
