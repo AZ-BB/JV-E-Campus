@@ -38,7 +38,8 @@ export default function Pagination({
 
     return (
         <div className="flex space-x-2">
-            <div>
+            <div className="flex items-center gap-1">
+                <span className="text-sm text-gray-300">Page size:</span>
                 <SelectRoot onSelect={(value) => onSizeChange(Number(value))}>
                     <SelectTrigger className="w-12 h-7 text-sm text-gray-300 bg-gray-800 border border-gray-700 hover:bg-gray-700">
                         <SelectValue className="text-gray-300" placeholder={`${pageSize}`} />

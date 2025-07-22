@@ -1,7 +1,7 @@
 'use client'
-import { TableRoot, TableHeader, TableBody, TableRow, TableCell, TableHead, Table } from "@/components/ui/table";
+import { Table } from "@/components/ui/table";
 import { GeneralActionResponse } from "@/types/general-action-response";
-import { ChevronUp, ChevronLeft, ChevronRight, Pencil, Trash } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Pagination from "./ui/pagination";
 import Button from "./ui/button";
@@ -38,6 +38,7 @@ export default function UserTable({
                         key: "id",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
+                        componentKey: "id",
                         sorted: sort === "id",
                         order: order === "asc" ? "desc" : "asc"
                     },
@@ -46,6 +47,7 @@ export default function UserTable({
                         key: "fullName",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
+                        componentKey: "fullName",
                         sorted: sort === "fullName",
                         order: order === "asc" ? "desc" : "asc"
                     },
@@ -54,6 +56,7 @@ export default function UserTable({
                         key: "email",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
+                        componentKey: "email",
                         sorted: sort === "email",
                         order: order === "asc" ? "desc" : "asc"
                     },
@@ -62,6 +65,7 @@ export default function UserTable({
                         key: "language",
                         sortable: false,
                         cell: (value) => <div>{value}</div>,
+                        componentKey: "language",
                         sorted: sort === "language",
                         order: order === "asc" ? "desc" : "asc"
                     },
@@ -70,12 +74,14 @@ export default function UserTable({
                         key: "createdAt",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
+                        componentKey: "createdAt",
                         sorted: sort === "createdAt",
                         order: order === "asc" ? "desc" : "asc"
                     },
                     {
                         label: "Actions",
                         key: "id",
+                        componentKey: "actions",
                         cell: (value) => (
                             <div className="flex gap-2">
                                 <Button className="w-8 h-8">
