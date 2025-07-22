@@ -43,9 +43,9 @@ export default function StaffStats({ staffStats }: { staffStats: GeneralActionRe
               <div className={`${stat.textColor} text-2xl`}>
                 {stat.icon}
               </div>
-              {/* <div className={`${stat.textColor} bg-gray-700 rounded-full px-2 py-1 text-xs font-medium`}>
+              <div className={`${stat.textColor} bg-gray-700 rounded-full px-2 py-1 text-xs font-medium`}>
                 Active
-              </div> */}
+              </div>
             </div>
             
             <div className="space-y-2">
