@@ -27,6 +27,7 @@ export default function BranchesTable({
                     {
                         label: "ID",
                         key: "id",
+                        componentKey: "id",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "id",
@@ -35,6 +36,7 @@ export default function BranchesTable({
                     {
                         label: "Name",
                         key: "name",
+                        componentKey: "name",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "name",
@@ -43,6 +45,7 @@ export default function BranchesTable({
                     {
                         label: "Staff Count",
                         key: "staffCount",
+                        componentKey: "staffCount",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "staffCount",
@@ -51,6 +54,7 @@ export default function BranchesTable({
                     {
                         label: "Created At",
                         key: "createdAt",
+                        componentKey: "createdAt",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "createdAt",
@@ -59,6 +63,7 @@ export default function BranchesTable({
                     {
                         label: "Updated At",
                         key: "updatedAt",
+                        componentKey: "updatedAt",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "updatedAt",
@@ -67,6 +72,7 @@ export default function BranchesTable({
                     {
                         label: "Actions",
                         key: "id",
+                        componentKey: "actions",
                         cell: (value) => (
                             <div className="flex gap-2">
                                 <Button className="w-8 h-8">

@@ -27,6 +27,7 @@ export default function StaffTable({
                     {
                         label: "ID",
                         key: "id",
+                        componentKey: "id",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "id",
@@ -35,6 +36,7 @@ export default function StaffTable({
                     {
                         label: "Name",
                         key: "fullName",
+                        componentKey: "fullName",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "fullName",
@@ -43,6 +45,7 @@ export default function StaffTable({
                     {
                         label: "Email",
                         key: "email",
+                        componentKey: "email",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "email",
@@ -51,6 +54,7 @@ export default function StaffTable({
                     {
                         label: "Language",
                         key: "language",
+                        componentKey: "language",
                         sortable: false,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "language",
@@ -59,6 +63,7 @@ export default function StaffTable({
                     {
                         label: "Role",
                         key: "staffRoleName",
+                        componentKey: "staffRoleName",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "staffRoleName",
@@ -67,6 +72,7 @@ export default function StaffTable({
                     {
                         label: "Branch",
                         key: "branchName",
+                        componentKey: "branchName",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "branchName",
@@ -75,6 +81,7 @@ export default function StaffTable({
                     {
                         label: "Nationality",
                         key: "nationality",
+                        componentKey: "nationality",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "nationality",
@@ -83,6 +90,7 @@ export default function StaffTable({
                     {
                         label: "Phone Number",
                         key: "phoneNumber",
+                        componentKey: "phoneNumber",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "phoneNumber",
@@ -91,6 +99,7 @@ export default function StaffTable({
                     {
                         label: "Created At",
                         key: "createdAt",
+                        componentKey: "createdAt",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "createdAt",
@@ -99,6 +108,7 @@ export default function StaffTable({
                     {
                         label: "Updated At",
                         key: "updatedAt",
+                        componentKey: "updatedAt",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "updatedAt",
@@ -107,6 +117,7 @@ export default function StaffTable({
                     {
                         label: "Created By",
                         key: "createdByName",
+                        componentKey: "createdByName",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "createdByName",
@@ -115,6 +126,7 @@ export default function StaffTable({
                     {
                         label: "Actions",
                         key: "id",
+                        componentKey: "actions",
                         cell: (value) => (
                             <div className="flex gap-2">
                                 <Button className="w-8 h-8">

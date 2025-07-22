@@ -27,6 +27,7 @@ export default function RolesTable({
                     {
                         label: "ID",
                         key: "id",
+                        componentKey: "id",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "id",
@@ -35,6 +36,7 @@ export default function RolesTable({
                     {
                         label: "Name",
                         key: "name",
+                        componentKey: "name",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "name",
@@ -43,6 +45,7 @@ export default function RolesTable({
                     {
                         label: "Full Name",
                         key: "fullName",
+                        componentKey: "fullName",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "fullName",
@@ -51,6 +54,7 @@ export default function RolesTable({
                     {
                         label: "Staff Count",
                         key: "staffCount",
+                        componentKey: "staffCount",
                         sortable: true,
                         cell: (value) => <div>{value}</div>,
                         sorted: sort === "staffCount",
@@ -59,6 +63,7 @@ export default function RolesTable({
                     {
                         label: "Actions",
                         key: "id",
+                        componentKey: "actions",
                         cell: (value) => (
                             <div className="flex gap-2">
                                 <Button className="w-8 h-8">
