@@ -1,28 +1,60 @@
 "use server"
 import { db } from "@/db"
 import { StaffCategory, UserRole } from "@/db/enums"
-import { staff, users } from "@/db/schema/schema"
-import {
-  createSupabaseAdminClient,
-} from "@/utils/supabase-browser"
+import { branches, staff, users } from "@/db/schema/schema"
+import { createSupabaseAdminClient } from "@/utils/supabase-browser"
 import { createSupabaseServerClient } from "@/utils/supabase-server"
 import { GeneralActionResponse } from "@/types/general-action-response"
-import { eq } from "drizzle-orm"
+import { aliasedTable, count, eq, sql } from "drizzle-orm"
 import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
 
+
+
+// GETTERS
+export type Staff = (typeof users.$inferSelect) & (typeof staff.$inferSelect) & {
+  branchName: string
+  createdByName: string
+}
 export const getStaffUsers = async (
   page: number = 1,
-  limit: number = 10
-): Promise<GeneralActionResponse<(typeof users.$inferSelect)[]>> => {
+  limit: number = 20
+): Promise<GeneralActionResponse<Staff[]>> => {
   try {
+    const usersCreator = aliasedTable(users, "usersCreator");
     const result = await db
-      .select()
+      .select({
+        // Users table fields
+        id: users.id,
+        fullName: users.fullName,
+        email: users.email,
+        role: users.role,
+        language: users.language,
+        profilePictureUrl: users.profilePictureUrl,
+        createdBy: users.createdBy,
+        createdAt: users.createdAt,
+        authUserId: users.authUserId,
+        // Staff table fields
+        staffId: staff.id,
+        userId: staff.userId,
+        nationality: staff.nationality,
+        phoneNumber: staff.phoneNumber,
+        staffCategory: staff.staffCategory,
+        staffProfilePictureUrl: staff.profilePictureUrl,
+        firstLogin: staff.firstLogin,
+        branchId: staff.branchId,
+        branchName: branches.name,
+        createdByName: usersCreator.fullName,
+      })
       .from(users)
+      .innerJoin(staff, eq(users.id, staff.userId))
+      .innerJoin(branches, eq(staff.branchId, branches.id))
+      .leftJoin(usersCreator, eq(users.id, usersCreator.id))
       .where(eq(users.role, UserRole.STAFF))
       .limit(limit)
       .offset((page - 1) * limit)
+    
     return { data: result, error: null }
   } catch (error) {
     console.error(error)
@@ -32,7 +64,7 @@ export const getStaffUsers = async (
 
 export const getAdminUsers = async (
   page: number = 1,
-  limit: number = 10
+  limit: number = 20
 ): Promise<GeneralActionResponse<(typeof users.$inferSelect)[]>> => {
   try {
     const result = await db
@@ -48,6 +80,31 @@ export const getAdminUsers = async (
   }
 }
 
+export type StaffStats = {
+  total_staff: number
+  total_foh: number
+  total_boh: number
+  total_manager: number
+}
+
+export const getStaffStats = async (): Promise<GeneralActionResponse<StaffStats>> => {
+  try {
+    const result = await db.execute<StaffStats>(sql`
+      SELECT
+        COUNT(*) AS total_staff,
+        COUNT(CASE WHEN staff_category = 'FOH' THEN 1 END) AS total_foh,
+        COUNT(CASE WHEN staff_category = 'BOH' THEN 1 END) AS total_boh,
+        COUNT(CASE WHEN staff_category = 'MANAGER' THEN 1 END) AS total_manager
+        FROM staff
+    `)
+    return { data: result.rows[0], error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: { total_staff: 0, total_foh: 0, total_boh: 0, total_manager: 0 }, error: error as string }
+  }
+}
+
+// CREATORS
 export interface CreateAdminUser {
   email: string
   password: string
@@ -61,7 +118,6 @@ export const createAdminUser = async (
   let dbUserId: number | null = null
 
   try {
-
     if (!user.email.trim() || !user.password.trim() || !user.fullName.trim()) {
       return { data: null, error: "Email, password and full name are required" }
     }
@@ -198,11 +254,26 @@ export interface CreateStaffUser {
 
 export const createStaffUser = async (
   newUser: CreateStaffUser
-): Promise<GeneralActionResponse<typeof users.$inferSelect & typeof staff.$inferSelect | null>> => {
+): Promise<
+  GeneralActionResponse<
+    (typeof users.$inferSelect & typeof staff.$inferSelect) | null
+  >
+> => {
   try {
-    if (!newUser.email.trim() || !newUser.password.trim() || !newUser.fullName.trim() || !newUser.branchId || !newUser.staffCategory) {
-      return { data: null, error: "Email, password, full name, branch id and staff category are required" }
+    if (
+      !newUser.email.trim() ||
+      !newUser.password.trim() ||
+      !newUser.fullName.trim() ||
+      !newUser.branchId ||
+      !newUser.staffCategory
+    ) {
+      return {
+        data: null,
+        error:
+          "Email, password, full name, branch id and staff category are required",
+      }
     }
+    const supabaseAdmin = createSupabaseAdminClient()
     const supabase = await createSupabaseServerClient()
     const { data: currentUser, error: currentUserError } =
       await supabase.auth.getUser()
@@ -211,7 +282,25 @@ export const createStaffUser = async (
       return { data: null, error: currentUserError.message }
     }
 
-    const userResult = await db
+    const { data: authData, error: authError } =
+      await supabaseAdmin.auth.admin.createUser({
+        email: newUser.email,
+        password: newUser.password,
+        email_confirm: true,
+        user_metadata: {
+          role: UserRole.STAFF,
+          full_name: newUser.fullName,
+        },
+      })
+
+    if (authError) {
+      console.error("Failed to create auth user:", authError)
+      return { data: null, error: authError.message }
+    }
+
+    let userResult
+    try {
+      userResult = await db
       .insert(users)
       .values({
         email: newUser.email,
@@ -221,6 +310,11 @@ export const createStaffUser = async (
         language: "en",
       })
       .returning()
+    } catch (error) {
+      console.error("Failed to create user rolling back auth user:", error)
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
+      return { data: null, error: error as string }
+    }
 
     try {
       const staffResult = await db
@@ -238,7 +332,6 @@ export const createStaffUser = async (
 
       revalidatePath("/admin")
       return { data: { ...userResult[0], ...staffResult[0] }, error: null }
-
     } catch (error) {
       console.error(
         "Failed to create staff user, rolling back user creation:",
@@ -249,10 +342,20 @@ export const createStaffUser = async (
       } catch (rollbackError) {
         console.error("Failed to rollback user creation:", rollbackError)
       }
-      return { data: null, error: error instanceof Error ? error.message : "An unexpected error occurred" }
+      return {
+        data: null,
+        error:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
+      }
     }
   } catch (error) {
     console.error("Unexpected error in createStaffUser:", error)
-    return { data: null, error: error instanceof Error ? error.message : "An unexpected error occurred" }
+    return {
+      data: null,
+      error:
+        error instanceof Error ? error.message : "An unexpected error occurred",
+    }
   }
 }

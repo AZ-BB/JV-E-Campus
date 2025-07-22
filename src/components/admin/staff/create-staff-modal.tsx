@@ -1,13 +1,14 @@
-import { createAdminUser, createStaffUser } from "@/actions/users";
+import { createStaffUser } from "@/actions/users";
 import { useEffect, useState } from "react";
-import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalOverlay, ModalPortal, ModalRoot, ModalTitle } from "../ui/modal";
-import Input from "../ui/input";
-import Button from "../ui/button";
-import Checkbox from "../ui/checkbox";
+import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalRoot, ModalTitle } from "@/components/ui/modal";
+import Input from "@/components/ui/input";
+import Button from "@/components/ui/button";
+import Checkbox from "@/components/ui/checkbox";
 import { StaffCategory } from "@/db/enums";
-import { SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValue } from "../ui/select";
-import { branches } from "@/db/schema/schema";
-import { getBranchs } from "@/actions/branchs";
+import { SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { branches as branchesTable } from "@/db/schema/schema";
+import { getBranches } from "@/actions/branches";
+import { Loader2 } from "lucide-react";
 
 export default function CreateStaffModal({
     isOpen,
@@ -17,7 +18,7 @@ export default function CreateStaffModal({
     onClose: () => void;
 }) {
     const [error, setError] = useState<string | null>(null);
-    const [branchs, setBranchs] = useState<typeof branches.$inferSelect[]>([]);
+    const [branches, setBranches] = useState<typeof branchesTable.$inferSelect[]>([]);
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -28,14 +29,14 @@ export default function CreateStaffModal({
     const [nationality, setNationality] = useState("");
     const [profilePictureUrl, setProfilePictureUrl] = useState("");
     const [resetPasswordOnFirstLogin, setResetPasswordOnFirstLogin] = useState(false);
-
+    const [isCreating, setIsCreating] = useState(false);
     useEffect(() => {
         const fetchBranchs = async () => {
-            const branchsResponse = await getBranchs();
-            if (branchsResponse.error) {
-                setError(branchsResponse.error)
+            const branchesResponse = await getBranches();
+            if (branchesResponse.error) {
+                setError(branchesResponse.error)
             } else {
-                setBranchs(branchsResponse.data || []);
+                setBranches(branchesResponse.data || []);
             }
         }
         fetchBranchs();
@@ -59,7 +60,8 @@ export default function CreateStaffModal({
         }
     }, [isOpen])
 
-    const handleCreateAdmin = async () => {
+    const handleCreateStaff = async () => {
+        setIsCreating(true)
         const response = await createStaffUser({
             email,
             password,
@@ -75,8 +77,8 @@ export default function CreateStaffModal({
             return
         }
         onClose()
+        setIsCreating(false)
     }
-
     return (
         <ModalRoot open={isOpen} onOpenChange={onClose}>
             <ModalContent>
@@ -111,7 +113,7 @@ export default function CreateStaffModal({
                             <SelectValue placeholder="Select Branch" />
                         </SelectTrigger>
                         <SelectContent>
-                            {branchs.map((branch) => (
+                            {branches.map((branch) => (
                                 <SelectItem key={branch.id} value={branch.id.toString()}>{branch.name}</SelectItem>
                             ))}
                         </SelectContent>
@@ -135,8 +137,11 @@ export default function CreateStaffModal({
                         !fullName.trim() ||
                         !staffCategory ||
                         !branchId ||
-                        !!error
-                    } onClick={handleCreateAdmin} >Create Staff</Button>
+                        !!error ||
+                        isCreating
+                    } onClick={handleCreateStaff}>{
+                        isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Staff"
+                    }</Button>
                 </ModalFooter>
             </ModalContent>
         </ModalRoot>
