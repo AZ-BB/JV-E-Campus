@@ -67,7 +67,7 @@ export default function CreateAdminModal({
                 </div>
                 {error && <p className="text-red-500 text-sm">{error}</p>}
                 <ModalFooter>
-                    <Button disabled={!email || !password || !fullName || !!error} onClick={handleCreateAdmin} >Create Admin</Button>
+                    <Button disabled={!email.trim() || !password.trim() || !fullName.trim() || !!error} onClick={handleCreateAdmin} >Create Admin</Button>
                 </ModalFooter>
             </ModalContent>
         </ModalRoot>

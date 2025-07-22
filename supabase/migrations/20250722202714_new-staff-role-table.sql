@@ -1,0 +1,15 @@
+CREATE TABLE staff_roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO staff_roles (name) VALUES ('FOH'), ('BOH'), ('MANAGER');
+
+ALTER TABLE users ADD COLUMN staff_role_id INTEGER REFERENCES staff_roles(id);
+
+
+
+
+
