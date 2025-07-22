@@ -126,7 +126,7 @@ function Table({
             <TableHeader>
                 <TableRow>
                     {headers.map((header) => (
-                        <TableHead key={header.key} onClick={() => onSort?.(header.key)}>
+                        <TableHead key={header.componentKey} onClick={() => onSort?.(header.key)}>
                             <div className={`flex justify-between items-center gap-2 font-medium ${header.sortable ? "cursor-pointer" : ""}`}>
                                 <span>
                                     {header.label}
