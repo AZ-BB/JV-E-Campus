@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { GeneralActionResponse } from "@/utils/GeneralActionResponse"
-import { createAdminUser } from "@/actions/users"
+import { GeneralActionResponse } from "@/app/types/general-action-response"
+import { createAdminUser, createStaffUser } from "@/actions/users"
 import { useRouter } from "next/navigation"
 
 interface User {
@@ -26,16 +26,35 @@ export default function UserTable({
   const { data: staffUsersData, error: staffUsersError } = staffUsers
   const [activeTab, setActiveTab] = useState<"admin" | "staff">("admin")
   const currentUsers = activeTab === "admin" ? adminUsers : staffUsers
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const handleCreateAdminUser = async () => {
     const response = await createAdminUser({
-      email: "adham@test.com",
+      email: "adham2@test.com",
       password: "123456",
       fullName: "Test User",
     })
+    if (response.error) {
+      setError(response.error)
+    }
+  }
+  const handleCreateStaffUser = async () => {
+    const response = await createStaffUser({
+      email: "staff3@test.com",
+      password: "123456",
+      fullName: "Test User",
+      branchId: 1,
+      staffCategory: "FOH",
+      phoneNumber: "1234567890",
+      nationality: "Egypt",
+      profilePictureUrl: "https://via.placeholder.com/150",
+    })
+    if (response.error) {
+      setError(response.error)
+    }
   }
   const handleRefresh = async () => {
-    router.refresh();
+    router.refresh()
   }
   return (
     <div className="w-full max-w-6xl mx-auto p-6">
@@ -77,19 +96,44 @@ export default function UserTable({
 
       <div className="bg-gray-800 rounded-lg overflow-hidden">
         <div className="p-4 border-b border-gray-700 flex gap-3">
-          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors" onClick={handleCreateAdminUser}>
-            Create User
-          </button>
-          <button 
-              className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2" 
-              onClick={handleRefresh}
+          {activeTab === "admin" && (
+            <button
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+              onClick={handleCreateAdminUser}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Refresh
+              Create Admin User
             </button>
+          )}
+          {activeTab === "staff" && (
+            <button
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+              onClick={handleCreateStaffUser}
+            >
+              Create Staff User
+            </button>
+          )}
+          <button
+            className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
+            onClick={handleRefresh}
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            Refresh
+          </button>
         </div>
+        {error && <div className="text-red-500 text-center mt-4">{error}</div>}
         {currentUsers?.data?.length === 0 ? (
           <div className="p-8 text-center text-gray-400">
             No {activeTab} users found
