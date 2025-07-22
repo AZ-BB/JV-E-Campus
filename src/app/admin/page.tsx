@@ -1,4 +1,5 @@
 import UserTable from '@/components/user-table';
+import UserTable2 from '@/components/_user-table';
 import { getAdminUsers, getStaffUsers } from '@/actions/users';
 import Logout from '@/components/admin/logout';
 
@@ -13,7 +14,9 @@ export default async function Admin() {
           <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
           <p className="text-gray-400">Manage users and system settings</p>
         </div>
-        <UserTable adminUsers={adminUsers} staffUsers={staffUsers} />
+        <UserTable users={adminUsers} />
+
+        <UserTable2 adminUsers={adminUsers} staffUsers={staffUsers} />
       </div>
     </div>
   )

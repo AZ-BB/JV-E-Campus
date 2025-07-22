@@ -18,7 +18,7 @@ interface User {
   createdAt?: string | null
 }
 
-export default function UserTable({
+export default function UserTable2({
   adminUsers,
   staffUsers,
 }: {

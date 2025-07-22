@@ -5,12 +5,14 @@ const TableRoot = React.forwardRef<
     HTMLTableElement,
     React.TableHTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-    <div className="relative w-full overflow-auto">
-        <table
-            ref={ref}
-            className={`w-full caption-bottom text-xs ${className}`}
-            {...props}
-        />
+    <div className="bg-gray-800 rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+            <table
+                ref={ref}
+                className={`min-w-full divide-y divide-gray-700 ${className}`}
+                {...props}
+            />
+        </div>
     </div>
 ));
 TableRoot.displayName = "TableRoot";
@@ -23,7 +25,7 @@ const TableHeader = React.forwardRef<
     ...props }, ref) => (
     <thead
         ref={ref}
-        className={`[&_tr]:border-b ${className}`}
+        className={`bg-gray-900 ${className}`}
         {...props}
     />
 ));
@@ -35,7 +37,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <tbody
         ref={ref}
-        className={`[&_tr:last-child]:border-0 ${className}`}
+        className={`bg-gray-800 divide-y divide-gray-700 ${className}`}
         {...props}
     />
 ));
@@ -47,7 +49,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <tfoot
         ref={ref}
-        className={`border-t font-medium [&>tr]:last:border-b-0 ${className}`}
+        className={`bg-gray-900 border-t border-gray-700 font-medium ${className}`}
         {...props}
     />
 ));
@@ -59,7 +61,7 @@ const TableRow = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <tr
         ref={ref}
-        className={`border-b border-gray-700 transition-colors ${className}`}
+        className={className}
         {...props}
     />
 ));
@@ -71,7 +73,7 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <th
         ref={ref}
-        className={`h-8 px-2 py-1 text-left align-middle text-white text-xs [&:has([role=checkbox])]:pr-0 ${className}`}
+        className={`px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider ${className}`}
         {...props}
     />
 ));
@@ -83,7 +85,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <td
         ref={ref}
-        className={`px-2 py-1.5 align-middle text-xs [&:has([role=checkbox])]:pr-0 ${className}`}
+        className={`px-6 py-4 whitespace-nowrap text-sm text-gray-300 ${className}`}
         {...props}
     />
 ));
@@ -95,7 +97,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <caption
         ref={ref}
-        className={`mt-2 text-xs ${className}`}
+        className={`mt-2 text-sm text-gray-400 ${className}`}
         {...props}
     />
 ));
@@ -114,6 +116,7 @@ function Table({
         sortable?: boolean;
         sorted?: boolean;
         order?: "asc" | "desc";
+        componentKey?: string;
     }[];
     data: { id: number, [key: string]: any }[];
     onSort?: (column: string) => void;
@@ -124,7 +127,7 @@ function Table({
                 <TableRow>
                     {headers.map((header) => (
                         <TableHead key={header.key} onClick={() => onSort?.(header.key)}>
-                            <div className={`flex justify-between items-center gap-2 font-normal ${header.sortable ? "cursor-pointer" : ""}`}>
+                            <div className={`flex justify-between items-center gap-2 font-medium ${header.sortable ? "cursor-pointer" : ""}`}>
                                 <span>
                                     {header.label}
                                 </span>
@@ -143,9 +146,9 @@ function Table({
             </TableHeader>
             <TableBody>
                 {data.map((row) => (
-                    <TableRow key={row.id}>
+                    <TableRow key={row.id} className="hover:bg-gray-700 transition-colors">
                         {headers.map((header) => (
-                            <TableCell key={header.key}>{header.cell ? header.cell(row[header.key]) : row[header.key]}</TableCell>
+                            <TableCell key={header.componentKey}>{header.cell ? header.cell(row[header.key]) : row[header.key]}</TableCell>
                         ))}
                     </TableRow>
                 ))}
