@@ -62,7 +62,7 @@ export const createAdminUser = async (
 
   try {
 
-    if (!user.email || !user.password || !user.fullName) {
+    if (!user.email.trim() || !user.password.trim() || !user.fullName.trim()) {
       return { data: null, error: "Email, password and full name are required" }
     }
 
@@ -200,6 +200,9 @@ export const createStaffUser = async (
   newUser: CreateStaffUser
 ): Promise<GeneralActionResponse<typeof users.$inferSelect & typeof staff.$inferSelect | null>> => {
   try {
+    if (!newUser.email.trim() || !newUser.password.trim() || !newUser.fullName.trim() || !newUser.branchId || !newUser.staffCategory) {
+      return { data: null, error: "Email, password, full name, branch id and staff category are required" }
+    }
     const supabase = await createSupabaseServerClient()
     const { data: currentUser, error: currentUserError } =
       await supabase.auth.getUser()

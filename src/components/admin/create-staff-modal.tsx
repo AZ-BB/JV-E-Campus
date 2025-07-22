@@ -119,7 +119,6 @@ export default function CreateStaffModal({
 
                     <Input type="text" label="Phone Number" placeholder="Phone Number" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full" />
                     <Input type="text" label="Nationality" placeholder="Nationality" value={nationality} onChange={(e) => setNationality(e.target.value)} className="w-full" />
-                    <Input type="text" label="Profile Picture URL" placeholder="Profile Picture URL" value={profilePictureUrl} onChange={(e) => setProfilePictureUrl(e.target.value)} className="w-full" />
                     <Checkbox
                         checked={resetPasswordOnFirstLogin}
                         onCheckedChange={() => setResetPasswordOnFirstLogin(!resetPasswordOnFirstLogin)}
@@ -131,9 +130,9 @@ export default function CreateStaffModal({
                 
                 <ModalFooter>
                     <Button disabled={
-                        !email ||
-                        !password ||
-                        !fullName ||
+                        !email.trim() ||
+                        !password.trim() ||
+                        !fullName.trim() ||
                         !staffCategory ||
                         !branchId ||
                         !!error
