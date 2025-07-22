@@ -1,9 +1,12 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { GeneralActionResponse } from "@/app/types/general-action-response"
+import { GeneralActionResponse } from "@/types/general-action-response"
 import { createAdminUser, createStaffUser } from "@/actions/users"
 import { useRouter } from "next/navigation"
+import CreateAdminModal from "./admin/create-admin-modal"
+import CreateStaffModal from "./admin/create-staff-modal"
+import { StaffCategory } from "@/db/enums"
 
 interface User {
   id: number
@@ -22,12 +25,18 @@ export default function UserTable({
   adminUsers: GeneralActionResponse<User[]>
   staffUsers: GeneralActionResponse<User[]>
 }) {
+  const router = useRouter()
+
   const { data: adminUsersData, error: adminUsersError } = adminUsers
   const { data: staffUsersData, error: staffUsersError } = staffUsers
+
   const [activeTab, setActiveTab] = useState<"admin" | "staff">("admin")
   const currentUsers = activeTab === "admin" ? adminUsers : staffUsers
+
+  const [isCreateAdminModalOpen, setIsCreateAdminModalOpen] = useState(false)
+  const [isCreateStaffModalOpen, setIsCreateStaffModalOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
+
   const handleCreateAdminUser = async () => {
     const response = await createAdminUser({
       email: "adham2@test.com",
@@ -38,13 +47,14 @@ export default function UserTable({
       setError(response.error)
     }
   }
+
   const handleCreateStaffUser = async () => {
     const response = await createStaffUser({
       email: "staff3@test.com",
       password: "123456",
       fullName: "Test User",
       branchId: 1,
-      staffCategory: "FOH",
+      staffCategory: StaffCategory.FOH,
       phoneNumber: "1234567890",
       nationality: "Egypt",
       profilePictureUrl: "https://via.placeholder.com/150",
@@ -58,26 +68,26 @@ export default function UserTable({
   }
   return (
     <div className="w-full max-w-6xl mx-auto p-6">
+      <CreateAdminModal isOpen={isCreateAdminModalOpen} onClose={() => setIsCreateAdminModalOpen(false)} />
+      <CreateStaffModal isOpen={isCreateStaffModalOpen} onClose={() => setIsCreateStaffModalOpen(false)} />
       {/* Tab Navigation */}
       <div className="border-b border-gray-700 mb-6">
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab("admin")}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === "admin"
-                ? "border-blue-500 text-blue-400"
-                : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
-            }`}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "admin"
+              ? "border-blue-500 text-blue-400"
+              : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
+              }`}
           >
             Admins ({adminUsersData?.length})
           </button>
           <button
             onClick={() => setActiveTab("staff")}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === "staff"
-                ? "border-blue-500 text-blue-400"
-                : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
-            }`}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "staff"
+              ? "border-blue-500 text-blue-400"
+              : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
+              }`}
           >
             Staff ({staffUsersData?.length})
           </button>
@@ -99,7 +109,7 @@ export default function UserTable({
           {activeTab === "admin" && (
             <button
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={handleCreateAdminUser}
+              onClick={() => setIsCreateAdminModalOpen(true)}
             >
               Create Admin User
             </button>
@@ -107,7 +117,7 @@ export default function UserTable({
           {activeTab === "staff" && (
             <button
               className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={handleCreateStaffUser}
+              onClick={() => setIsCreateStaffModalOpen(true)}
             >
               Create Staff User
             </button>
@@ -198,11 +208,10 @@ export default function UserTable({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.role === "ADMIN"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-green-100 text-green-800"
-                        }`}
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.role === "ADMIN"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-green-100 text-green-800"
+                          }`}
                       >
                         {user.role}
                       </span>

@@ -1,4 +1,4 @@
-import { pgTable, foreignKey, unique, serial, text, integer, timestamp, uuid, boolean, numeric, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, serial, integer, text, boolean, timestamp, unique, varchar, uuid, numeric, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const lessonLevel = pgEnum("lesson_level", ['BEGINNER', 'INTERMEDIATE', 'EXPERT'])
@@ -8,31 +8,6 @@ export const staffCategory = pgEnum("staff_category", ['FOH', 'BOH', 'MANAGER'])
 export const trainingStatus = pgEnum("training_status", ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED'])
 export const userRole = pgEnum("user_role", ['ADMIN', 'STAFF'])
 
-
-export const users = pgTable("users", {
-	id: serial().primaryKey().notNull(),
-	fullName: text("full_name").notNull(),
-	email: text().notNull(),
-	role: userRole().notNull(),
-	language: text(),
-	profilePictureUrl: text("profile_picture_url"),
-	createdBy: integer("created_by"),
-	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
-	authUserId: uuid("auth_user_id"),
-}, (table) => [
-	foreignKey({
-			columns: [table.authUserId],
-			foreignColumns: [table.id],
-			name: "fk_auth_user"
-		}).onDelete("cascade"),
-	foreignKey({
-			columns: [table.createdBy],
-			foreignColumns: [table.id],
-			name: "users_created_by_fkey"
-		}).onDelete("set null"),
-	unique("users_email_key").on(table.email),
-	unique("users_auth_user_id_key").on(table.authUserId),
-]);
 
 export const staff = pgTable("staff", {
 	id: serial().primaryKey().notNull(),
@@ -61,6 +36,31 @@ export const branches = pgTable("branches", {
 	name: text().notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
 });
+
+export const users = pgTable("users", {
+	id: serial().primaryKey().notNull(),
+	fullName: varchar("full_name", { length: 255 }).notNull(),
+	email: varchar({ length: 255 }).notNull(),
+	role: userRole().notNull(),
+	language: varchar({ length: 2 }),
+	profilePictureUrl: text("profile_picture_url"),
+	createdBy: integer("created_by"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+	authUserId: uuid("auth_user_id"),
+}, (table) => [
+	foreignKey({
+			columns: [table.authUserId],
+			foreignColumns: [table.id],
+			name: "fk_auth_user"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.createdBy],
+			foreignColumns: [table.id],
+			name: "users_created_by_fkey"
+		}).onDelete("set null"),
+	unique("users_email_key").on(table.email),
+	unique("users_auth_user_id_key").on(table.authUserId),
+]);
 
 export const modules = pgTable("modules", {
 	id: serial().primaryKey().notNull(),
