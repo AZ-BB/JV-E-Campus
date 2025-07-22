@@ -7,6 +7,7 @@ import { StaffCategory } from "@/db/enums";
 import { SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { branches as branchesTable } from "@/db/schema/schema";
 import { createBranch, getBranches } from "@/actions/branches";
+import { Loader2 } from "lucide-react";
 
 export default function CreateBranchModal({
     isOpen,
@@ -17,7 +18,7 @@ export default function CreateBranchModal({
 }) {
     const [error, setError] = useState<string | null>(null);
     const [branches, setBranches] = useState<typeof branchesTable.$inferSelect[]>([]);
-
+    const [isCreating, setIsCreating] = useState(false);
     const [branchName, setBranchName] = useState("");
 
     useEffect(() => {
@@ -43,14 +44,16 @@ export default function CreateBranchModal({
     }, [isOpen])
 
     const handleCreateBranch = async () => {
+        setIsCreating(true)
         const response = await createBranch({
-            name: branchName,
+            name: branchName.trim(),
         })
         if (response.error) {
             setError(response.error)
             return
         }
         onClose()
+        setIsCreating(false)
     }
 
     return (
@@ -68,7 +71,9 @@ export default function CreateBranchModal({
                 </div>
                 {error && <p className="text-red-500 text-sm">{error}</p>}
                 <ModalFooter>
-                    <Button disabled={!branchName || !!error} onClick={handleCreateBranch} >Create Branch</Button>
+                    <Button disabled={!branchName.trim() || !!error} onClick={handleCreateBranch} >{
+                        isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Branch"
+                    }</Button>
                 </ModalFooter>
 
 

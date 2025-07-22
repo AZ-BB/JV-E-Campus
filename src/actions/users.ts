@@ -1,13 +1,11 @@
 "use server"
 import { db } from "@/db"
 import { StaffCategory, UserRole } from "@/db/enums"
-import { branches, staff, users } from "@/db/schema/schema"
+import { branches, staff, staffRoles, users } from "@/db/schema/schema"
 import { createSupabaseAdminClient } from "@/utils/supabase-browser"
 import { createSupabaseServerClient } from "@/utils/supabase-server"
 import { GeneralActionResponse } from "@/types/general-action-response"
 import { aliasedTable, count, eq, sql } from "drizzle-orm"
-import { createServerClient } from "@supabase/ssr"
-import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
 
 
@@ -16,6 +14,7 @@ import { revalidatePath } from "next/cache"
 export type Staff = (typeof users.$inferSelect) & (typeof staff.$inferSelect) & {
   branchName: string
   createdByName: string
+  staffRoleName: string
 }
 export const getStaffUsers = async (
   page: number = 1,
@@ -35,6 +34,7 @@ export const getStaffUsers = async (
         createdBy: users.createdBy,
         createdAt: users.createdAt,
         authUserId: users.authUserId,
+        
         // Staff table fields
         staffId: staff.id,
         userId: staff.userId,
@@ -44,13 +44,21 @@ export const getStaffUsers = async (
         staffProfilePictureUrl: staff.profilePictureUrl,
         firstLogin: staff.firstLogin,
         branchId: staff.branchId,
+
+        // Branches table fields
         branchName: branches.name,
+
+        // UsersCreator table fields
         createdByName: usersCreator.fullName,
+
+        // StaffRoles table fields
+        staffRoleName: staffRoles.name,
       })
       .from(users)
       .innerJoin(staff, eq(users.id, staff.userId))
       .innerJoin(branches, eq(staff.branchId, branches.id))
-      .leftJoin(usersCreator, eq(users.id, usersCreator.id))
+      .leftJoin(usersCreator, eq(users.createdBy, usersCreator.id))
+      .leftJoin(staffRoles, eq(staff.staffRoleId, staffRoles.id))
       .where(eq(users.role, UserRole.STAFF))
       .limit(limit)
       .offset((page - 1) * limit)
@@ -81,26 +89,23 @@ export const getAdminUsers = async (
 }
 
 export type StaffStats = {
-  total_staff: number
-  total_foh: number
-  total_boh: number
-  total_manager: number
+  staff_count: number
 }
 
 export const getStaffStats = async (): Promise<GeneralActionResponse<StaffStats>> => {
   try {
-    const result = await db.execute<StaffStats>(sql`
+    const result = await db.execute<{
+      count: number
+    }>(sql`
       SELECT
-        COUNT(*) AS total_staff,
-        COUNT(CASE WHEN staff_category = 'FOH' THEN 1 END) AS total_foh,
-        COUNT(CASE WHEN staff_category = 'BOH' THEN 1 END) AS total_boh,
-        COUNT(CASE WHEN staff_category = 'MANAGER' THEN 1 END) AS total_manager
+        COUNT(*)
         FROM staff
     `)
-    return { data: result.rows[0], error: null }
+
+    return { data: { staff_count: result.rows[0].count }, error: null }
   } catch (error) {
     console.error(error)
-    return { data: { total_staff: 0, total_foh: 0, total_boh: 0, total_manager: 0 }, error: error as string }
+    return { data: { staff_count: 0 }, error: error as string }
   }
 }
 

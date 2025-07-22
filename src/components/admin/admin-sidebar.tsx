@@ -59,6 +59,12 @@ const navigationItems = [
     description: 'Manage branches'
   },
   {
+    href: '/admin/roles',
+    label: 'Roles Management',
+    icon: Settings,
+    description: 'Manage staff roles'
+  },
+  {
     href: '/admin/users',
     label: 'Admin Management',
     icon: Users,

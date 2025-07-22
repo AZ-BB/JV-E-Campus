@@ -1,27 +1,36 @@
-import { StaffStats as StaffStatsType } from "@/actions/users"
+import { RolesStats as RolesStatsTypes } from "@/actions/roles"
 import { GeneralActionResponse } from "@/types/general-action-response"
 
-export default function StaffStats({ staffStats }: { staffStats: GeneralActionResponse<StaffStatsType> }) {
-  const { data: staffStatsData, error: staffStatsError } = staffStats
+export default function RolesStats({ rolesStats }: { rolesStats: GeneralActionResponse<RolesStatsTypes> }) {
+  const { data: rolesStatsData, error: rolesStatsError } = rolesStats
 
   const statsItems = [
     {
-      title: "Total Staff",
-      value: staffStatsData?.staff_count || 0,
-      icon: "👥",
-      unit: staffStatsData?.staff_count === 1 ? "person" : "people",
+      title: "Total Roles",
+      value: rolesStatsData?.total_roles || 0,
+      icon: "🎩",
+      unit: rolesStatsData?.total_roles && rolesStatsData.total_roles > 1 ? "roles" : "role",
       bgColor: "bg-gray-800",
       textColor: "text-blue-400",
       borderColor: "border-gray-700",
       hoverColor: "hover:bg-gray-700"
     },
-
+    {
+      title: "Active Roles",
+      value: rolesStatsData?.active_roles || 0,
+      icon: "⭐️",
+      unit: rolesStatsData?.active_roles && rolesStatsData.active_roles > 1 ? "roles" : "role",
+      bgColor: "bg-gray-800",
+      textColor: "text-green-400",
+      borderColor: "border-gray-700",
+      hoverColor: "hover:bg-gray-700"
+    }
   ]
 
-  if (staffStatsError) {
+  if (rolesStatsError) {
     return (
       <div className="bg-red-900/20 border border-red-700 rounded-lg p-4">
-        <p className="text-red-400">Error loading staff statistics</p>
+        <p className="text-red-400">Error loading roles statistics</p>
       </div>
     )
   }
@@ -29,8 +38,8 @@ export default function StaffStats({ staffStats }: { staffStats: GeneralActionRe
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Staff Statistics</h1>
-        <p className="text-gray-400">Overview of your team composition</p>
+        <h1 className="text-3xl font-bold text-white mb-2">Branches Statistics</h1>
+        <p className="text-gray-400">Overview of your branches</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

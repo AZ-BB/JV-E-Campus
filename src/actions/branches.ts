@@ -15,7 +15,7 @@ export const getBranches = async (): Promise<
     return { data: branchesData, error: null }
   } catch (error) {
     console.error(error)
-    return { data: null, error: error as string }
+    return { data: null, error: "Failed to fetch branches, please try again later" as string }
   }
 }
 
@@ -25,7 +25,7 @@ export interface Branch {
   createdAt: string | null
   number_of_staff: number
 }
-export const getDetailedBranches = async (): Promise<
+export const getDetailedBranches = async (page: number = 1, limit: number = 20): Promise<
   GeneralActionResponse<Branch[]>
 > => {
   try {
@@ -39,10 +39,12 @@ export const getDetailedBranches = async (): Promise<
       .from(branches)
       .leftJoin(staff, eq(branches.id, staff.branchId))
       .groupBy(branches.id)
+      .limit(limit)
+      .offset((page - 1) * limit)
     return { data: branchesData, error: null }
   } catch (error) {
     console.error(error)
-    return { data: null, error: error as string }
+    return { data: null, error: "Failed to fetch branches, please try again later" as string }
   }
 }
 
@@ -72,7 +74,7 @@ export const getBranchesStats = async (): Promise<
     return { data, error: null }
   } catch (error) {
     console.error(error)
-    return { data: null, error: error as string }
+    return { data: null, error: "Failed to fetch branches stats, please try again later" as string }
   }
 }
 
@@ -81,11 +83,13 @@ export const createBranch = async (branch: {
   name: string
 }): Promise<GeneralActionResponse<typeof branches.$inferSelect>> => {
   try {
-    const result = await db.insert(branches).values(branch).returning()
+    const result = await db.insert(branches).values({
+      name: branch.name.trim(),
+    }).returning()
     revalidatePath("/admin/branches")
     return { data: result[0], error: null }
   } catch (error) {
     console.error(error)
-    return { data: null, error: error as string }
+    return { data: null, error: "Failed to create branch, please try again later" as string }
   }
 }

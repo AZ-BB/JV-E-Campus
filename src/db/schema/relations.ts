@@ -1,23 +1,7 @@
 import { relations } from "drizzle-orm/relations";
-import { branches, staff, users, usersInAuth, modules, sections, lessons, bookmarks, progress } from "./schema";
-
-export const staffRelations = relations(staff, ({one}) => ({
-	branch: one(branches, {
-		fields: [staff.branchId],
-		references: [branches.id]
-	}),
-	user: one(users, {
-		fields: [staff.userId],
-		references: [users.id]
-	}),
-}));
-
-export const branchesRelations = relations(branches, ({many}) => ({
-	staff: many(staff),
-}));
+import { usersInAuth, users, branches, staff, staffRoles, modules, sections, lessons, bookmarks, progress } from "./schema";
 
 export const usersRelations = relations(users, ({one, many}) => ({
-	staff: many(staff),
 	usersInAuth: one(usersInAuth, {
 		fields: [users.authUserId],
 		references: [usersInAuth.id]
@@ -30,6 +14,7 @@ export const usersRelations = relations(users, ({one, many}) => ({
 	users: many(users, {
 		relationName: "users_createdBy_users_id"
 	}),
+	staff: many(staff),
 	modules_createdBy: many(modules, {
 		relationName: "modules_createdBy_users_id"
 	}),
@@ -54,6 +39,29 @@ export const usersRelations = relations(users, ({one, many}) => ({
 
 export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
 	users: many(users),
+}));
+
+export const staffRelations = relations(staff, ({one}) => ({
+	branch: one(branches, {
+		fields: [staff.branchId],
+		references: [branches.id]
+	}),
+	staffRole: one(staffRoles, {
+		fields: [staff.staffRoleId],
+		references: [staffRoles.id]
+	}),
+	user: one(users, {
+		fields: [staff.userId],
+		references: [users.id]
+	}),
+}));
+
+export const branchesRelations = relations(branches, ({many}) => ({
+	staff: many(staff),
+}));
+
+export const staffRolesRelations = relations(staffRoles, ({many}) => ({
+	staff: many(staff),
 }));
 
 export const modulesRelations = relations(modules, ({one, many}) => ({
