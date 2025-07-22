@@ -4,124 +4,49 @@ import React, { useState, useEffect } from "react"
 import { GeneralActionResponse } from "@/types/general-action-response"
 import { createAdminUser, createStaffUser } from "@/actions/users"
 import { useRouter } from "next/navigation"
-import CreateAdminModal from "./admin/create-admin-modal"
-import CreateStaffModal from "./admin/create-staff-modal"
+import CreateStaffModal from "./create-staff-modal"
 import { StaffCategory } from "@/db/enums"
+import { Staff } from "@/actions/users"
 
-interface User {
-  id: number
-  fullName: string
-  email: string
-  role: string
-  language?: string | null
-  profilePictureUrl?: string | null
-  createdAt?: string | null
-}
-
-export default function UserTable({
-  adminUsers,
+export default function StaffTable({
   staffUsers,
 }: {
-  adminUsers: GeneralActionResponse<User[]>
-  staffUsers: GeneralActionResponse<User[]>
+  staffUsers: GeneralActionResponse<Staff[]>
 }) {
   const router = useRouter()
-
-  const { data: adminUsersData, error: adminUsersError } = adminUsers
   const { data: staffUsersData, error: staffUsersError } = staffUsers
 
-  const [activeTab, setActiveTab] = useState<"admin" | "staff">("admin")
-  const currentUsers = activeTab === "admin" ? adminUsers : staffUsers
-
-  const [isCreateAdminModalOpen, setIsCreateAdminModalOpen] = useState(false)
   const [isCreateStaffModalOpen, setIsCreateStaffModalOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleCreateAdminUser = async () => {
-    const response = await createAdminUser({
-      email: "adham2@test.com",
-      password: "123456",
-      fullName: "Test User",
-    })
-    if (response.error) {
-      setError(response.error)
-    }
-  }
-
-  const handleCreateStaffUser = async () => {
-    const response = await createStaffUser({
-      email: "staff3@test.com",
-      password: "123456",
-      fullName: "Test User",
-      branchId: 1,
-      staffCategory: StaffCategory.FOH,
-      phoneNumber: "1234567890",
-      nationality: "Egypt",
-      profilePictureUrl: "https://via.placeholder.com/150",
-    })
-    if (response.error) {
-      setError(response.error)
-    }
-  }
   const handleRefresh = async () => {
     router.refresh()
   }
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
-      <CreateAdminModal isOpen={isCreateAdminModalOpen} onClose={() => setIsCreateAdminModalOpen(false)} />
+    <div className="w-full p-6">
       <CreateStaffModal isOpen={isCreateStaffModalOpen} onClose={() => setIsCreateStaffModalOpen(false)} />
-      {/* Tab Navigation */}
-      <div className="border-b border-gray-700 mb-6">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab("admin")}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "admin"
-              ? "border-blue-500 text-blue-400"
-              : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
-              }`}
-          >
-            Admins ({adminUsersData?.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("staff")}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === "staff"
-              ? "border-blue-500 text-blue-400"
-              : "border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300"
-              }`}
-          >
-            Staff ({staffUsersData?.length})
-          </button>
-        </nav>
-      </div>
-
       {/* Table Header */}
       <div className="mb-4">
         <h2 className="text-2xl font-bold text-white mb-2">
-          {activeTab === "admin" ? "Admin Users" : "Staff Users"}
+          Staff Users
         </h2>
         <p className="text-gray-400">
-          Manage {activeTab === "admin" ? "admin" : "staff"} user accounts
+          Manage staff user accounts
         </p>
       </div>
 
       <div className="bg-gray-800 rounded-lg overflow-hidden">
         <div className="p-4 border-b border-gray-700 flex gap-3">
-          {activeTab === "admin" && (
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={() => setIsCreateAdminModalOpen(true)}
-            >
-              Create Admin User
-            </button>
-          )}
-          {activeTab === "staff" && (
-            <button
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
-              onClick={() => setIsCreateStaffModalOpen(true)}
-            >
-              Create Staff User
-            </button>
-          )}
+          <button
+            className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
+            onClick={() => setIsCreateStaffModalOpen(true)}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create Staff
+          </button>
+
           <button
             className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition-colors flex items-center gap-2"
             onClick={handleRefresh}
@@ -144,9 +69,9 @@ export default function UserTable({
           </button>
         </div>
         {error && <div className="text-red-500 text-center mt-4">{error}</div>}
-        {currentUsers?.data?.length === 0 ? (
+        {staffUsersData?.length === 0 ? (
           <div className="p-8 text-center text-gray-400">
-            No {activeTab} users found
+            No staff users found
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -166,7 +91,19 @@ export default function UserTable({
                     Language
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Created
+                    Branch
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Nationality
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Phone Number
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Created By
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Created At
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Actions
@@ -174,7 +111,7 @@ export default function UserTable({
                 </tr>
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-700">
-                {currentUsers?.data?.map((user) => (
+                {staffUsersData?.map((user) => (
                   <tr
                     key={user.id}
                     className="hover:bg-gray-700 transition-colors"
@@ -213,11 +150,23 @@ export default function UserTable({
                           : "bg-green-100 text-green-800"
                           }`}
                       >
-                        {user.role}
+                        {user.staffRoleName}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {user.language || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {user.branchName}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {user.nationality || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {user.phoneNumber || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {user.createdByName || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {user.createdAt

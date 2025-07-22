@@ -1,4 +1,4 @@
-import { pgTable, foreignKey, serial, integer, text, boolean, timestamp, unique, varchar, uuid, numeric, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, unique, serial, varchar, text, integer, timestamp, uuid, boolean, numeric, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const lessonLevel = pgEnum("lesson_level", ['BEGINNER', 'INTERMEDIATE', 'EXPERT'])
@@ -8,34 +8,6 @@ export const staffCategory = pgEnum("staff_category", ['FOH', 'BOH', 'MANAGER'])
 export const trainingStatus = pgEnum("training_status", ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED'])
 export const userRole = pgEnum("user_role", ['ADMIN', 'STAFF'])
 
-
-export const staff = pgTable("staff", {
-	id: serial().primaryKey().notNull(),
-	userId: integer("user_id"),
-	nationality: text(),
-	phoneNumber: text("phone_number"),
-	staffCategory: staffCategory("staff_category").notNull(),
-	profilePictureUrl: text("profile_picture_url"),
-	firstLogin: boolean("first_login").default(true),
-	branchId: integer("branch_id"),
-}, (table) => [
-	foreignKey({
-			columns: [table.branchId],
-			foreignColumns: [branches.id],
-			name: "staff_branch_id_fkey"
-		}).onDelete("set null"),
-	foreignKey({
-			columns: [table.userId],
-			foreignColumns: [users.id],
-			name: "staff_user_id_fkey"
-		}).onDelete("cascade"),
-]);
-
-export const branches = pgTable("branches", {
-	id: serial().primaryKey().notNull(),
-	name: text().notNull(),
-	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
-});
 
 export const users = pgTable("users", {
 	id: serial().primaryKey().notNull(),
@@ -60,6 +32,40 @@ export const users = pgTable("users", {
 		}).onDelete("set null"),
 	unique("users_email_key").on(table.email),
 	unique("users_auth_user_id_key").on(table.authUserId),
+]);
+
+export const branches = pgTable("branches", {
+	id: serial().primaryKey().notNull(),
+	name: text().notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+});
+
+export const staff = pgTable("staff", {
+	id: serial().primaryKey().notNull(),
+	userId: integer("user_id"),
+	nationality: text(),
+	phoneNumber: text("phone_number"),
+	staffCategory: staffCategory("staff_category").notNull(),
+	profilePictureUrl: text("profile_picture_url"),
+	firstLogin: boolean("first_login").default(true),
+	branchId: integer("branch_id"),
+	staffRoleId: integer("staff_role_id"),
+}, (table) => [
+	foreignKey({
+			columns: [table.branchId],
+			foreignColumns: [branches.id],
+			name: "staff_branch_id_fkey"
+		}).onDelete("set null"),
+	foreignKey({
+			columns: [table.staffRoleId],
+			foreignColumns: [staffRoles.id],
+			name: "staff_staff_role_id_fkey"
+		}),
+	foreignKey({
+			columns: [table.userId],
+			foreignColumns: [users.id],
+			name: "staff_user_id_fkey"
+		}).onDelete("cascade"),
 ]);
 
 export const modules = pgTable("modules", {
@@ -177,3 +183,11 @@ export const progress = pgTable("progress", {
 			name: "progress_user_id_fkey"
 		}).onDelete("cascade"),
 ]);
+
+export const staffRoles = pgTable("staff_roles", {
+	id: serial().primaryKey().notNull(),
+	name: varchar({ length: 255 }).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: timestamp("updated_at", { withTimezone: true, mode: 'string' }).default(sql`CURRENT_TIMESTAMP`),
+	fullName: varchar("full_name", { length: 255 }),
+});
