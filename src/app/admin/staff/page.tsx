@@ -8,7 +8,9 @@ export default async function StaffPage() {
   return (
     <div>
       <StaffStats staffStats={staffStats} />
-      <StaffTable staffUsers={staffUsers} />
+      <div className="p-4 pt-0">
+        <StaffTable staffUsers={staffUsers} />
+      </div>
     </div>
   )
 }

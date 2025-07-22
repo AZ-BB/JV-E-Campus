@@ -23,7 +23,7 @@ export interface Branch {
   id: number
   name: string
   createdAt: string | null
-  number_of_staff: number
+  staffCount: number
 }
 export const getDetailedBranches = async (page: number = 1, limit: number = 20): Promise<
   GeneralActionResponse<Branch[]>
@@ -34,7 +34,7 @@ export const getDetailedBranches = async (page: number = 1, limit: number = 20):
         id: branches.id,
         name: branches.name,
         createdAt: branches.createdAt,
-        number_of_staff: count(staff.id),
+        staffCount: count(staff.id),
       })
       .from(branches)
       .leftJoin(staff, eq(branches.id, staff.branchId))
