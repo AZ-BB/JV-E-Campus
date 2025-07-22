@@ -40,7 +40,6 @@ export const staff = pgTable("staff", {
 	nationality: text(),
 	phoneNumber: text("phone_number"),
 	staffCategory: staffCategory("staff_category").notNull(),
-	language: text(),
 	profilePictureUrl: text("profile_picture_url"),
 	firstLogin: boolean("first_login").default(true),
 	branchId: integer("branch_id"),
