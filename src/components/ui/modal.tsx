@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import * as React from "react";
 
-const ModalRoot = Dialog.Root;
+const ModalRoot = Dialog.Root
 
 const ModalTrigger = Dialog.Trigger;
 
@@ -13,7 +13,7 @@ const ModalOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <Dialog.Overlay
         ref={ref}
-        className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 ${className}`}
+        className={`fixed inset-0 z-50 bg-black/30 backdrop-blur-sm ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:backdrop-blur-sm data-[state=closed]:backdrop-blur-none ${className}`}
         {...props}
     />
 ));

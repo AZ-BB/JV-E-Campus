@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { userRole } from '@/db/enums';
+import { UserRole } from '@/db/enums';
 
 export async function middleware(req: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -38,17 +38,17 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getUser();
   console.log(user);
   const url = req.nextUrl.pathname;
-  
+
   if (user) {
     const userRoleFromMetadata = user.user_metadata?.role;
     console.log('User role from metadata:', userRoleFromMetadata);
 
     // Check Auth
     if (url.startsWith('/auth') && user) {
-      if (userRoleFromMetadata === userRole.ADMIN) {
+      if (userRoleFromMetadata === UserRole.ADMIN) {
         const redirectUrl = new URL('/admin', req.url);
         return NextResponse.redirect(redirectUrl);
-      } else if (userRoleFromMetadata === userRole.STAFF) {
+      } else if (userRoleFromMetadata === UserRole.STAFF) {
         const redirectUrl = new URL('/staff', req.url);
         return NextResponse.redirect(redirectUrl);
       } else {
@@ -58,13 +58,13 @@ export async function middleware(req: NextRequest) {
     }
 
     // Check admin access
-    if (url.startsWith('/admin') && userRoleFromMetadata !== userRole.ADMIN) {
+    if (url.startsWith('/admin') && userRoleFromMetadata !== UserRole.ADMIN) {
       const redirectUrl = new URL('/unauthorized', req.url);
       return NextResponse.redirect(redirectUrl);
     }
 
     // Check staff access
-    if (url.startsWith('/staff') && userRoleFromMetadata !== userRole.STAFF) {
+    if (url.startsWith('/staff') && userRoleFromMetadata !== UserRole.STAFF) {
       const redirectUrl = new URL('/unauthorized', req.url);
       return NextResponse.redirect(redirectUrl);
     }
