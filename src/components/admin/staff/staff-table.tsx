@@ -25,6 +25,7 @@ import Button from "../../ui/button"
 import { Staff } from "@/actions/users"
 import CreateStaffModal from "./create-staff-modal"
 import Input from "@/components/ui/input"
+import toaster from "@/components/ui/toast"
 
 export default function StaffTable({
   staffUsers,
@@ -171,11 +172,11 @@ export default function StaffTable({
             componentKey: "actions",
             cell: (value) => (
               <div className="flex gap-2">
-                <Button className="w-8 h-8">
+                <Button className="w-8 h-8 flex justify-center items-center">
                   <Pencil className="w-4 h-4" />
                 </Button>
                 <Button
-                  className="w-8 h-8"
+                  className="w-8 h-8 flex justify-center items-center bg-red-500 hover:bg-red-600"
                   onClick={() => {
                     console.log("Delete", value)
                   }}
@@ -216,6 +217,21 @@ export default function StaffTable({
           }}
         />
       </div>
+
+
+      <Button onClick={() => {
+        toaster.promise(
+          new Promise((resolve, reject) => {
+            setTimeout(() => {
+              resolve(true)
+            }, 1000)
+          }),
+          "Success",
+          "Error"
+        )
+      }}>
+        Test
+      </Button>
 
       {/* Create Staff Modal */}
       <CreateStaffModal
