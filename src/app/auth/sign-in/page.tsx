@@ -2,13 +2,14 @@
 import { createBrowserClient } from "@supabase/ssr"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 // Static image component with logo
 const StaticImage = () => {
   return (
     <div className="relative h-full overflow-hidden bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700">
       {/* Static first image */}
-      <img
+      <Image
         src="/auth/1.jpeg"
         alt="JV Campus Training Center"
         className="w-full h-full object-cover"
@@ -114,7 +115,7 @@ export default function SignIn() {
           <div className="text-center mb-8">
             {/* Logo */}
             <div className="mb-6 flex justify-center p-2 py-4 bg-[#01a252] rounded-lg">
-              <img
+              <Image
                 src="/logo.jpg"
                 alt="JV Campus Logo"
                 className="h-20 w-auto rounded-lg"
@@ -234,7 +235,7 @@ export default function SignIn() {
           {/* Footer */}
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <span className="font-medium text-green-600">
                 Contact your administrator
               </span>

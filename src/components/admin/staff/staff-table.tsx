@@ -19,12 +19,13 @@ import {
   RefreshCcw,
 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import Pagination from "../../ui/pagination"
 import Button from "../../ui/button"
-import { Staff } from "@/actions/users"
+import { deleteStaffUser, Staff } from "@/actions/users"
 import CreateStaffModal from "./create-staff-modal"
 import Input from "@/components/ui/input"
+import UpdateStaffModal from "./update-staff-modal"
 import toaster from "@/components/ui/toast"
 
 export default function StaffTable({
@@ -39,9 +40,70 @@ export default function StaffTable({
   const pageSize = query.get("page_size") || "10"
   const router = useRouter()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean
+    staffId: string | null
+    position: { top: number; left: number } | null
+  }>({
+    isOpen: false,
+    staffId: null,
+    position: null,
+  })
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+  const [updateStaffData, setUpdateStaffData] = useState<Staff | null>(null)
+  const handleDeleteClick = (staffId: string, event: React.MouseEvent) => {
+    const button = event.currentTarget
+    const buttonRect = button.getBoundingClientRect()
+    const container = button.closest('.relative') as HTMLElement
+    const containerRect = container?.getBoundingClientRect()
+    
+    if (!containerRect) return
+    
+    const dialogWidth = 256 // w-64 = 16rem = 256px
+    const dialogHeight = 100 // Approximate height
+    
+    // Calculate position relative to the container
+    const relativeButtonTop = buttonRect.top - containerRect.top
+    const relativeButtonLeft = buttonRect.left - containerRect.left
+    
+    // Calculate initial position (above and centered to button)
+    let top = relativeButtonTop - dialogHeight - 10
+    let left = relativeButtonLeft + (buttonRect.width / 2) - (dialogWidth / 2)
+    
+    // Adjust if dialog would go off-screen horizontally
+    if (left < 10) {
+      left = 10 // Keep 10px from left edge
+    } else if (left + dialogWidth > containerRect.width - 10) {
+      left = containerRect.width - dialogWidth - 10 // Keep 10px from right edge
+    }
+    
+    // Adjust if dialog would go off-screen vertically (show below button instead)
+    if (top < 10) {
+      top = relativeButtonTop + buttonRect.height + 10 // Show below button with 10px gap
+    }
+    
+    setDeleteConfirm({
+      isOpen: true,
+      staffId,
+      position: { top, left },
+    })
+  }
+
+  const handleDeleteConfirm = () => {
+    console.log("Delete confirmed for staff ID:", deleteConfirm.staffId)
+    if (deleteConfirm.staffId) {
+      console.log("Delete confirmed for staff ID:", deleteConfirm.staffId)
+      deleteStaffUser(Number(deleteConfirm.staffId))
+    }
+    setDeleteConfirm({ isOpen: false, staffId: null, position: null })
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirm({ isOpen: false, staffId: null, position: null })
+  }
 
   return (
-    <div>
+    <div className="relative">
       {/* Create Staff Button */}
       <div className="mb-4 flex justify-between">
         <div className="flex gap-2">
@@ -53,7 +115,9 @@ export default function StaffTable({
             Create Staff
           </Button>
           <Button
-            onClick={() => setIsCreateModalOpen(true)}
+            onClick={() => {
+              router.refresh()
+            }}
             className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 disabled:hover:bg-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCcw className="w-4 h-4" />
@@ -69,11 +133,11 @@ export default function StaffTable({
         headers={[
           {
             label: "ID",
-            key: "id",
-            componentKey: "id",
+            key: "staffId",
+            componentKey: "staffId",
             sortable: true,
             cell: (value) => <div>{value}</div>,
-            sorted: sort === "id",
+            sorted: sort === "staffId",
             order: order === "asc" ? "desc" : "asc",
           },
           {
@@ -167,19 +231,29 @@ export default function StaffTable({
             order: order === "asc" ? "desc" : "asc",
           },
           {
+            label: "User ID",
+            key: "id",
+            componentKey: "id",
+            sortable: true,
+            cell: (value) => <div>{value}</div>,
+            sorted: sort === "createdByName",
+            order: order === "asc" ? "desc" : "asc",
+          },
+          {
             label: "Actions",
             key: "id",
             componentKey: "actions",
             cell: (value) => (
               <div className="flex gap-2">
-                <Button className="w-8 h-8 flex justify-center items-center">
+                <Button className="w-8 h-8" onClick={() => {
+                  setUpdateStaffData(staffUsers.data?.find((staff) => staff.id === Number(value)) || null)
+                  setIsUpdateModalOpen(true)
+                }}>
                   <Pencil className="w-4 h-4" />
                 </Button>
                 <Button
-                  className="w-8 h-8 flex justify-center items-center bg-red-500 hover:bg-red-600"
-                  onClick={() => {
-                    console.log("Delete", value)
-                  }}
+                  className="w-8 h-8"
+                  onClick={(event) => handleDeleteClick(value, event)}
                 >
                   <Trash className="w-4 h-4" />
                 </Button>
@@ -238,6 +312,50 @@ export default function StaffTable({
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
       />
+      {/* Update Staff Modal */}
+      <UpdateStaffModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        staffData={updateStaffData}
+      />
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm.isOpen && deleteConfirm.position && (
+        <>
+          {/* Backdrop to close dialog when clicking outside */}
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={handleDeleteCancel}
+          />
+          {/* Confirmation Dialog */}
+          <div
+            className="absolute z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 w-64"
+            style={{
+              top: `${deleteConfirm.position.top}px`,
+              left: `${deleteConfirm.position.left}px`,
+            }}
+          >
+            <div className="text-center">
+              <p className="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                Are you sure you want to delete this staff member?
+              </p>
+              <div className="flex gap-2 justify-center">
+                <Button
+                  onClick={handleDeleteCancel}
+                  className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleDeleteConfirm}
+                  className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

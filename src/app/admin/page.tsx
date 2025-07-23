@@ -67,7 +67,7 @@ export default async function AdminDashboard() {
                 <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm text-white">Training module completed</div>
-                  <div className="text-xs text-gray-400 mt-1">12 staff members completed "Safety Protocols" • 15 minutes ago</div>
+                  <div className="text-xs text-gray-400 mt-1">12 staff members completed Safety Protocols • 15 minutes ago</div>
                 </div>
               </div>
               
