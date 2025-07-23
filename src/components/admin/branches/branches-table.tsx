@@ -1,11 +1,14 @@
 'use client'
 import { TableRoot, TableHeader, TableBody, TableRow, TableCell, TableHead, Table } from "@/components/ui/table";
 import { GeneralActionResponse } from "@/types/general-action-response";
-import { ChevronUp, ChevronLeft, ChevronRight, Pencil, Trash } from "lucide-react";
+import { ChevronUp, ChevronLeft, ChevronRight, Pencil, Trash, Plus, RefreshCcw } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import Pagination from "../../ui/pagination";
 import Button from "../../ui/button";
 import { Branch } from "@/actions/branches";
+import CreateBranchModal from "./create-branch-modal";
+import Input from "@/components/ui/input";
 
 export default function BranchesTable({
     branches
@@ -19,9 +22,33 @@ export default function BranchesTable({
     const page = query.get("page") || "1"
     const pageSize = query.get("page_size") || "10"
     const router = useRouter()
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
     return (
         <div>
+            {/* Create Branch Button and Search */}
+            <div className="mb-4 flex justify-between">
+                <div className="flex gap-2">
+                    <Button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Create Branch
+                    </Button>
+                    <Button
+                        onClick={() => window.location.reload()}
+                        className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 disabled:hover:bg-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <RefreshCcw className="w-4 h-4" />
+                        Refresh
+                    </Button>
+                </div>
+                <div>
+                    <Input placeholder="Search" className="w-80 bg-gray-800 border-gray-700" />
+                </div>
+            </div>
+
             <Table
                 headers={[
                     {
@@ -56,7 +83,7 @@ export default function BranchesTable({
                         key: "createdAt",
                         componentKey: "createdAt",
                         sortable: true,
-                        cell: (value) => <div>{value}</div>,
+                        cell: (value) => <div>{value.split(" ")[0]}</div>,
                         sorted: sort === "createdAt",
                         order: order === "asc" ? "desc" : "asc"
                     },
@@ -117,6 +144,12 @@ export default function BranchesTable({
                     }}
                 />
             </div>
+
+            {/* Create Branch Modal */}
+            <CreateBranchModal
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+            />
 
         </div>
     )

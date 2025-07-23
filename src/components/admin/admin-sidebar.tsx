@@ -35,10 +35,10 @@ const navigationItems = [
     description: 'Manage staff accounts'
   },
   {
-    href: '/admin/carriers',
-    label: 'Carriers',
+    href: '/admin/training-modules',
+    label: 'Training Modules',
     icon: Truck,
-    description: 'Manage different carriers and training modules'
+    description: 'Manage different training modules'
   },
   {
     href: '/admin/products',

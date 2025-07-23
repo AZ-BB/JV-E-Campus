@@ -23,10 +23,11 @@ import { branches as branchesTable, staffRoles } from "@/db/schema/schema"
 import { getBranches } from "@/actions/branches"
 import { Loader2 } from "lucide-react"
 import { getRoles } from "@/actions/roles"
+import countryList from "country-list"
 
 export default function CreateStaffModal({
   isOpen,
-  onClose,
+  onClose,  
 }: {
   isOpen: boolean
   onClose: () => void
@@ -40,21 +41,14 @@ export default function CreateStaffModal({
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
   const [branchId, setBranchId] = useState<number | null>(null)
-  const [staffCategory, setStaffCategory] = useState<StaffCategory | null>(null)
+  const [staffRoleId, setStaffRoleId] = useState<number | null>(null)
   const [phoneNumber, setPhoneNumber] = useState("")
   const [nationality, setNationality] = useState("")
   const [profilePictureUrl, setProfilePictureUrl] = useState("")
   const [resetPasswordOnFirstLogin, setResetPasswordOnFirstLogin] =
     useState(false)
   const [isCreating, setIsCreating] = useState(false)
-  const countries = [
-    "United States",
-    "Canada",
-    "United Kingdom",
-    "Australia",
-    "New Zealand",
-    "Other",
-  ]
+  const countries = countryList.getNames()
   useEffect(() => {
     const fetchBranchs = async () => {
       const branchesResponse = await getBranches()
@@ -78,7 +72,7 @@ export default function CreateStaffModal({
 
   useEffect(() => {
     setError(null)
-  }, [email, password, fullName, branchId, staffCategory])
+  }, [email, password, fullName, branchId, staffRoleId])
 
   useEffect(() => {
     if (isOpen) {
@@ -86,7 +80,7 @@ export default function CreateStaffModal({
       setPassword("")
       setFullName("")
       setBranchId(null)
-      setStaffCategory(null)
+      setStaffRoleId(null)
       setPhoneNumber("")
       setNationality("")
       setProfilePictureUrl("")
@@ -101,7 +95,7 @@ export default function CreateStaffModal({
       password,
       fullName,
       branchId: branchId!,
-      staffCategory: staffCategory!,
+      staffRoleId: staffRoleId!,
       phoneNumber: phoneNumber,
       nationality: nationality,
       profilePictureUrl: profilePictureUrl,
@@ -151,7 +145,7 @@ export default function CreateStaffModal({
             className="w-full"
           />
           <SelectRoot
-            onSelect={(value) => setStaffCategory(value as StaffCategory)}
+            onSelect={(value) => setStaffRoleId(Number(value))}
           >
             <SelectTrigger className="w-full" label="Staff Role" required>
               <SelectValue placeholder="Select Staff Role" />
@@ -213,7 +207,7 @@ export default function CreateStaffModal({
               !email.trim() ||
               !password.trim() ||
               !fullName.trim() ||
-              !staffCategory ||
+              !staffRoleId ||
               !branchId ||
               !!error ||
               isCreating
