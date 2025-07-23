@@ -93,3 +93,35 @@ export const createBranch = async (branch: {
     return { data: null, error: "Failed to create branch, please try again later" as string }
   }
 }
+
+
+// UPDATERS
+export const updateBranch = async (branchId: number, data: { name: string }): Promise<GeneralActionResponse<typeof branches.$inferSelect>> => {
+  try {
+    const result = await db.update(branches).set({ name: data.name.trim() }).where(eq(branches.id, branchId)).returning()
+    revalidatePath("/admin/branches")
+    return { data: result[0], error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: "Failed to update branch, please try again later" as string }
+  }
+}
+
+// DELETERS
+export const deleteBranch = async (branchId: number): Promise<GeneralActionResponse<void>> => {
+  try {
+    const result = await db.select({
+      staffCount: count(staff.id),
+    }).from(staff).where(eq(staff.branchId, branchId))
+    if(result[0]?.staffCount > 0) {
+      console.error("Branch has staff, please remove staff from this branch first")
+      return { data: null, error: "Branch has staff, please remove staff from this branch first" as string }
+    }
+    await db.delete(branches).where(eq(branches.id, branchId))
+    revalidatePath("/admin/branches")
+    return { data: null, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: "Failed to delete branch, please try again later" as string }
+  }
+}

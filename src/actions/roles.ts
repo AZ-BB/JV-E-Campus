@@ -90,3 +90,33 @@ export const createRole = async (role: { name: string, fullName: string }): Prom
     return { data: null, error: "Unexpected error occurred, please try again later" as string }
   }
 }
+
+export const updateRole = async (roleId: number, data: { name: string, fullName: string }): Promise<GeneralActionResponse<typeof staffRoles.$inferSelect>> => {
+  try {
+    const result = await db.update(staffRoles).set(data).where(eq(staffRoles.id, roleId)).returning()
+    revalidatePath("/admin/roles")
+    return { data: result[0], error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: "Unexpected error occurred, please try again later" as string }
+  }
+}
+
+export const deleteRole = async (roleId: number): Promise<GeneralActionResponse<void>> => {
+  try {
+    const result = await db.select({
+      staffCount: count(staff.id),
+    }).from(staff).where(eq(staff.staffRoleId, roleId))
+    console.log("Result", result)
+    if(result[0]?.staffCount > 0) {
+      console.error("Role has staff, please remove staff from this role first")
+      return { data: null, error: "Role has staff, please remove staff from this role first" as string }
+    }
+    await db.delete(staffRoles).where(eq(staffRoles.id, roleId))
+    revalidatePath("/admin/roles")
+    return { data: null, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: "Unexpected error occurred, please try again later" as string }
+  }
+}
