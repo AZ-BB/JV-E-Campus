@@ -5,6 +5,7 @@ import { Pencil, Trash } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Pagination from "./ui/pagination";
 import Button from "./ui/button";
+import toaster from "./ui/toast";
 
 interface User {
     id: number
@@ -126,7 +127,6 @@ export default function UserTable({
                     }}
                 />
             </div>
-
         </div>
     )
 }

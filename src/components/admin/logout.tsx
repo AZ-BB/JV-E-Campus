@@ -15,14 +15,14 @@ const Logout = () => {
     setLoading(false)
   }
   return (
-    <Button onClick={logout} disabled={loading}>
-        {
-            loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-                "Log Out"
-            )
-        }
+    <Button onClick={logout} disabled={loading} className="px-4 py-2">
+      {
+        loading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          "Log Out"
+        )
+      }
     </Button>
   )
 }

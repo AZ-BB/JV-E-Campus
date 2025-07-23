@@ -27,7 +27,7 @@ import countryList from "country-list"
 
 export default function CreateStaffModal({
   isOpen,
-  onClose,  
+  onClose,
 }: {
   isOpen: boolean
   onClose: () => void
@@ -203,6 +203,8 @@ export default function CreateStaffModal({
 
         <ModalFooter>
           <Button
+            loading={isCreating}
+            className="px-4 py-2"
             disabled={
               !email.trim() ||
               !password.trim() ||
@@ -214,11 +216,7 @@ export default function CreateStaffModal({
             }
             onClick={handleCreateStaff}
           >
-            {isCreating ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              "Create Staff"
-            )}
+            Create Staff
           </Button>
         </ModalFooter>
       </ModalContent>

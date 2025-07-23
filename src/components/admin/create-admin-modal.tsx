@@ -13,7 +13,7 @@ export default function CreateAdminModal({
     onClose: () => void;
 }) {
     const [error, setError] = useState<string | null>(null);
-
+    const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [fullName, setFullName] = useState("");
@@ -33,6 +33,7 @@ export default function CreateAdminModal({
     }, [isOpen])
 
     const handleCreateAdmin = async () => {
+        setIsLoading(true)
         const response = await createAdminUser({
             email,
             password,
@@ -43,6 +44,7 @@ export default function CreateAdminModal({
             return
         }
         onClose()
+        setIsLoading(false)
     }
 
     return (
@@ -67,7 +69,15 @@ export default function CreateAdminModal({
                 </div>
                 {error && <p className="text-red-500 text-sm">{error}</p>}
                 <ModalFooter>
-                    <Button disabled={!email.trim() || !password.trim() || !fullName.trim() || !!error} onClick={handleCreateAdmin} >Create Admin</Button>
+                    <Button
+                        loading={isLoading}
+                        className="px-4 py-2"
+                        disabled={
+                            !email.trim() ||
+                            !password.trim() ||
+                            !fullName.trim() ||
+                            !!error
+                        } onClick={handleCreateAdmin} >Create Admin</Button>
                 </ModalFooter>
             </ModalContent>
         </ModalRoot>
