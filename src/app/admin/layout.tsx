@@ -12,7 +12,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
     data: { user },
   } = await supabase.auth.getUser()
   return (
-    <div className="min-h-screen bg-admin_background text-admin_text">
+    <div className="min-h-screen bg-admin-background text-admin-text">
       <AdminSidebar currentUser={user?.user_metadata} />
 
       {/* Main content */}

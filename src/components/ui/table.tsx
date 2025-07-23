@@ -9,7 +9,7 @@ const TableRoot = React.forwardRef<
         <div className="overflow-x-auto">
             <table
                 ref={ref}
-                className={`min-w-full divide-y divide-gray-700 ${className}`}
+                className={`min-w-full divide-y divide-admin-border ${className}`}
                 {...props}
             />
         </div>
@@ -25,7 +25,7 @@ const TableHeader = React.forwardRef<
     ...props }, ref) => (
     <thead
         ref={ref}
-        className={`bg-gray-900 ${className}`}
+        className={`bg-admin-surface ${className}`}
         {...props}
     />
 ));
@@ -37,7 +37,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <tbody
         ref={ref}
-        className={`bg-gray-800 divide-y divide-gray-700 ${className}`}
+        className={`bg-admin-surface divide-y divide-admin-border ${className}`}
         {...props}
     />
 ));
@@ -49,7 +49,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <tfoot
         ref={ref}
-        className={`bg-gray-900 border-t border-gray-700 font-medium ${className}`}
+        className={`bg-admin-surface border-t border-admin-border font-medium ${className}`}
         {...props}
     />
 ));
@@ -73,7 +73,7 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <th
         ref={ref}
-        className={`px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider ${className}`}
+        className={`px-6 bg-admin-primary text-white py-3 text-left text-xs font-medium text-admin-text-muted uppercase tracking-wider ${className}`}
         {...props}
     />
 ));
@@ -85,7 +85,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <td
         ref={ref}
-        className={`px-6 py-4 whitespace-nowrap text-sm text-gray-300 ${className}`}
+        className={`px-6 py-4 whitespace-nowrap text-sm text-admin-text ${className}`}
         {...props}
     />
 ));
@@ -97,7 +97,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <caption
         ref={ref}
-        className={`mt-2 text-sm text-gray-400 ${className}`}
+        className={`mt-2 text-sm text-admin-text-muted ${className}`}
         {...props}
     />
 ));
@@ -146,7 +146,7 @@ function Table({
             </TableHeader>
             <TableBody>
                 {data.map((row) => (
-                    <TableRow key={row.id} className="hover:bg-gray-700 transition-colors">
+                    <TableRow key={row.id} className="hover:bg-admin-border transition-colors">
                         {headers.map((header) => (
                             <TableCell key={header.componentKey}>{header.cell ? header.cell(row[header.key]) : row[header.key]}</TableCell>
                         ))}

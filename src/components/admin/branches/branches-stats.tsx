@@ -10,47 +10,47 @@ export default function BranchesStats({ branchesStats }: { branchesStats: Genera
       value: branchesStatsData?.total_branches || 0,
       icon: "🏪",
       unit: branchesStatsData?.total_branches && branchesStatsData.total_branches > 1 ? "branches" : "branch",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_primary",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-primary",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     },
     {
       title: "Average Staff per Branch",
       value: branchesStatsData?.average_staff_per_branch ? (Number(branchesStatsData.average_staff_per_branch) % 1 === 0 ? Number(branchesStatsData.average_staff_per_branch) : Number(branchesStatsData.average_staff_per_branch).toFixed(2)) : 0,
       icon: "👥",
       unit: branchesStatsData?.average_staff_per_branch && branchesStatsData.average_staff_per_branch > 1 ? "members" : "member",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_success",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-success",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     },
     {
       title: "Active Branches",
       value: branchesStatsData?.total_branches || 0,
       icon: "🟢",
       unit: "branches",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_success",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-success",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     },
     {
       title: "Recently Opened",
       value: Math.floor(Math.random() * 3) + 1,
       icon: "🎉",
       unit: Math.floor(Math.random() * 3) + 1 !== 1 ? "branches" : "branch",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_secondary",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-secondary",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     }
   ]
 
   if (branchesStatsError) {
     return (
-      <div className="bg-admin_accent/20 border border-admin_accent rounded-lg p-4">
-        <p className="text-admin_accent">Error loading branches statistics</p>
+      <div className="bg-admin-accent/20 border border-admin-accent rounded-lg p-4">
+        <p className="text-admin-accent">Error loading branches statistics</p>
       </div>
     )
   }
@@ -58,8 +58,8 @@ export default function BranchesStats({ branchesStats }: { branchesStats: Genera
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold text-admin_text mb-2">Branches Statistics</h1>
-        <p className="text-admin_text-muted">Overview of your branches</p>
+        <h1 className="text-3xl font-bold text-admin-text mb-2">Branches Statistics</h1>
+        <p className="text-admin-text-muted">Overview of your branches</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -78,14 +78,14 @@ export default function BranchesStats({ branchesStats }: { branchesStats: Genera
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-admin_text-muted font-medium text-sm uppercase tracking-wide">
+              <h3 className="text-admin-text-muted font-medium text-sm uppercase tracking-wide">
                 {stat.title}
               </h3>
               <div className="flex items-end space-x-2">
                 <span className={`${stat.textColor} text-3xl font-bold`}>
                   {stat.value}
                 </span>
-                <span className="text-admin_text-muted text-sm mb-1">
+                <span className="text-admin-text-muted text-sm mb-1">
                   {stat.unit}
                 </span>
               </div>

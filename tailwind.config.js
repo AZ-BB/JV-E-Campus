@@ -5,35 +5,22 @@ module.exports = {
     "./src/components/**/*.{js,ts,jsx,tsx}",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        admin_primary: {
-          DEFAULT: '#3B82F6',
+        admin: {
+          bg: 'rgb(var(--color-bg) / <alpha-value>)',
+          surface: 'rgb(var(--color-surface) / <alpha-value>)',
+          border: 'rgb(var(--color-border) / <alpha-value>)',
+          text: 'rgb(var(--color-text) / <alpha-value>)',
+          textMuted: 'rgb(var(--color-text-muted) / <alpha-value>)',
+          primary: 'rgb(var(--color-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--color-secondary) / <alpha-value>)',
+          accent: 'rgb(var(--color-accent) / <alpha-value>)',
+          success: 'rgb(var(--color-success) / <alpha-value>)',
         },
-        admin_secondary: {
-          DEFAULT: '#9333EA',
-        },
-        admin_accent: {
-          DEFAULT: '#F43F5E',
-        },
-        admin_success: {
-          DEFAULT: '#22C55E',
-        },
-        admin_background: {
-          DEFAULT: '#0F172A',
-        },
-        admin_surface: {
-          DEFAULT: '#1E293B',
-        },
-        admin_border: {
-          DEFAULT: '#334155',
-        },
-        admin_text: {
-          DEFAULT: '#F8FAFC',
-          muted: '#94A3B8',
-        },
-      }
+      },
     },
   },
   plugins: [],

@@ -199,7 +199,7 @@ export default function CreateStaffModal({
             className="w-5 h-5 rounded-md"
           />
         </div>
-        {error && <p className="text-admin_accent text-sm">{error}</p>}
+        {error && <p className="text-admin-accent text-sm">{error}</p>}
 
         <ModalFooter>
           <Button

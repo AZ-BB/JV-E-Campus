@@ -10,47 +10,47 @@ export default function RolesStats({ rolesStats }: { rolesStats: GeneralActionRe
       value: rolesStatsData?.total_roles || 0,
       icon: "🎩",
       unit: rolesStatsData?.total_roles && rolesStatsData.total_roles > 1 ? "roles" : "role",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_primary",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-primary",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     },
     {
       title: "Active Roles",
       value: rolesStatsData?.active_roles || 0,
       icon: "⭐️",
       unit: rolesStatsData?.active_roles && rolesStatsData.active_roles > 1 ? "roles" : "role",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_success",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-success",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     },
     {
       title: "Inactive Roles",
       value: Math.max(0, (rolesStatsData?.total_roles || 0) - (rolesStatsData?.active_roles || 0)),
       icon: "😴",
       unit: Math.max(0, (rolesStatsData?.total_roles || 0) - (rolesStatsData?.active_roles || 0)) !== 1 ? "roles" : "role",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_accent",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-accent",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     },
     {
       title: "Recently Created",
       value: Math.floor(Math.random() * 3) + 1,
       icon: "🆕",
       unit: Math.floor(Math.random() * 3) + 1 !== 1 ? "roles" : "role",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_secondary",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-secondary",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     }
   ]
 
   if (rolesStatsError) {
     return (
-      <div className="bg-admin_accent/20 border border-admin_accent rounded-lg p-4">
-        <p className="text-admin_accent">Error loading roles statistics</p>
+      <div className="bg-admin-accent/20 border border-admin-accent rounded-lg p-4">
+        <p className="text-admin-accent">Error loading roles statistics</p>
       </div>
     )
   }
@@ -58,8 +58,8 @@ export default function RolesStats({ rolesStats }: { rolesStats: GeneralActionRe
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold text-admin_text mb-2">Roles</h1>
-        <p className="text-admin_text-muted">Overview of system roles</p>
+        <h1 className="text-3xl font-bold text-admin-text mb-2">Roles</h1>
+        <p className="text-admin-text-muted">Overview of system roles</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -78,14 +78,14 @@ export default function RolesStats({ rolesStats }: { rolesStats: GeneralActionRe
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-admin_text-muted font-medium text-sm uppercase tracking-wide">
+              <h3 className="text-admin-text-muted font-medium text-sm uppercase tracking-wide">
                 {stat.title}
               </h3>
               <div className="flex items-end space-x-2">
                 <span className={`${stat.textColor} text-3xl font-bold`}>
                   {stat.value}
                 </span>
-                <span className="text-admin_text-muted text-sm mb-1">
+                <span className="text-admin-text-muted text-sm mb-1">
                   {stat.unit}
                 </span>
               </div>

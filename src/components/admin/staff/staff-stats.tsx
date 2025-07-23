@@ -10,47 +10,47 @@ export default function StaffStats({ staffStats }: { staffStats: GeneralActionRe
       value: staffStatsData?.staff_count || 0,
       icon: "👨‍🍳",
       unit: staffStatsData?.staff_count === 1 ? "person" : "people",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_primary",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-primary",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     },
     {
       title: "Active Staff",
       value: Math.floor((staffStatsData?.staff_count || 0) * 0.85),
       icon: "✅",
       unit: "active",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_success",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-success",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     },
     {
       title: "New Hires",
       value: Math.floor((staffStatsData?.staff_count || 0) * 0.1),
       icon: "🆕",
       unit: "this month",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_secondary",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-secondary",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     },
     {
       title: "Avg Experience",
       value: 3.2,
       icon: "📊",
       unit: "years",
-      bgColor: "bg-admin_surface",
-      textColor: "text-admin_accent",
-      borderColor: "border-admin_border",
-      hoverColor: "hover:bg-admin_border"
+      bgColor: "bg-admin-surface",
+      textColor: "text-admin-accent",
+      borderColor: "border-admin-border",
+      hoverColor: "hover:bg-admin-border"
     }
   ]
 
   if (staffStatsError) {
     return (
-      <div className="bg-admin_accent/20 border border-admin_accent rounded-lg p-4">
-        <p className="text-admin_accent">Error loading staff statistics</p>
+      <div className="bg-admin-accent/20 border border-admin-accent rounded-lg p-4">
+        <p className="text-admin-accent">Error loading staff statistics</p>
       </div>
     )
   }
@@ -58,8 +58,8 @@ export default function StaffStats({ staffStats }: { staffStats: GeneralActionRe
   return (
     <div className="space-y-6 p-6 px-4">
       <div>
-        <h1 className="text-3xl font-bold text-admin_text mb-2">Staff Statistics</h1>
-        <p className="text-admin_text-muted">Overview of your team composition</p>
+        <h1 className="text-3xl font-bold text-admin-text mb-2">Staff Statistics</h1>
+        <p className="text-admin-text-muted">Overview of your team composition</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -72,20 +72,20 @@ export default function StaffStats({ staffStats }: { staffStats: GeneralActionRe
               <div className={`${stat.textColor} text-2xl`}>
                 {stat.icon}
               </div>
-              <div className={`${stat.textColor} bg-admin_border rounded-full px-2 py-1 text-xs font-medium`}>
+              <div className={`${stat.textColor} bg-admin-border rounded-full px-2 py-1 text-xs font-medium`}>
                 Active
               </div>
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-admin_text-muted font-medium text-sm uppercase tracking-wide">
+              <h3 className="text-admin-text-muted font-medium text-sm uppercase tracking-wide">
                 {stat.title}
               </h3>
               <div className="flex items-end space-x-2">
                 <span className={`${stat.textColor} text-3xl font-bold`}>
                   {stat.value}
                 </span>
-                <span className="text-admin_text-muted text-sm mb-1">
+                <span className="text-admin-text-muted text-sm mb-1">
                   {stat.unit}
                 </span>
               </div>
