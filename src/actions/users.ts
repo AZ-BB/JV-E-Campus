@@ -1,11 +1,11 @@
 "use server"
 import { db } from "@/db"
-import { StaffCategory, UserRole } from "@/db/enums"
+import {  UserRole } from "@/db/enums"
 import { branches, staff, staffRoles, users } from "@/db/schema/schema"
 import { createSupabaseAdminClient } from "@/utils/supabase-browser"
 import { createSupabaseServerClient } from "@/utils/supabase-server"
 import { GeneralActionResponse } from "@/types/general-action-response"
-import { aliasedTable, count, eq, sql } from "drizzle-orm"
+import { aliasedTable, eq, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 
 
@@ -44,6 +44,7 @@ export const getStaffUsers = async (
         staffProfilePictureUrl: staff.profilePictureUrl,
         firstLogin: staff.firstLogin,
         branchId: staff.branchId,
+        staffRoleId: staff.staffRoleId,
 
         // Branches table fields
         branchName: branches.name,
@@ -150,7 +151,7 @@ export const createAdminUser = async (
 
     // Step 2: Create Database User
     const supabase = await createSupabaseServerClient()
-    const { data: currentUser, error: currentUserError } =
+    const { data: currentUser } =
       await supabase.auth.getUser()
 
     let dbResult
@@ -313,6 +314,7 @@ export const createStaffUser = async (
         fullName: newUser.fullName,
         createdBy: currentUser?.user?.user_metadata?.db_user_id,
         language: "en",
+        authUserId: authData.user.id,
       })
       .returning()
     } catch (error) {
@@ -364,5 +366,43 @@ export const createStaffUser = async (
       error:
         error instanceof Error ? error.message : "An unexpected error occurred",
     }
+  }
+}
+
+// UPDATERS
+
+export const updateStaffUser = async (userId: number, data: Partial<CreateStaffUser>): Promise<GeneralActionResponse<void>> => {
+  try {
+    if(data.fullName) {
+      await db.update(users).set({fullName: data.fullName}).where(eq(users.id, userId))
+    }
+    await db.update(staff).set(data).where(eq(staff.userId, userId))
+    revalidatePath("/admin/staff")
+    return { data: null, error: null }
+  } catch (error) {
+    console.error("Unexpected error in updateStaffUser:", error)
+    return { data: null, error: error as string }
+  }
+}
+
+// DELETERS
+export const deleteStaffUser = async (userId: number): Promise<GeneralActionResponse<void>> => {
+  try {
+    const result = await db.select({
+      authUserId: users.authUserId,
+    }).from(users).where(eq(users.id, userId))
+    if(!result[0]) {
+      console.error("User not found")
+      return { data: null, error: "User not found" }
+    } else {
+      const supabaseAdmin = createSupabaseAdminClient()
+      console.log("Deleting user with auth user id:", result[0])
+      await supabaseAdmin.auth.admin.deleteUser(result[0].authUserId!)
+    }
+    revalidatePath("/admin/staff")
+    return { data: null, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: error as string }
   }
 }
