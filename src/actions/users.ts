@@ -251,7 +251,7 @@ export interface CreateStaffUser {
   password: string
   fullName: string
   branchId: number
-  staffCategory: StaffCategory
+  staffRoleId: number
   phoneNumber?: string
   nationality?: string
   profilePictureUrl?: string
@@ -270,12 +270,12 @@ export const createStaffUser = async (
       !newUser.password.trim() ||
       !newUser.fullName.trim() ||
       !newUser.branchId ||
-      !newUser.staffCategory
+      !newUser.staffRoleId
     ) {
       return {
         data: null,
         error:
-          "Email, password, full name, branch id and staff category are required",
+          "Email, password, full name, branch id and staff role id are required",
       }
     }
     const supabaseAdmin = createSupabaseAdminClient()
@@ -327,7 +327,8 @@ export const createStaffUser = async (
         .values({
           userId: userResult[0].id,
           branchId: newUser.branchId,
-          staffCategory: newUser.staffCategory,
+          staffCategory: "MANAGER", // Deprecated
+          staffRoleId: newUser.staffRoleId,
           phoneNumber: newUser.phoneNumber,
           nationality: newUser.nationality,
           firstLogin: true,
@@ -343,6 +344,7 @@ export const createStaffUser = async (
         error
       )
       try {
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
         await db.delete(users).where(eq(users.id, userResult[0].id))
       } catch (rollbackError) {
         console.error("Failed to rollback user creation:", rollbackError)

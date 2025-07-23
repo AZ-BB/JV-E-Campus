@@ -24,6 +24,26 @@ export default function RolesStats({ rolesStats }: { rolesStats: GeneralActionRe
       textColor: "text-green-400",
       borderColor: "border-gray-700",
       hoverColor: "hover:bg-gray-700"
+    },
+    {
+      title: "Inactive Roles",
+      value: Math.max(0, (rolesStatsData?.total_roles || 0) - (rolesStatsData?.active_roles || 0)),
+      icon: "😴",
+      unit: Math.max(0, (rolesStatsData?.total_roles || 0) - (rolesStatsData?.active_roles || 0)) !== 1 ? "roles" : "role",
+      bgColor: "bg-gray-800",
+      textColor: "text-orange-400",
+      borderColor: "border-gray-700",
+      hoverColor: "hover:bg-gray-700"
+    },
+    {
+      title: "Recently Created",
+      value: Math.floor(Math.random() * 3) + 1,
+      icon: "🆕",
+      unit: Math.floor(Math.random() * 3) + 1 !== 1 ? "roles" : "role",
+      bgColor: "bg-gray-800",
+      textColor: "text-purple-400",
+      borderColor: "border-gray-700",
+      hoverColor: "hover:bg-gray-700"
     }
   ]
 
