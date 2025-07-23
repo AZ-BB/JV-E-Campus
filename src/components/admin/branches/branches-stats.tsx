@@ -10,47 +10,47 @@ export default function BranchesStats({ branchesStats }: { branchesStats: Genera
       value: branchesStatsData?.total_branches || 0,
       icon: "🏪",
       unit: branchesStatsData?.total_branches && branchesStatsData.total_branches > 1 ? "branches" : "branch",
-      bgColor: "bg-gray-800",
-      textColor: "text-blue-400",
-      borderColor: "border-gray-700",
-      hoverColor: "hover:bg-gray-700"
+      bgColor: "bg-admin_surface",
+      textColor: "text-admin_primary",
+      borderColor: "border-admin_border",
+      hoverColor: "hover:bg-admin_border"
     },
     {
       title: "Average Staff per Branch",
       value: branchesStatsData?.average_staff_per_branch ? (Number(branchesStatsData.average_staff_per_branch) % 1 === 0 ? Number(branchesStatsData.average_staff_per_branch) : Number(branchesStatsData.average_staff_per_branch).toFixed(2)) : 0,
       icon: "👥",
       unit: branchesStatsData?.average_staff_per_branch && branchesStatsData.average_staff_per_branch > 1 ? "members" : "member",
-      bgColor: "bg-gray-800",
-      textColor: "text-green-400",
-      borderColor: "border-gray-700",
-      hoverColor: "hover:bg-gray-700"
+      bgColor: "bg-admin_surface",
+      textColor: "text-admin_success",
+      borderColor: "border-admin_border",
+      hoverColor: "hover:bg-admin_border"
     },
     {
       title: "Active Branches",
       value: branchesStatsData?.total_branches || 0,
       icon: "🟢",
       unit: "branches",
-      bgColor: "bg-gray-800",
-      textColor: "text-emerald-400",
-      borderColor: "border-gray-700",
-      hoverColor: "hover:bg-gray-700"
+      bgColor: "bg-admin_surface",
+      textColor: "text-admin_success",
+      borderColor: "border-admin_border",
+      hoverColor: "hover:bg-admin_border"
     },
     {
       title: "Recently Opened",
       value: Math.floor(Math.random() * 3) + 1,
       icon: "🎉",
       unit: Math.floor(Math.random() * 3) + 1 !== 1 ? "branches" : "branch",
-      bgColor: "bg-gray-800",
-      textColor: "text-purple-400",
-      borderColor: "border-gray-700",
-      hoverColor: "hover:bg-gray-700"
+      bgColor: "bg-admin_surface",
+      textColor: "text-admin_secondary",
+      borderColor: "border-admin_border",
+      hoverColor: "hover:bg-admin_border"
     }
   ]
 
   if (branchesStatsError) {
     return (
-      <div className="bg-red-900/20 border border-red-700 rounded-lg p-4">
-        <p className="text-red-400">Error loading branches statistics</p>
+      <div className="bg-admin_accent/20 border border-admin_accent rounded-lg p-4">
+        <p className="text-admin_accent">Error loading branches statistics</p>
       </div>
     )
   }
@@ -58,8 +58,8 @@ export default function BranchesStats({ branchesStats }: { branchesStats: Genera
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Branches Statistics</h1>
-        <p className="text-gray-400">Overview of your branches</p>
+        <h1 className="text-3xl font-bold text-admin_text mb-2">Branches Statistics</h1>
+        <p className="text-admin_text-muted">Overview of your branches</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -78,14 +78,14 @@ export default function BranchesStats({ branchesStats }: { branchesStats: Genera
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-gray-300 font-medium text-sm uppercase tracking-wide">
+              <h3 className="text-admin_text-muted font-medium text-sm uppercase tracking-wide">
                 {stat.title}
               </h3>
               <div className="flex items-end space-x-2">
                 <span className={`${stat.textColor} text-3xl font-bold`}>
                   {stat.value}
                 </span>
-                <span className="text-gray-500 text-sm mb-1">
+                <span className="text-admin_text-muted text-sm mb-1">
                   {stat.unit}
                 </span>
               </div>

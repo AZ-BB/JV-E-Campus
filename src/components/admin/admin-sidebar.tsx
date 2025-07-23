@@ -91,7 +91,7 @@ export default function AdminSidebar({ currentUser }: { currentUser: UserMetadat
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <button
           onClick={toggleSidebar}
-          className="p-2 rounded-md bg-gray-800 hover:bg-gray-700 transition-colors"
+          className="p-2 rounded-md bg-admin_surface hover:bg-admin_border transition-colors"
         >
           {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -107,7 +107,7 @@ export default function AdminSidebar({ currentUser }: { currentUser: UserMetadat
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed left-0 top-0 h-full bg-gray-800 border-r border-gray-700 z-40 transition-all duration-300 ease-in-out",
+        "fixed left-0 top-0 h-full bg-admin_surface border-r border-admin_border z-40 transition-all duration-300 ease-in-out",
         // Mobile styles
         "lg:translate-x-0",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full",
@@ -118,10 +118,10 @@ export default function AdminSidebar({ currentUser }: { currentUser: UserMetadat
       )}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-4 border-b border-gray-700">
+          <div className="p-4 border-b border-admin_border">
             <div className="flex items-center justify-between">
               {!isSidebarCollapsed && (
-                <h1 className="text-xl font-bold text-white">Admin Panel</h1>
+                <h1 className="text-xl font-bold text-admin_text">Admin Panel</h1>
               )}
               {/* <button
                 onClick={toggleCollapse}
@@ -150,15 +150,15 @@ export default function AdminSidebar({ currentUser }: { currentUser: UserMetadat
                   <div className={cn(
                     "flex items-center my-1 px-3 py-2 rounded-md text-sm font-medium transition-colors group",
                     isActive 
-                      ? "bg-blue-600 text-white" 
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                      ? "bg-admin_primary text-admin_text" 
+                      : "text-admin_text-muted hover:bg-admin_border hover:text-admin_text",
                     isSidebarCollapsed && "justify-center"
                   )}>
                     <Icon size={20} className="flex-shrink-0" />
                     {!isSidebarCollapsed && (
                       <div className="ml-3">
                         <div className="font-medium">{item.label}</div>
-                        <div className={`text-xs ${isActive ? "text-gray-200" : "text-gray-400"} group-hover:text-gray-300`}>
+                        <div className={`text-xs ${isActive ? "text-admin_text/80" : "text-admin_text-muted"} group-hover:text-admin_text/90`}>
                           {item.description}
                         </div>
                       </div>
@@ -170,13 +170,13 @@ export default function AdminSidebar({ currentUser }: { currentUser: UserMetadat
           </nav>
 
           {/* Footer with logout */}
-          <div className="p-4 border-t border-gray-700">
+          <div className="p-4 border-t border-admin_border">
             <div className={cn(
               "flex items-center",
               isSidebarCollapsed ? "justify-center" : "justify-between"
             )}>
               {!isSidebarCollapsed && (
-                <div className="text-sm text-gray-400">
+                <div className="text-sm text-admin_text-muted">
                   {currentUser?.full_name}
                 </div>
               )}

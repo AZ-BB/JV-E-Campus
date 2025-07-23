@@ -15,7 +15,7 @@ const Logout = () => {
     setLoading(false)
   }
   return (
-    <Button onClick={logout} disabled={loading} className="px-4 py-2">
+    <Button onClick={logout} disabled={loading} className="px-4 py-2 bg-admin_primary hover:bg-admin_primary/80 text-admin_text">
       {
         loading ? (
           <Loader2 className="w-4 h-4 animate-spin" />
