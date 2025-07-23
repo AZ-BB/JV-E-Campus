@@ -39,10 +39,10 @@ export default function Pagination({
     return (
         <div className="flex space-x-2">
             <div className="flex items-center gap-1">
-                <span className="text-sm text-gray-300">Page size:</span>
+                <span className="text-sm text-admin-text-muted">Page size:</span>
                 <SelectRoot onSelect={(value) => onSizeChange(Number(value))}>
-                    <SelectTrigger className="w-12 h-7 text-sm text-gray-300 bg-gray-800 border border-gray-700 hover:bg-gray-700">
-                        <SelectValue className="text-gray-300" placeholder={`${pageSize}`} />
+                    <SelectTrigger className="w-12 h-7 text-sm text-admin-text-muted bg-admin-surface border border-admin-border hover:bg-admin-border">
+                        <SelectValue className="text-admin-text-muted" placeholder={`${pageSize}`} />
                     </SelectTrigger>
                     <SelectContent className="w-10">
                         <SelectItem value="10">10</SelectItem>
@@ -57,7 +57,7 @@ export default function Pagination({
                 <button
                     onClick={() => onChange(currentPage - 1)}
                     disabled={currentPage <= 1}
-                    className="h-7 w-7 flex items-center justify-center text-sm text-gray-300 bg-gray-800 border border-gray-700 rounded-l hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-800"
+                    className="h-7 w-7 flex items-center justify-center text-sm text-admin-text-muted bg-admin-surface border border-admin-border rounded-l hover:bg-admin-border disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-admin-border"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -68,13 +68,13 @@ export default function Pagination({
                             <button
                                 key={1}
                                 onClick={() => onChange(1)}
-                                className={`h-7 w-7 text-sm text-gray-300 bg-gray-800 border border-gray-700 hover:bg-gray-700`}
+                                className={`h-7 w-7 text-sm text-admin-text-muted bg-admin-surface border border-admin-border hover:bg-admin-border`}
                             >
                                 1
                             </button>
 
                             <button
-                                className={`cursor-default h-7 w-7 text-sm border border-gray-700 bg-gray-900 text-gray-400`}
+                                className={`cursor-default h-7 w-7 text-sm border border-admin-border bg-admin-surface text-admin-text-muted`}
                             >
                                 ...
                             </button>
@@ -90,7 +90,7 @@ export default function Pagination({
                         onClick={() => onChange(page)}
                         className={`h-7 w-7 text-sm border ${page === currentPage
                             ? "bg-blue-500 text-white border-blue-500"
-                            : "text-gray-300 bg-gray-800 border-gray-700 hover:bg-gray-700"
+                            : "text-admin-text-muted bg-admin-surface border-admin-border hover:bg-admin-border"
                             }`}
                     >
                         {page}
@@ -101,7 +101,7 @@ export default function Pagination({
                     currentPage < maxPage - 1 && (
                         <>
                             <button
-                                className={`cursor-default h-7 w-7 text-sm border border-gray-700 bg-gray-900 text-gray-400`}
+                                className={`cursor-default h-7 w-7 text-sm border border-admin-border bg-admin-surface text-admin-text-muted`}
                             >
                                 ...
                             </button>
@@ -109,7 +109,7 @@ export default function Pagination({
                             <button
                                 key={maxPage}
                                 onClick={() => onChange(maxPage)}
-                                className={`h-7 w-7 text-sm text-gray-300 bg-gray-800 border border-gray-700 hover:bg-gray-700`}
+                                className={`h-7 w-7 text-sm text-admin-text-muted bg-admin-surface border border-admin-border hover:bg-admin-border`}
                             >
                                 {maxPage}
                             </button>
@@ -121,7 +121,7 @@ export default function Pagination({
                 <button
                     onClick={() => onChange(currentPage + 1)}
                     disabled={currentPage >= maxPage}
-                    className="h-7 w-7 flex items-center justify-center text-sm text-gray-300 bg-gray-800 border border-gray-700 rounded-r hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-800"
+                    className="h-7 w-7 flex items-center justify-center text-sm text-admin-text-muted bg-admin-surface border border-admin-border rounded-r hover:bg-admin-border disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-admin-border"
                 >
                     <ChevronRight className="w-4 h-4" />
                 </button>

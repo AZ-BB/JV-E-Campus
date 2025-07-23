@@ -109,7 +109,7 @@ export default function StaffTable({
         <div className="flex gap-2">
           <Button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-admin-primary text-admin-text px-4 py-2 rounded-md hover:bg-admin-primary/80 disabled:hover:bg-admin-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-4 h-4" />
             Create Staff
@@ -118,14 +118,14 @@ export default function StaffTable({
             onClick={() => {
               router.refresh()
             }}
-            className="flex items-center gap-2 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 disabled:hover:bg-gray-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-admin-secondary text-admin-text px-4 py-2 rounded-md hover:bg-admin-secondary/80 disabled:hover:bg-admin-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCcw className="w-4 h-4" />
             Refresh
           </Button>
         </div>
         <div>
-          <Input placeholder="Search" className="w-80 bg-gray-800 border-gray-700" />
+          <Input placeholder="Search" className="w-80 bg-admin-surface border-admin-border" />
         </div>
       </div>
 
@@ -245,14 +245,15 @@ export default function StaffTable({
             componentKey: "actions",
             cell: (value) => (
               <div className="flex gap-2">
-                <Button className="w-8 h-8" onClick={() => {
+                <Button className="w-8 h-8 flex justify-center items-center bg-admin-secondary hover:bg-admin-secondary/80"
+                  onClick={() => {
                   setUpdateStaffData(staffUsers.data?.find((staff) => staff.id === Number(value)) || null)
                   setIsUpdateModalOpen(true)
                 }}>
                   <Pencil className="w-4 h-4" />
                 </Button>
                 <Button
-                  className="w-8 h-8"
+                  className="w-8 h-8 flex justify-center items-center bg-admin-accent hover:bg-admin-accent/80"
                   onClick={(event) => handleDeleteClick(value, event)}
                 >
                   <Trash className="w-4 h-4" />
@@ -291,21 +292,6 @@ export default function StaffTable({
           }}
         />
       </div>
-
-
-      <Button onClick={() => {
-        toaster.promise(
-          new Promise((resolve, reject) => {
-            setTimeout(() => {
-              resolve(true)
-            }, 1000)
-          }),
-          "Success",
-          "Error"
-        )
-      }}>
-        Test
-      </Button>
 
       {/* Create Staff Modal */}
       <CreateStaffModal

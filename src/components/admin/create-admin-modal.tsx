@@ -67,7 +67,7 @@ export default function CreateAdminModal({
                         className="w-5 h-5 rounded-md"
                     />
                 </div>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-admin-accent text-sm">{error}</p>}
                 <ModalFooter>
                     <Button
                         loading={isLoading}

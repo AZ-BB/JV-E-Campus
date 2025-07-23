@@ -57,7 +57,7 @@ export default function CreateRoleModal({
                     <Input required type="text" label="Role Name" placeholder="Role Name" value={roleName} onChange={(e) => setRoleName(e.target.value)} className="w-full" />
                     <Input required type="text" label="Full Name" placeholder="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full" />
                 </div>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-admin-accent text-sm">{error}</p>}
                 <ModalFooter>
                     <Button disabled={!roleName.trim() || !fullName.trim() || !!error} onClick={handleCreateRole} >{
                         isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Role"
