@@ -59,9 +59,14 @@ export default function CreateRoleModal({
                 </div>
                 {error && <p className="text-admin-accent text-sm">{error}</p>}
                 <ModalFooter>
-                    <Button disabled={!roleName.trim() || !fullName.trim() || !!error} onClick={handleCreateRole} >{
-                        isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Role"
-                    }</Button>
+                    <Button
+                        disabled={!roleName.trim() || !fullName.trim() || !!error}
+                        onClick={handleCreateRole}
+                        loading={isCreating}
+                        className="px-4 py-2"
+                    >
+                        Create Role
+                    </Button>
                 </ModalFooter>
 
 

@@ -16,14 +16,14 @@ export default function Input({
     return (
         <div className="space-y-1">
             {label && (
-                <label className={cn("block text-sm font-medium text-gray-700", labelClassName)}>
+                <label className={cn("block text-sm font-medium text-admin-text-muted", labelClassName)}>
                     {label} {
-                        required && <span className="text-red-500">*</span>
+                        required && <span className="text-admin-accent">*</span>
                     }
                 </label>
             )}
             <input
-                className={cn("w-full rounded-md border border-gray-300 p-2 focus:ring-1 focus:outline-none", className)}
+                className={cn("w-full rounded-md border border-admin-border p-2 focus:ring-1 focus:outline-none bg-admin-surface text-admin-text disabled:bg-admin-border disabled:text-admin-text-muted disabled:cursor-not-allowed", className)}
                 {...props}
             />
         </div>

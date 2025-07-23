@@ -69,11 +69,16 @@ export default function CreateBranchModal({
                 <div className="flex flex-col gap-2">
                     <Input required type="text" label="Branch Name" placeholder="Branch Name" value={branchName} onChange={(e) => setBranchName(e.target.value)} className="w-full" />
                 </div>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-admin-accent text-sm">{error}</p>}
                 <ModalFooter>
-                    <Button disabled={!branchName.trim() || !!error} onClick={handleCreateBranch} >{
-                        isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create Branch"
-                    }</Button>
+                    <Button
+                        disabled={!branchName.trim() || !!error}
+                        onClick={handleCreateBranch}
+                        loading={isCreating}
+                        className="px-4 py-2"
+                    >
+                        Create Branch
+                    </Button>
                 </ModalFooter>
 
 
