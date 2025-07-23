@@ -48,7 +48,7 @@ export default function UpdateStaffModal({
   const [profilePictureUrl, setProfilePictureUrl] = useState("")
   const [isUpdating, setIsUpdating] = useState(false)
   const countries = countryList.getNames()
-  
+
   useEffect(() => {
     const fetchBranchs = async () => {
       const branchesResponse = await getBranches()
@@ -88,7 +88,7 @@ export default function UpdateStaffModal({
 
   const handleUpdateStaff = async () => {
     if (!staffData) return
-    
+
     setIsUpdating(true)
     const response = await updateStaffUser(staffData.id, {
       fullName,
@@ -106,7 +106,7 @@ export default function UpdateStaffModal({
     onClose()
     setIsUpdating(false)
   }
-  
+
   return (
     <ModalRoot open={isOpen} onOpenChange={onClose}>
       <ModalContent>
@@ -152,7 +152,7 @@ export default function UpdateStaffModal({
             </SelectContent>
           </SelectRoot>
 
-          <SelectRoot 
+          <SelectRoot
             value={branchId?.toString()}
             onSelect={(value) => setBranchId(Number(value))}
           >
@@ -176,7 +176,7 @@ export default function UpdateStaffModal({
             onChange={(e) => setPhoneNumber(e.target.value)}
             className="w-full"
           />
-          <SelectRoot 
+          <SelectRoot
             value={nationality}
             onSelect={(value) => setNationality(value as string)}
           >
@@ -198,10 +198,12 @@ export default function UpdateStaffModal({
             className="w-full"
           />
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-admin-accent text-sm">{error}</p>}
 
         <ModalFooter>
           <Button
+            loading={isUpdating}
+            className="px-4 py-2"
             disabled={
               !email.trim() ||
               !fullName.trim() ||
@@ -212,11 +214,7 @@ export default function UpdateStaffModal({
             }
             onClick={handleUpdateStaff}
           >
-            {isUpdating ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              "Update Staff"
-            )}
+            Update Staff
           </Button>
         </ModalFooter>
       </ModalContent>

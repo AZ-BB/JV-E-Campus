@@ -31,7 +31,7 @@ export default function UpdateBranchModal({
 
     const handleUpdateBranch = async () => {
         if (!branchData) return
-        
+
         setIsUpdating(true)
         const response = await updateBranch(branchData.id, {
             name: branchName.trim(),
@@ -56,28 +56,26 @@ export default function UpdateBranchModal({
                 </ModalHeader>
 
                 <div className="flex flex-col gap-2">
-                    <Input 
-                        required 
-                        type="text" 
-                        label="Branch Name" 
-                        placeholder="Branch Name" 
-                        value={branchName} 
-                        onChange={(e) => setBranchName(e.target.value)} 
-                        className="w-full" 
+                    <Input
+                        required
+                        type="text"
+                        label="Branch Name"
+                        placeholder="Branch Name"
+                        value={branchName}
+                        onChange={(e) => setBranchName(e.target.value)}
+                        className="w-full"
                         autoFocus={false}
                     />
                 </div>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-admin-accent text-sm">{error}</p>}
                 <ModalFooter>
-                    <Button 
-                        disabled={!branchName.trim() || !!error || isUpdating} 
+                    <Button
+                        disabled={!branchName.trim() || !!error || isUpdating}
                         onClick={handleUpdateBranch}
+                        loading={isUpdating}
+                        className="px-4 py-2"
                     >
-                        {isUpdating ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                            "Update Branch"
-                        )}
+                        Update Branch
                     </Button>
                 </ModalFooter>
             </ModalContent>

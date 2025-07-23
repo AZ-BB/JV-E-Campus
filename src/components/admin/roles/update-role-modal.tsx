@@ -33,7 +33,7 @@ export default function UpdateRoleModal({
 
     const handleUpdateRole = async () => {
         if (!roleData) return
-        
+
         setIsUpdating(true)
         const response = await updateRole(roleData.id, {
             name: roleName.trim(),
@@ -59,38 +59,36 @@ export default function UpdateRoleModal({
                 </ModalHeader>
 
                 <div className="flex flex-col gap-2">
-                    <Input 
-                        required 
-                        type="text" 
-                        label="Role Name" 
-                        placeholder="Role Name" 
-                        value={roleName} 
-                        onChange={(e) => setRoleName(e.target.value)} 
-                        className="w-full" 
+                    <Input
+                        required
+                        type="text"
+                        label="Role Name"
+                        placeholder="Role Name"
+                        value={roleName}
+                        onChange={(e) => setRoleName(e.target.value)}
+                        className="w-full"
                         autoFocus={false}
                     />
-                    <Input 
-                        required 
-                        type="text" 
-                        label="Full Name" 
-                        placeholder="Full Name" 
-                        value={fullName} 
-                        onChange={(e) => setFullName(e.target.value)} 
-                        className="w-full" 
+                    <Input
+                        required
+                        type="text"
+                        label="Full Name"
+                        placeholder="Full Name"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="w-full"
                         autoFocus={false}
                     />
                 </div>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-admin-accent text-sm">{error}</p>}
                 <ModalFooter>
-                    <Button 
-                        disabled={!roleName.trim() || !fullName.trim() || !!error || isUpdating} 
+                    <Button
+                        disabled={!roleName.trim() || !fullName.trim() || !!error || isUpdating}
                         onClick={handleUpdateRole}
+                        loading={isUpdating}
+                        className="px-4 py-2"
                     >
-                        {isUpdating ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                            "Update Role"
-                        )}
+                        Update Role
                     </Button>
                 </ModalFooter>
             </ModalContent>
