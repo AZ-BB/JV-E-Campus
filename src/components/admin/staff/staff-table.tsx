@@ -26,6 +26,7 @@ import { deleteStaffUser, Staff } from "@/actions/users"
 import CreateStaffModal from "./create-staff-modal"
 import Input from "@/components/ui/input"
 import UpdateStaffModal from "./update-staff-modal"
+import toaster from "@/components/ui/toast"
 
 export default function StaffTable({
   staffUsers,
@@ -290,6 +291,21 @@ export default function StaffTable({
           }}
         />
       </div>
+
+
+      <Button onClick={() => {
+        toaster.promise(
+          new Promise((resolve, reject) => {
+            setTimeout(() => {
+              resolve(true)
+            }, 1000)
+          }),
+          "Success",
+          "Error"
+        )
+      }}>
+        Test
+      </Button>
 
       {/* Create Staff Modal */}
       <CreateStaffModal
