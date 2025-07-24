@@ -1,6 +1,6 @@
 import { createAdminUser } from "@/actions/users";
 import { useEffect, useState } from "react";
-import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalOverlay, ModalPortal, ModalRoot, ModalTitle } from "../ui/modal";
+import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalRoot, ModalTitle } from "../ui/modal";
 import Input from "../ui/input";
 import Button from "../ui/button";
 import Checkbox from "../ui/checkbox";

@@ -7,19 +7,6 @@ import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
 
 
-export const getRolesDropList = async (): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
-  try {
-    const roles = await db.select({
-      value: staffRoles.id,
-      label: staffRoles.name,
-    }).from(staffRoles)
-    return { data: roles, error: null }
-  } catch (error) {
-    console.error(error)
-    return { data: null, error: "Failed to fetch roles, please try again later" as string }
-  }
-}
-
 export type Role = typeof staffRoles.$inferSelect & {
   number_of_staff: number
 }
@@ -48,6 +35,20 @@ export const getRolesDetailed = async (
     return { data: null, error: responses.role.fetchedAll.error.general }
   }
 }
+
+export const getRolesNames = async (): Promise<GeneralActionResponse<{ id: number, name: string }[]>> => {
+  try {
+    const roles = await db.select({
+      id: staffRoles.id,
+      name: staffRoles.name,
+    }).from(staffRoles)
+    return { data: roles, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: "Failed to fetch roles, please try again later" as string }
+  }
+}
+
 export interface RolesStats {
   total_roles: number
   active_roles: number

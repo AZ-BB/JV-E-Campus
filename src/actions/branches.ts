@@ -13,11 +13,11 @@ export interface Branch {
   staffCount: number
 }
 
-export const getBranchesDropList = async (): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
+export const getBranchesNames = async (): Promise<GeneralActionResponse<{ id: number, name: string }[]>> => {
   try {
     const branchesList = await db.select({
-      value: branches.id,
-      label: branches.name,
+      id: branches.id,
+      name: branches.name,
     }).from(branches)
     return { data: branchesList, error: null }
   } catch (error) {
@@ -114,7 +114,7 @@ export const deleteBranch = async (branchId: number): Promise<GeneralActionRespo
     const result = await db.select({
       staffCount: count(staff.id),
     }).from(staff).where(eq(staff.branchId, branchId))
-    if(result[0]?.staffCount > 0) {
+    if (result[0]?.staffCount > 0) {
       console.error("Branch has staff, please remove staff from this branch first")
       return { data: null, error: responses.branch.deleted.error.hasStaff }
     }

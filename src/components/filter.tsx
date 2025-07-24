@@ -3,9 +3,9 @@ import Input from "./ui/input"
 import { useRouter } from "next/navigation"
 import debounce from "lodash.debounce"
 import { MultipleSelect } from "./ui/multiple-select"
-import { getRolesDropList } from "@/actions/roles"
-import { getBranchesDropList } from "@/actions/branches"
-import { getAdminDropList } from "@/actions/users"
+import { getRolesNames } from "@/actions/roles"
+import { getBranchesNames } from "@/actions/branches"
+import { getAdminsNames } from "@/actions/users"
 
 export default function Filter({
     children
@@ -16,13 +16,13 @@ export default function Filter({
     const router = useRouter()
     const [search, setSearch] = useState("")
 
-    const [roles, setRoles] = useState<{ label: string, value: number }[]>([])
+    const [roles, setRoles] = useState<{ label: string, value: string }[]>([])
     const [selectedRoles, setSelectedRoles] = useState<string[]>([])
 
-    const [branches, setBranches] = useState<{ label: string, value: number }[]>([])
+    const [branches, setBranches] = useState<{ label: string, value: string }[]>([])
     const [selectedBranches, setSelectedBranches] = useState<string[]>([])
 
-    const [createdBy, setCreatedBy] = useState<{ label: string, value: number }[]>([])
+    const [createdBy, setCreatedBy] = useState<{ label: string, value: string }[]>([])
     const [selectedCreatedBy, setSelectedCreatedBy] = useState<string[]>([])
 
     useEffect(() => {
@@ -43,21 +43,21 @@ export default function Filter({
             setSelectedBranches(branchId.split(","))
         }
 
-        getRolesDropList().then((res) => {
+        getRolesNames().then((res) => {
             if (res.data) {
-                setRoles(res.data)
+                setRoles(res.data.map((role) => ({ label: role.name, value: role.id.toString() })))
             }
         })
 
-        getBranchesDropList().then((res) => {
+        getBranchesNames().then((res) => {
             if (res.data) {
-                setBranches(res.data)
+                setBranches(res.data.map((branch) => ({ label: branch.name, value: branch.id.toString() })))
             }
         })
 
-        getAdminDropList().then((res) => {
+        getAdminsNames().then((res) => {
             if (res.data) {
-                setCreatedBy(res.data)
+                setCreatedBy(res.data.map((admin) => ({ label: admin.fullName, value: admin.id.toString() })))
             }
         })
 
@@ -113,7 +113,7 @@ export default function Filter({
 
                 <MultipleSelect
                     className="w-44 h-10"
-                    options={createdBy.map((admin) => ({ label: admin.label, value: admin.value.toString() }))}
+                    options={createdBy.map((admin) => ({ label: admin.label, value: admin.value }))}
                     value={selectedCreatedBy}
                     onValueChange={(value) => {
                         setSelectedCreatedBy(value)
@@ -125,7 +125,7 @@ export default function Filter({
 
                 <MultipleSelect
                     className="w-44 h-10"
-                    options={roles.map((role) => ({ label: role.label, value: role.value.toString() }))}
+                    options={roles.map((role) => ({ label: role.label, value: role.value }))}
                     value={selectedRoles}
                     onValueChange={(value) => {
                         setSelectedRoles(value)
@@ -137,7 +137,7 @@ export default function Filter({
 
                 <MultipleSelect
                     className="w-44 h-10"
-                    options={branches.map((branch) => ({ label: branch.label, value: branch.value.toString() }))}
+                    options={branches.map((branch) => ({ label: branch.label, value: branch.value }))}
                     value={selectedBranches}
                     onValueChange={(value) => {
                         setSelectedBranches(value)

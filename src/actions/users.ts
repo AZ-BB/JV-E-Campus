@@ -11,7 +11,6 @@ import Staff from "@/app/staff/page"
 import responses from "@/responses/responses"
 
 
-
 // Export the type based on the query selection
 export type Staff = (typeof users.$inferSelect) & (typeof staff.$inferSelect) & {
   branchName: string
@@ -146,6 +145,22 @@ export const getAdminUsers = async (
   } catch (error) {
     console.error(error)
     return { data: [], error: responses.staff.fetchedAll.error.general }
+  }
+}
+
+export const getAdminsNames = async (search: string = ""): Promise<GeneralActionResponse<{ id: number, fullName: string }[]>> => {
+  try {
+    const conditions: any = [
+      eq(users.role, UserRole.ADMIN),
+    ]
+    if (search) {
+      conditions.push(ilike(users.fullName, `%${search}%`))
+    }
+    const result = await db.select({ id: users.id, fullName: users.fullName }).from(users).where(and(...conditions)).orderBy(asc(users.fullName)).limit(10)
+    return { data: result, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: [], error: error as string }
   }
 }
 
@@ -367,17 +382,17 @@ export const createStaffUser = async (
     let userResult
     try {
       userResult = await db
-      .insert(users)
-      .values({
-        email: newUser.email,
-        role: UserRole.STAFF,
-        fullName: newUser.fullName,
-        createdBy: currentUser?.user?.user_metadata?.db_user_id,
-        language: "en",
-        authUserId: authData.user.id,
-        profilePictureUrl: newUser.profilePictureUrl || "",
-      })
-      .returning()
+        .insert(users)
+        .values({
+          email: newUser.email,
+          role: UserRole.STAFF,
+          fullName: newUser.fullName,
+          createdBy: currentUser?.user?.user_metadata?.db_user_id,
+          language: "en",
+          authUserId: authData.user.id,
+          profilePictureUrl: newUser.profilePictureUrl || "",
+        })
+        .returning()
     } catch (error) {
       console.error("Failed to create user rolling back auth user:", error)
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
@@ -434,10 +449,10 @@ export const createStaffUser = async (
 
 export const updateStaffUser = async (userId: number, data: Partial<CreateStaffUser>): Promise<GeneralActionResponse<void>> => {
   try {
-    if(data.fullName) {
-      await db.update(users).set({fullName: data.fullName, profilePictureUrl: data.profilePictureUrl}).where(eq(users.id, userId))
-    }else {
-      await db.update(users).set({profilePictureUrl: data.profilePictureUrl}).where(eq(users.id, userId))
+    if (data.fullName) {
+      await db.update(users).set({ fullName: data.fullName, profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
+    } else {
+      await db.update(users).set({ profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
     }
 
     await db.update(staff).set(data).where(eq(staff.userId, userId))
@@ -468,22 +483,5 @@ export const deleteStaffUser = async (userId: number): Promise<GeneralActionResp
   } catch (error) {
     console.error(error)
     return { data: null, error: responses.staff.deleted.error.general }
-  }
-}
-
-
-export const getAdminDropList = async (search: string = ""): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
-  try {
-    const conditions: any = [
-      eq(users.role, UserRole.ADMIN),
-    ]
-    if (search) {
-      conditions.push(ilike(users.fullName, `%${search}%`))
-    }
-    const result = await db.select({ id: users.id, fullName: users.fullName }).from(users).where(and(...conditions)).orderBy(asc(users.fullName)).limit(10)
-    return { data: result.map((user) => ({ label: user.fullName, value: user.id })), error: null }
-  } catch (error) {
-    console.error(error)
-    return { data: [], error: error as string }
   }
 }

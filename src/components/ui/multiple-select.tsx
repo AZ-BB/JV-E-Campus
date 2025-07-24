@@ -194,7 +194,7 @@ const MultipleSelectItem = React.forwardRef<
     <div
         ref={ref}
         className={cn(
-            "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none bg-admin-surface hover:bg-gray-200/80 hover:dark:bg-gray-500/80 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+            "relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-5 pr-2 text-sm outline-none bg-admin-surface hover:bg-gray-200/80 hover:dark:bg-gray-500/80 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
             option.disabled && "pointer-events-none opacity-50",
             className
         )}
@@ -208,7 +208,7 @@ const MultipleSelectItem = React.forwardRef<
         }}
         {...props}
     >
-        <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+        <span className="absolute left-1 flex h-3.5 w-2.5 items-center justify-center">
             {checked && <MultipleSelectItemIndicator />}
         </span>
         {renderItem ? renderItem(option) : <MultipleSelectItemText>{option.label}</MultipleSelectItemText>}
