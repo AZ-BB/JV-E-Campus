@@ -19,10 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { branches as branchesTable, staffRoles } from "@/db/schema/schema"
-import { getBranches } from "@/actions/branches"
-import { Loader2 } from "lucide-react"
-import { getRoles } from "@/actions/roles"
+import { getBranchesDropList } from "@/actions/branches"
+import { getRolesDropList } from "@/actions/roles"
 import countryList from "country-list"
 
 export default function CreateStaffModal({
@@ -33,10 +31,11 @@ export default function CreateStaffModal({
   onClose: () => void
 }) {
   const [error, setError] = useState<string | null>(null)
-  const [branches, setBranches] = useState<
-    (typeof branchesTable.$inferSelect)[]
-  >([])
-  const [roles, setRoles] = useState<typeof staffRoles.$inferSelect[]>([])
+
+  const [branches, setBranches] = useState<{ label: string, value: number }[]>([])
+  const [roles, setRoles] = useState<{ label: string, value: number }[]>([])
+  const countries = countryList.getNames()
+
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
@@ -45,13 +44,13 @@ export default function CreateStaffModal({
   const [phoneNumber, setPhoneNumber] = useState("")
   const [nationality, setNationality] = useState("")
   const [profilePictureUrl, setProfilePictureUrl] = useState("")
-  const [resetPasswordOnFirstLogin, setResetPasswordOnFirstLogin] =
-    useState(false)
+  const [resetPasswordOnFirstLogin, setResetPasswordOnFirstLogin] = useState(false)
+
   const [isCreating, setIsCreating] = useState(false)
-  const countries = countryList.getNames()
+
   useEffect(() => {
     const fetchBranchs = async () => {
-      const branchesResponse = await getBranches()
+      const branchesResponse = await getBranchesDropList()
       if (branchesResponse.error) {
         setError(branchesResponse.error)
       } else {
@@ -59,7 +58,7 @@ export default function CreateStaffModal({
       }
     }
     const fetchRoles = async () => {
-      const rolesResponse = await getRoles()
+      const rolesResponse = await getRolesDropList()
       if (rolesResponse.error) {
         setError(rolesResponse.error)
       } else {
@@ -108,6 +107,7 @@ export default function CreateStaffModal({
     onClose()
     setIsCreating(false)
   }
+
   return (
     <ModalRoot open={isOpen} onOpenChange={onClose}>
       <ModalContent>
@@ -152,8 +152,8 @@ export default function CreateStaffModal({
             </SelectTrigger>
             <SelectContent>
               {roles.map((role) => (
-                <SelectItem key={role.id} value={role.id.toString()}>
-                  {role.name} - {role.fullName}
+                <SelectItem key={role.value} value={role.value.toString()}>
+                  {role.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -165,8 +165,8 @@ export default function CreateStaffModal({
             </SelectTrigger>
             <SelectContent>
               {branches.map((branch) => (
-                <SelectItem key={branch.id} value={branch.id.toString()}>
-                  {branch.name}
+                <SelectItem key={branch.value} value={branch.value.toString()}>
+                  {branch.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -203,7 +203,7 @@ export default function CreateStaffModal({
 
         <ModalFooter>
           <Button
-            loading={isCreating}
+            isLoading={isCreating}
             className="px-4 py-2"
             disabled={
               !email.trim() ||

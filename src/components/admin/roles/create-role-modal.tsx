@@ -62,7 +62,7 @@ export default function CreateRoleModal({
                     <Button
                         disabled={!roleName.trim() || !fullName.trim() || !!error}
                         onClick={handleCreateRole}
-                        loading={isCreating}
+                        isLoading={isCreating}
                         className="px-4 py-2"
                     >
                         Create Role

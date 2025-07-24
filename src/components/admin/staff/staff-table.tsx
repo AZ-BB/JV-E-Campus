@@ -28,6 +28,7 @@ import Input from "@/components/ui/input"
 import UpdateStaffModal from "./update-staff-modal"
 import DeleteDialog from "@/components/delete-dialog"
 import Avatar from "@/components/ui/avatar"
+import Filter from "@/components/filter"
 
 export default function StaffTable({
   staffUsers,
@@ -106,29 +107,28 @@ export default function StaffTable({
   return (
     <div className="relative">
       {/* Create Staff Button */}
-      <div className="mb-4 flex justify-between">
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 bg-admin-primary text-admin-textSecondary px-4 py-2 rounded-md hover:bg-admin-primary/80 disabled:hover:bg-admin-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Plus className="w-4 h-4" />
-            Create Staff
-          </Button>
-          <Button
-            onClick={() => {
-              router.refresh()
-            }}
-            className="flex items-center gap-2 bg-admin-secondary text-admin-textSecondary px-4 py-2 rounded-md hover:bg-admin-secondary/80 disabled:hover:bg-admin-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <RefreshCcw className="w-4 h-4" />
-            Refresh
-          </Button>
-        </div>
+      <Filter>
         <div>
-          <Input placeholder="Search" className="w-80 bg-admin-surface border-admin-border" />
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="flex items-center gap-2 bg-admin-primary text-admin-textSecondary px-4 py-2 rounded-md hover:bg-admin-primary/80 disabled:hover:bg-admin-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus className="w-4 h-4" />
+              Create Staff
+            </Button>
+            <Button
+              onClick={() => {
+                router.refresh()
+              }}
+              className="flex items-center gap-2 bg-admin-secondary text-admin-textSecondary px-4 py-2 rounded-md hover:bg-admin-secondary/80 disabled:hover:bg-admin-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCcw className="w-4 h-4" />
+              Refresh
+            </Button>
+          </div>
         </div>
-      </div>
+      </Filter>
 
       <Table
         headers={[

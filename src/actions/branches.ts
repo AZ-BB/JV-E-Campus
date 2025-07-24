@@ -5,20 +5,6 @@ import { branches, staff } from "@/db/schema/schema"
 import { count, eq, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 
-export const getBranches = async (): Promise<
-  GeneralActionResponse<(typeof branches.$inferSelect)[]>
-> => {
-  try {
-    const branchesData = await db
-      .select()
-      .from(branches)
-    return { data: branchesData, error: null }
-  } catch (error) {
-    console.error(error)
-    return { data: null, error: "Failed to fetch branches, please try again later" as string }
-  }
-}
-
 export interface Branch {
   id: number
   name: string
@@ -123,5 +109,18 @@ export const deleteBranch = async (branchId: number): Promise<GeneralActionRespo
   } catch (error) {
     console.error(error)
     return { data: null, error: "Failed to delete branch, please try again later" as string }
+  }
+}
+
+export const getBranchesDropList = async (): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
+  try {
+    const branchesList = await db.select({
+      value: branches.id,
+      label: branches.name,
+    }).from(branches)
+    return { data: branchesList, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: "Failed to fetch branches, please try again later" as string }
   }
 }

@@ -16,6 +16,7 @@ interface MultipleSelectProps {
     disabled?: boolean;
     className?: string;
     label?: string;
+    labelClassName?: string;
     required?: boolean;
     maxDisplayed?: number;
     renderItem?: (option: MultipleSelectOption) => React.ReactNode;
@@ -32,6 +33,7 @@ const MultipleSelect = React.forwardRef<
     disabled = false,
     className,
     label,
+    labelClassName,
     required,
     maxDisplayed = 3,
     renderItem,
@@ -64,16 +66,16 @@ const MultipleSelect = React.forwardRef<
     };
 
     return (
-        <div className="flex flex-col gap-2" ref={ref} {...props}>
+        <div className="flex flex-col gap-1" ref={ref} {...props}>
             {label && (
-                <label className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <label className={cn("text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70", labelClassName)}>
                     {label}
                     {required && <span className="text-red-500 ml-1">*</span>}
                 </label>
             )}
             <Popover.Root open={open} onOpenChange={setOpen}>
                 <MultipleSelectTrigger
-                    className={className}
+                    className={cn("bg-admin-surface border-admin-border", className)}
                     disabled={disabled}
                     displayText={getDisplayText()}
                     hasValue={value.length > 0}
@@ -110,7 +112,7 @@ const MultipleSelectTrigger = React.forwardRef<
     <Popover.Trigger
         ref={ref}
         className={cn(
-            "flex h-11 w-full items-center justify-between rounded-md border px-3 py-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50",
+            "flex w-full items-center justify-between rounded-md border p-2 text-sm ring-offset-white placeholder:text-gray-500 focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:opacity-50",
             !hasValue && "text-gray-500",
             className
         )}

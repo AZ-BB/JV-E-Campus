@@ -14,7 +14,7 @@ export default function Input({
     ...props
 }: InputProps) {
     return (
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
             {label && (
                 <label className={cn("block text-sm font-medium text-admin-text-muted", labelClassName)}>
                     {label} {
@@ -23,7 +23,7 @@ export default function Input({
                 </label>
             )}
             <input
-                className={cn("w-full rounded-md border border-admin-border p-2 focus:ring-1 focus:outline-none bg-admin-surface text-admin-text disabled:bg-admin-border disabled:text-admin-text-muted disabled:cursor-not-allowed", className)}
+                className={cn("w-full rounded-md border border-admin-border p-2 focus:ring-1 focus:outline-none bg-admin-surface text-admin-text disabled:bg-admin-border disabled:text-admin-text-muted disabled:cursor-not-allowed placeholder:text-gray-500", className)}
                 {...props}
             />
         </div>

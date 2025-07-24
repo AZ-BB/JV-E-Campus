@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/modal"
 import Input from "@/components/ui/input"
 import Button from "@/components/ui/button"
-import { StaffCategory } from "@/db/enums"
 import {
   SelectContent,
   SelectItem,
@@ -18,10 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { branches as branchesTable, staffRoles } from "@/db/schema/schema"
-import { getBranches } from "@/actions/branches"
-import { Loader2 } from "lucide-react"
-import { getRoles } from "@/actions/roles"
+import { getBranchesDropList } from "@/actions/branches"
+import { getRolesDropList } from "@/actions/roles"
 import countryList from "country-list"
 import { Staff } from "@/actions/users"
 
@@ -35,10 +32,8 @@ export default function UpdateStaffModal({
   staffData: Staff | null
 }) {
   const [error, setError] = useState<string | null>(null)
-  const [branches, setBranches] = useState<
-    (typeof branchesTable.$inferSelect)[]
-  >([])
-  const [roles, setRoles] = useState<typeof staffRoles.$inferSelect[]>([])
+  const [branches, setBranches] = useState<{ label: string, value: number }[]>([])
+  const [roles, setRoles] = useState<{ label: string, value: number }[]>([])
   const [email, setEmail] = useState("")
   const [fullName, setFullName] = useState("")
   const [branchId, setBranchId] = useState<number | null>(null)
@@ -51,7 +46,7 @@ export default function UpdateStaffModal({
 
   useEffect(() => {
     const fetchBranchs = async () => {
-      const branchesResponse = await getBranches()
+      const branchesResponse = await getBranchesDropList()
       if (branchesResponse.error) {
         setError(branchesResponse.error)
       } else {
@@ -59,7 +54,7 @@ export default function UpdateStaffModal({
       }
     }
     const fetchRoles = async () => {
-      const rolesResponse = await getRoles()
+      const rolesResponse = await getRolesDropList()
       if (rolesResponse.error) {
         setError(rolesResponse.error)
       } else {
@@ -145,8 +140,8 @@ export default function UpdateStaffModal({
             </SelectTrigger>
             <SelectContent>
               {roles.map((role) => (
-                <SelectItem key={role.id} value={role.id.toString()}>
-                  {role.name} - {role.fullName}
+                <SelectItem key={role.value} value={role.value.toString()}>
+                  {role.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -161,8 +156,8 @@ export default function UpdateStaffModal({
             </SelectTrigger>
             <SelectContent>
               {branches.map((branch) => (
-                <SelectItem key={branch.id} value={branch.id.toString()}>
-                  {branch.name}
+                <SelectItem key={branch.value} value={branch.value.toString()}>
+                  {branch.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -202,7 +197,7 @@ export default function UpdateStaffModal({
 
         <ModalFooter>
           <Button
-            loading={isUpdating}
+            isLoading={isUpdating}
             className="px-4 py-2"
             disabled={
               !email.trim() ||
