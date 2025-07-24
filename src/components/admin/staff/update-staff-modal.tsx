@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/modal"
 import Input from "@/components/ui/input"
 import Button from "@/components/ui/button"
+import ProfilePicture from "@/components/ui/profile-picture"
 import {
   SelectContent,
   SelectItem,
@@ -21,6 +22,9 @@ import { getBranchesDropList } from "@/actions/branches"
 import { getRolesDropList } from "@/actions/roles"
 import countryList from "country-list"
 import { Staff } from "@/actions/users"
+import toaster from "@/components/ui/toast"
+import { v4 as uuidv4 } from "uuid"
+import { uploadFile } from "@/actions/upload"
 
 export default function UpdateStaffModal({
   isOpen,
@@ -41,6 +45,11 @@ export default function UpdateStaffModal({
   const [phoneNumber, setPhoneNumber] = useState("")
   const [nationality, setNationality] = useState("")
   const [profilePictureUrl, setProfilePictureUrl] = useState("")
+  const [profilePictureTempUrl, setProfilePictureTempUrl] = useState("")
+  const [profilePictureError, setProfilePictureError] = useState<string | null>(
+    null
+  )
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
   const countries = countryList.getNames()
 
@@ -78,20 +87,59 @@ export default function UpdateStaffModal({
       setPhoneNumber(staffData.phoneNumber || "")
       setNationality(staffData.nationality || "")
       setProfilePictureUrl(staffData.profilePictureUrl || "")
+      setProfilePictureTempUrl("")
+      setSelectedFile(null)
+      setProfilePictureError(null)
     }
   }, [isOpen, staffData])
 
+  const handleProfilePictureUpload = async (file: File) => {
+    setProfilePictureError(null)
+    const tempUrl = URL.createObjectURL(file)
+    setProfilePictureTempUrl(tempUrl)
+    setSelectedFile(file)
+  }
+
+  const handleProfilePictureRemove = () => {
+    setProfilePictureUrl("")
+    setProfilePictureTempUrl("")
+    setSelectedFile(null)
+  }
+
   const handleUpdateStaff = async () => {
     if (!staffData) return
-
     setIsUpdating(true)
+    let finalProfilePictureUrl = profilePictureUrl
+    let databaseProfilePictureUrl = profilePictureUrl
+    if (selectedFile) {
+      if (staffData.profilePictureUrl) {
+        finalProfilePictureUrl = staffData.profilePictureUrl
+        databaseProfilePictureUrl = staffData.profilePictureUrl.split(".").slice(0, -1).join(".") +
+        "." +
+        selectedFile.type.split("/")[1]
+      } else {
+        const name = uuidv4()
+        finalProfilePictureUrl = name + "." + selectedFile.type.split("/")[1]
+        databaseProfilePictureUrl = name + "." + selectedFile.type.split("/")[1]
+      }
+      const uploadResponse = await uploadFile(
+        selectedFile,
+        "avatars",
+        finalProfilePictureUrl
+      )
+      if (uploadResponse.error) {
+        setProfilePictureError(uploadResponse.error)
+        setIsUpdating(false)
+        return
+      }
+    }
     const response = await updateStaffUser(staffData.id, {
       fullName,
       branchId: branchId!,
       staffRoleId: staffRoleId!,
       phoneNumber: phoneNumber,
       nationality: nationality,
-      profilePictureUrl: profilePictureUrl,
+      profilePictureUrl: databaseProfilePictureUrl,
     })
     if (response.error) {
       setError(response.error)
@@ -99,6 +147,7 @@ export default function UpdateStaffModal({
       return
     }
     onClose()
+    response.message && toaster.success(response.message)
     setIsUpdating(false)
   }
 
@@ -111,6 +160,24 @@ export default function UpdateStaffModal({
         </ModalHeader>
 
         <div className="flex flex-col gap-2">
+          <div className="flex w-full justify-center items-center flex-col gap-2">
+            <ProfilePicture
+              src={
+                profilePictureTempUrl ||
+                (profilePictureUrl
+                  ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_NAME}/${process.env.NEXT_PUBLIC_STORAGE_AVATAR_DIRECTORY}/${profilePictureUrl}`
+                  : "")
+              }
+              alt={fullName || "Profile picture"}
+              size="lg"
+              className="w-28 h-28"
+              onUpload={handleProfilePictureUpload}
+              onRemove={handleProfilePictureRemove}
+            />
+            {profilePictureError && (
+              <p className="text-admin-accent text-sm">{profilePictureError}</p>
+            )}
+          </div>
           <Input
             required
             type="email"
@@ -180,18 +247,12 @@ export default function UpdateStaffModal({
             </SelectTrigger>
             <SelectContent>
               {countries.map((country) => (
-                <SelectItem key={country} value={country}>{country}</SelectItem>
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
               ))}
             </SelectContent>
           </SelectRoot>
-          <Input
-            type="text"
-            label="Profile Picture URL"
-            placeholder="Profile Picture URL"
-            value={profilePictureUrl}
-            onChange={(e) => setProfilePictureUrl(e.target.value)}
-            className="w-full"
-          />
         </div>
         {error && <p className="text-admin-accent text-sm">{error}</p>}
 

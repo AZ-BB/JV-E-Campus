@@ -4,6 +4,7 @@ import { db } from "@/db"
 import { branches, staff } from "@/db/schema/schema"
 import { count, eq, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
+import responses from "@/responses/responses"
 
 export interface Branch {
   id: number
@@ -11,6 +12,20 @@ export interface Branch {
   createdAt: string | null
   staffCount: number
 }
+
+export const getBranchesDropList = async (): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
+  try {
+    const branchesList = await db.select({
+      value: branches.id,
+      label: branches.name,
+    }).from(branches)
+    return { data: branchesList, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: "Failed to fetch branches, please try again later" as string }
+  }
+}
+
 export const getDetailedBranches = async (page: number = 1, limit: number = 20): Promise<
   GeneralActionResponse<Branch[]>
 > => {
@@ -30,7 +45,7 @@ export const getDetailedBranches = async (page: number = 1, limit: number = 20):
     return { data: branchesData, error: null }
   } catch (error) {
     console.error(error)
-    return { data: null, error: "Failed to fetch branches, please try again later" as string }
+    return { data: null, error: responses.branch.fetchedAll.error.general }
   }
 }
 
@@ -60,7 +75,7 @@ export const getBranchesStats = async (): Promise<
     return { data, error: null }
   } catch (error) {
     console.error(error)
-    return { data: null, error: "Failed to fetch branches stats, please try again later" as string }
+    return { data: null, error: responses.branch.fetchedAll.error.general }
   }
 }
 
@@ -73,10 +88,10 @@ export const createBranch = async (branch: {
       name: branch.name.trim(),
     }).returning()
     revalidatePath("/admin/branches")
-    return { data: result[0], error: null }
+    return { data: result[0], error: null, message: responses.branch.created.success }
   } catch (error) {
     console.error(error)
-    return { data: null, error: "Failed to create branch, please try again later" as string }
+    return { data: null, error: responses.branch.created.error.general }
   }
 }
 
@@ -86,10 +101,10 @@ export const updateBranch = async (branchId: number, data: { name: string }): Pr
   try {
     const result = await db.update(branches).set({ name: data.name.trim() }).where(eq(branches.id, branchId)).returning()
     revalidatePath("/admin/branches")
-    return { data: result[0], error: null }
+    return { data: result[0], error: null, message: responses.branch.updated.success }
   } catch (error) {
     console.error(error)
-    return { data: null, error: "Failed to update branch, please try again later" as string }
+    return { data: null, error: responses.branch.updated.error.general }
   }
 }
 
@@ -101,26 +116,15 @@ export const deleteBranch = async (branchId: number): Promise<GeneralActionRespo
     }).from(staff).where(eq(staff.branchId, branchId))
     if(result[0]?.staffCount > 0) {
       console.error("Branch has staff, please remove staff from this branch first")
-      return { data: null, error: "Branch has staff, please remove staff from this branch first" as string }
+      return { data: null, error: responses.branch.deleted.error.hasStaff }
     }
     await db.delete(branches).where(eq(branches.id, branchId))
     revalidatePath("/admin/branches")
-    return { data: null, error: null }
+    return { data: null, error: null, message: responses.branch.deleted.success }
   } catch (error) {
     console.error(error)
-    return { data: null, error: "Failed to delete branch, please try again later" as string }
+    return { data: null, error: responses.branch.deleted.error.general }
   }
 }
 
-export const getBranchesDropList = async (): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
-  try {
-    const branchesList = await db.select({
-      value: branches.id,
-      label: branches.name,
-    }).from(branches)
-    return { data: branchesList, error: null }
-  } catch (error) {
-    console.error(error)
-    return { data: null, error: "Failed to fetch branches, please try again later" as string }
-  }
-}
+

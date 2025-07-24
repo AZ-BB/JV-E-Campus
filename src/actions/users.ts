@@ -8,6 +8,7 @@ import { GeneralActionResponse } from "@/types/general-action-response"
 import { aliasedTable, and, asc, desc, eq, ilike, inArray, or, SQL, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import Staff from "@/app/staff/page"
+import responses from "@/responses/responses"
 
 
 
@@ -126,7 +127,7 @@ export const getStaffUsers = async ({
     return { data: result, error: null }
   } catch (error) {
     console.error(error)
-    return { data: [], error: error as string }
+    return { data: [], error: responses.staff.fetchedAll.error.general }
   }
 }
 
@@ -144,7 +145,7 @@ export const getAdminUsers = async (
     return { data: result, error: null }
   } catch (error) {
     console.error(error)
-    return { data: [], error: error as string }
+    return { data: [], error: responses.staff.fetchedAll.error.general }
   }
 }
 
@@ -165,7 +166,7 @@ export const getStaffStats = async (): Promise<GeneralActionResponse<StaffStats>
     return { data: { staff_count: result.rows[0].count }, error: null }
   } catch (error) {
     console.error(error)
-    return { data: { staff_count: 0 }, error: error as string }
+    return { data: { staff_count: 0 }, error: responses.staff.fetchedAll.error.general }
   }
 }
 
@@ -184,7 +185,7 @@ export const createAdminUser = async (
 
   try {
     if (!user.email.trim() || !user.password.trim() || !user.fullName.trim()) {
-      return { data: null, error: "Email, password and full name are required" }
+      return { data: null, error: responses.staff.created.error.missingFields }
     }
 
     const supabaseAdmin = createSupabaseAdminClient()
@@ -238,7 +239,7 @@ export const createAdminUser = async (
       // Rollback: Delete the auth user
       await supabaseAdmin.auth.admin.deleteUser(authUserId)
 
-      return { data: null, error: `Failed to create database user: ${dbError}` }
+      return { data: null, error: responses.staff.created.error.general }
     }
 
     // Step 3: Update Auth User Metadata
@@ -270,12 +271,12 @@ export const createAdminUser = async (
 
       return {
         data: null,
-        error: `Failed to update user metadata: ${metadataError}`,
+        error: responses.staff.created.error.general,
       }
     }
 
     revalidatePath("/admin")
-    return { data: null, error: null }
+    return { data: null, error: null, message: responses.staff.created.success }
   } catch (error) {
     console.error("Unexpected error in createAdminUser:", error)
 
@@ -302,7 +303,7 @@ export const createAdminUser = async (
       }
     }
 
-    return { data: null, error: error as string }
+    return { data: null, error: error as string } // Keep the supabase error message
   }
 }
 
@@ -335,7 +336,7 @@ export const createStaffUser = async (
       return {
         data: null,
         error:
-          "Email, password, full name, branch id and staff role id are required",
+          responses.staff.created.error.missingFields,
       }
     }
     const supabaseAdmin = createSupabaseAdminClient()
@@ -344,7 +345,7 @@ export const createStaffUser = async (
       await supabase.auth.getUser()
 
     if (currentUserError) {
-      return { data: null, error: currentUserError.message }
+      return { data: null, error: responses.staff.created.error.general }
     }
 
     const { data: authData, error: authError } =
@@ -366,20 +367,21 @@ export const createStaffUser = async (
     let userResult
     try {
       userResult = await db
-        .insert(users)
-        .values({
-          email: newUser.email,
-          role: UserRole.STAFF,
-          fullName: newUser.fullName,
-          createdBy: currentUser?.user?.user_metadata?.db_user_id,
-          language: "en",
-          authUserId: authData.user.id,
-        })
-        .returning()
+      .insert(users)
+      .values({
+        email: newUser.email,
+        role: UserRole.STAFF,
+        fullName: newUser.fullName,
+        createdBy: currentUser?.user?.user_metadata?.db_user_id,
+        language: "en",
+        authUserId: authData.user.id,
+        profilePictureUrl: newUser.profilePictureUrl || "",
+      })
+      .returning()
     } catch (error) {
       console.error("Failed to create user rolling back auth user:", error)
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
-      return { data: null, error: error as string }
+      return { data: null, error: error as string } // Keep the supabase error message
     }
 
     try {
@@ -398,7 +400,7 @@ export const createStaffUser = async (
         .returning()
 
       revalidatePath("/admin")
-      return { data: { ...userResult[0], ...staffResult[0] }, error: null }
+      return { data: { ...userResult[0], ...staffResult[0] }, error: null, message: responses.staff.created.success }
     } catch (error) {
       console.error(
         "Failed to create staff user, rolling back user creation:",
@@ -432,15 +434,18 @@ export const createStaffUser = async (
 
 export const updateStaffUser = async (userId: number, data: Partial<CreateStaffUser>): Promise<GeneralActionResponse<void>> => {
   try {
-    if (data.fullName) {
-      await db.update(users).set({ fullName: data.fullName }).where(eq(users.id, userId))
+    if(data.fullName) {
+      await db.update(users).set({fullName: data.fullName, profilePictureUrl: data.profilePictureUrl}).where(eq(users.id, userId))
+    }else {
+      await db.update(users).set({profilePictureUrl: data.profilePictureUrl}).where(eq(users.id, userId))
     }
+
     await db.update(staff).set(data).where(eq(staff.userId, userId))
     revalidatePath("/admin/staff")
-    return { data: null, error: null }
+    return { data: null, error: null, message: responses.staff.updated.success }
   } catch (error) {
     console.error("Unexpected error in updateStaffUser:", error)
-    return { data: null, error: error as string }
+    return { data: null, error: responses.staff.updated.error.general }
   }
 }
 
@@ -452,17 +457,17 @@ export const deleteStaffUser = async (userId: number): Promise<GeneralActionResp
     }).from(users).where(eq(users.id, userId))
     if (!result[0]) {
       console.error("User not found")
-      return { data: null, error: "User not found" }
+      return { data: null, error: responses.staff.deleted.error.notFound }
     } else {
       const supabaseAdmin = createSupabaseAdminClient()
       console.log("Deleting user with auth user id:", result[0])
       await supabaseAdmin.auth.admin.deleteUser(result[0].authUserId!)
     }
     revalidatePath("/admin/staff")
-    return { data: null, error: null }
+    return { data: null, error: null, message: responses.staff.deleted.success }
   } catch (error) {
     console.error(error)
-    return { data: null, error: error as string }
+    return { data: null, error: responses.staff.deleted.error.general }
   }
 }
 

@@ -27,6 +27,7 @@ import CreateBranchModal from "./create-branch-modal"
 import Input from "@/components/ui/input"
 import UpdateBranchModal from "./update-branch-modal"
 import DeleteDialog from "@/components/delete-dialog"
+import toaster from "@/components/ui/toast"
 
 export default function BranchesTable({
   branches,
@@ -90,11 +91,16 @@ export default function BranchesTable({
     })
   }
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (deleteConfirm.branchId) {
       console.log("Delete confirmed for branch ID:", deleteConfirm.branchId)
       // Add your delete logic here
-      deleteBranch(Number(deleteConfirm.branchId))
+      const response = await deleteBranch(Number(deleteConfirm.branchId))
+      if (response.error) {
+        toaster.error(response.error)
+      } else {
+        response.message && toaster.success(response.message)
+      }
     }
     setDeleteConfirm({ isOpen: false, branchId: null, position: null })
   }

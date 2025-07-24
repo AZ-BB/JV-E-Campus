@@ -4,6 +4,21 @@ import { staff, staffRoles } from "@/db/schema/schema"
 import { db } from "@/db"
 import { count, eq, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
+import responses from "@/responses/responses"
+
+
+export const getRolesDropList = async (): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
+  try {
+    const roles = await db.select({
+      value: staffRoles.id,
+      label: staffRoles.name,
+    }).from(staffRoles)
+    return { data: roles, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: "Failed to fetch roles, please try again later" as string }
+  }
+}
 
 export type Role = typeof staffRoles.$inferSelect & {
   number_of_staff: number
@@ -30,7 +45,7 @@ export const getRolesDetailed = async (
     return { data: roles, error: null }
   } catch (error) {
     console.error(error)
-    return { data: null, error: "Failed to fetch roles, please try again later" as string }
+    return { data: null, error: responses.role.fetchedAll.error.general }
   }
 }
 export interface RolesStats {
@@ -66,7 +81,7 @@ export const getRolesStats = async (): Promise<
     }
   } catch (error) {
     console.error(error)
-    return { data: { total_roles: 0, active_roles: 0 }, error: "Failed to fetch roles stats, please try again later" as string }
+    return { data: { total_roles: 0, active_roles: 0 }, error: responses.role.fetchedAll.error.general }
   }
 }
 
@@ -74,10 +89,10 @@ export const createRole = async (role: { name: string, fullName: string }): Prom
   try {
     const result = await db.insert(staffRoles).values(role).returning()
     revalidatePath("/admin/roles")
-    return { data: result[0], error: null }
+    return { data: result[0], error: null, message: responses.role.created.success }
   } catch (error) {
     console.error(error)
-    return { data: null, error: "Unexpected error occurred, please try again later" as string }
+    return { data: null, error: responses.role.created.error.general }
   }
 }
 
@@ -85,10 +100,10 @@ export const updateRole = async (roleId: number, data: { name: string, fullName:
   try {
     const result = await db.update(staffRoles).set(data).where(eq(staffRoles.id, roleId)).returning()
     revalidatePath("/admin/roles")
-    return { data: result[0], error: null }
+    return { data: result[0], error: null, message: responses.role.updated.success }
   } catch (error) {
     console.error(error)
-    return { data: null, error: "Unexpected error occurred, please try again later" as string }
+    return { data: null, error: responses.role.updated.error.general }
   }
 }
 
@@ -100,26 +115,13 @@ export const deleteRole = async (roleId: number): Promise<GeneralActionResponse<
     console.log("Result", result)
     if (result[0]?.staffCount > 0) {
       console.error("Role has staff, please remove staff from this role first")
-      return { data: null, error: "Role has staff, please remove staff from this role first" as string }
+      return { data: null, error: responses.role.deleted.error.hasStaff }
     }
     await db.delete(staffRoles).where(eq(staffRoles.id, roleId))
     revalidatePath("/admin/roles")
-    return { data: null, error: null }
+    return { data: null, error: null, message: responses.role.deleted.success }
   } catch (error) {
     console.error(error)
-    return { data: null, error: "Unexpected error occurred, please try again later" as string }
-  }
-}
-
-export const getRolesDropList = async (): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
-  try {
-    const roles = await db.select({
-      value: staffRoles.id,
-      label: staffRoles.name,
-    }).from(staffRoles)
-    return { data: roles, error: null }
-  } catch (error) {
-    console.error(error)
-    return { data: null, error: "Failed to fetch roles, please try again later" as string }
+    return { data: null, error: responses.role.deleted.error.general }
   }
 }

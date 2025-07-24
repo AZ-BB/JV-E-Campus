@@ -3,6 +3,7 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalRoot, Mo
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import { createBranch } from "@/actions/branches";
+import toaster from "@/components/ui/toast";
 
 export default function CreateBranchModal({
     isOpen,
@@ -14,6 +15,7 @@ export default function CreateBranchModal({
     const [error, setError] = useState<string | null>(null);
     const [isCreating, setIsCreating] = useState(false);
     const [branchName, setBranchName] = useState("");
+
 
     useEffect(() => {
         setError(null)
@@ -35,6 +37,7 @@ export default function CreateBranchModal({
             return
         }
         onClose()
+        response.message && toaster.success(response.message)
         setIsCreating(false)
     }
 

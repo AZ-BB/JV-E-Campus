@@ -3,8 +3,8 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalRoot, Mo
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import { updateRole } from "@/actions/roles";
-import { Loader2 } from "lucide-react";
 import { Role } from "@/actions/roles";
+import toaster from "@/components/ui/toast";
 
 export default function UpdateRoleModal({
     isOpen,
@@ -45,6 +45,7 @@ export default function UpdateRoleModal({
             return
         }
         onClose()
+        response.message && toaster.success(response.message)
         setIsUpdating(false)
     }
 

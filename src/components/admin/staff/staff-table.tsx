@@ -17,6 +17,7 @@ import {
   Trash,
   Plus,
   RefreshCcw,
+  User,
 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useRef } from "react"
@@ -27,8 +28,10 @@ import CreateStaffModal from "./create-staff-modal"
 import Input from "@/components/ui/input"
 import UpdateStaffModal from "./update-staff-modal"
 import DeleteDialog from "@/components/delete-dialog"
+import Image from "next/image"
 import Avatar from "@/components/ui/avatar"
 import Filter from "@/components/filter"
+import toaster from "@/components/ui/toast"
 
 export default function StaffTable({
   staffUsers,
@@ -56,7 +59,7 @@ export default function StaffTable({
   const handleDeleteClick = (staffId: string, event: React.MouseEvent) => {
     const button = event.currentTarget
     const buttonRect = button.getBoundingClientRect()
-    const container = button.closest('.relative') as HTMLElement
+    const container = button.closest(".relative") as HTMLElement
     const containerRect = container?.getBoundingClientRect()
 
     if (!containerRect) return
@@ -70,7 +73,7 @@ export default function StaffTable({
 
     // Calculate initial position (above and centered to button)
     let top = relativeButtonTop - dialogHeight - 10
-    let left = relativeButtonLeft + (buttonRect.width / 2) - (dialogWidth / 2)
+    let left = relativeButtonLeft + buttonRect.width / 2 - dialogWidth / 2
 
     // Adjust if dialog would go off-screen horizontally
     if (left < 10) {
@@ -91,11 +94,16 @@ export default function StaffTable({
     })
   }
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     console.log("Delete confirmed for staff ID:", deleteConfirm.staffId)
     if (deleteConfirm.staffId) {
       console.log("Delete confirmed for staff ID:", deleteConfirm.staffId)
-      deleteStaffUser(Number(deleteConfirm.staffId))
+      const response = await deleteStaffUser(Number(deleteConfirm.staffId))
+      if (response.error) {
+        toaster.error(response.error)
+      } else {
+        response.message && toaster.success(response.message)
+      }
     }
     setDeleteConfirm({ isOpen: false, staffId: null, position: null })
   }
@@ -108,25 +116,23 @@ export default function StaffTable({
     <div className="relative">
       {/* Create Staff Button */}
       <Filter>
-        <div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-2 bg-admin-primary text-admin-textSecondary px-4 py-2 rounded-md hover:bg-admin-primary/80 disabled:hover:bg-admin-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Plus className="w-4 h-4" />
-              Create Staff
-            </Button>
-            <Button
-              onClick={() => {
-                router.refresh()
-              }}
-              className="flex items-center gap-2 bg-admin-secondary text-admin-textSecondary px-4 py-2 rounded-md hover:bg-admin-secondary/80 disabled:hover:bg-admin-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <RefreshCcw className="w-4 h-4" />
-              Refresh
-            </Button>
-          </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 bg-admin-primary text-admin-textSecondary px-4 py-2 rounded-md hover:bg-admin-primary/80 disabled:hover:bg-admin-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Plus className="w-4 h-4" />
+            Create Staff
+          </Button>
+          <Button
+            onClick={() => {
+              router.refresh()
+            }}
+            className="flex items-center gap-2 bg-admin-secondary text-admin-textSecondary px-4 py-2 rounded-md hover:bg-admin-secondary/80 disabled:hover:bg-admin-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCcw className="w-4 h-4" />
+            Refresh
+          </Button>
         </div>
       </Filter>
 
@@ -140,6 +146,27 @@ export default function StaffTable({
             cell: (value) => <div>{value}</div>,
             sorted: sort === "staffId",
             order: order === "asc" ? "desc" : "asc",
+          },
+          {
+            label: "",
+            key: "profilePictureUrl",
+            componentKey: "profilePictureUrl",
+            sortable: false,
+            cell: (value) => (
+              <div>
+                {value ? (
+                  <div className="w-10 h-10 overflow-hidden rounded-full">
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_NAME}/${process.env.NEXT_PUBLIC_STORAGE_AVATAR_DIRECTORY}/${value}`}
+                      alt="Profile Picture"
+                      className="w-full h-full object-cover object-center"
+                    />
+                  </div>
+                ) : (
+                  <User className="w-4 h-4" />
+                )}
+              </div>
+            ),
           },
           {
             label: "Name",
@@ -246,11 +273,17 @@ export default function StaffTable({
             componentKey: "actions",
             cell: (value) => (
               <div className="flex gap-2">
-                <Button className="w-8 h-8 flex justify-center items-center bg-admin-secondary hover:bg-admin-secondary/80"
+                <Button
+                  className="w-8 h-8 flex justify-center items-center bg-admin-secondary hover:bg-admin-secondary/80"
                   onClick={() => {
-                    setUpdateStaffData(staffUsers.data?.find((staff) => staff.id === Number(value)) || null)
+                    setUpdateStaffData(
+                      staffUsers.data?.find(
+                        (staff) => staff.id === Number(value)
+                      ) || null
+                    )
                     setIsUpdateModalOpen(true)
-                  }}>
+                  }}
+                >
                   <Pencil className="w-4 h-4" />
                 </Button>
                 <Button

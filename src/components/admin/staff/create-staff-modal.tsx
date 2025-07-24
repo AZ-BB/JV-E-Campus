@@ -11,6 +11,7 @@ import {
 import Input from "@/components/ui/input"
 import Button from "@/components/ui/button"
 import Checkbox from "@/components/ui/checkbox"
+import ProfilePicture from "@/components/ui/profile-picture"
 import { StaffCategory } from "@/db/enums"
 import {
   SelectContent,
@@ -22,6 +23,9 @@ import {
 import { getBranchesDropList } from "@/actions/branches"
 import { getRolesDropList } from "@/actions/roles"
 import countryList from "country-list"
+import toaster from "@/components/ui/toast"
+import { uploadFile } from "@/actions/upload"
+import { v4 as uuidv4 } from 'uuid'
 
 export default function CreateStaffModal({
   isOpen,
@@ -35,6 +39,7 @@ export default function CreateStaffModal({
   const [branches, setBranches] = useState<{ label: string, value: number }[]>([])
   const [roles, setRoles] = useState<{ label: string, value: number }[]>([])
   const countries = countryList.getNames()
+  
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -44,8 +49,10 @@ export default function CreateStaffModal({
   const [phoneNumber, setPhoneNumber] = useState("")
   const [nationality, setNationality] = useState("")
   const [profilePictureUrl, setProfilePictureUrl] = useState("")
-  const [resetPasswordOnFirstLogin, setResetPasswordOnFirstLogin] = useState(false)
-
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [profilePictureError, setProfilePictureError] = useState<string | null>(null)
+  const [resetPasswordOnFirstLogin, setResetPasswordOnFirstLogin] =
+    useState(false)
   const [isCreating, setIsCreating] = useState(false)
 
   useEffect(() => {
@@ -83,12 +90,32 @@ export default function CreateStaffModal({
       setPhoneNumber("")
       setNationality("")
       setProfilePictureUrl("")
+      setSelectedFile(null)
+      setProfilePictureError(null)
       setResetPasswordOnFirstLogin(false)
     }
   }, [isOpen])
 
   const handleCreateStaff = async () => {
     setIsCreating(true)
+    
+    let finalProfilePictureUrl = ""
+    
+    // Upload the profile picture first if one is selected
+    if (selectedFile) {
+      const name = uuidv4()
+      const fileName = name + "." + selectedFile.type.split("/")[1]
+      const uploadResponse = await uploadFile(selectedFile, "avatars", fileName)
+      
+      if (uploadResponse.error) {
+        setProfilePictureError(uploadResponse.error)
+        setIsCreating(false)
+        return
+      }
+      
+      finalProfilePictureUrl = fileName
+    }
+
     const response = await createStaffUser({
       email,
       password,
@@ -97,7 +124,7 @@ export default function CreateStaffModal({
       staffRoleId: staffRoleId!,
       phoneNumber: phoneNumber,
       nationality: nationality,
-      profilePictureUrl: profilePictureUrl,
+      profilePictureUrl: finalProfilePictureUrl,
     })
     if (response.error) {
       setError(response.error)
@@ -105,8 +132,35 @@ export default function CreateStaffModal({
       return
     }
     onClose()
+    response.message && toaster.success(response.message)
     setIsCreating(false)
   }
+
+  const handleProfilePictureUpload = async (file: File) => {
+    setProfilePictureError(null)
+    // Create a temporary URL for preview
+    const tempUrl = URL.createObjectURL(file)
+    setProfilePictureUrl(tempUrl)
+    setSelectedFile(file)
+  }
+
+  const handleProfilePictureRemove = () => {
+    // Clean up the temporary URL if it exists
+    if (profilePictureUrl && profilePictureUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(profilePictureUrl)
+    }
+    setProfilePictureUrl("")
+    setSelectedFile(null)
+  }
+
+  // Clean up temporary URL when component unmounts or modal closes
+  useEffect(() => {
+    return () => {
+      if (profilePictureUrl && profilePictureUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(profilePictureUrl)
+      }
+    }
+  }, [profilePictureUrl])
 
   return (
     <ModalRoot open={isOpen} onOpenChange={onClose}>
@@ -117,6 +171,17 @@ export default function CreateStaffModal({
         </ModalHeader>
 
         <div className="flex flex-col gap-2">
+          <div className="flex w-full justify-center items-center flex-col gap-2">
+            <ProfilePicture
+              src={profilePictureUrl}
+              alt={fullName || "Profile picture"}
+              size="lg"
+              className="w-28 h-28"
+              onUpload={handleProfilePictureUpload}
+              onRemove={handleProfilePictureRemove}
+            />
+            {profilePictureError && <p className="text-admin-accent text-sm">{profilePictureError}</p>}
+          </div>
           <Input
             required
             type="email"
@@ -144,9 +209,7 @@ export default function CreateStaffModal({
             onChange={(e) => setFullName(e.target.value)}
             className="w-full"
           />
-          <SelectRoot
-            onSelect={(value) => setStaffRoleId(Number(value))}
-          >
+          <SelectRoot onSelect={(value) => setStaffRoleId(Number(value))}>
             <SelectTrigger className="w-full" label="Staff Role" required>
               <SelectValue placeholder="Select Staff Role" />
             </SelectTrigger>
@@ -186,7 +249,9 @@ export default function CreateStaffModal({
             </SelectTrigger>
             <SelectContent>
               {countries.map((country) => (
-                <SelectItem key={country} value={country}>{country}</SelectItem>
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
               ))}
             </SelectContent>
           </SelectRoot>
