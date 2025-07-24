@@ -21,6 +21,7 @@ module.exports = {
           secondary: 'rgb(var(--color-secondary) / <alpha-value>)',
           accent: 'rgb(var(--color-accent) / <alpha-value>)',
           success: 'rgb(var(--color-success) / <alpha-value>)',
+          danger: 'rgb(var(--color-danger) / <alpha-value>)',
         },
       },
     },

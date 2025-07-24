@@ -137,6 +137,9 @@ export default function StaffTable({
       </Filter>
 
       <Table
+        onRowClick={(row) => {
+          router.push(`/admin/staff/${row.id}`)
+        }}
         headers={[
           {
             label: "ID",
@@ -261,16 +264,12 @@ export default function StaffTable({
             label: "Actions",
             key: "id",
             componentKey: "actions",
-            cell: (value) => (
+            cell: (value, row) => (
               <div className="flex gap-2">
                 <Button
                   className="w-8 h-8 flex justify-center items-center bg-admin-secondary hover:bg-admin-secondary/80"
                   onClick={() => {
-                    setUpdateStaffData(
-                      staffUsers.data?.find(
-                        (staff) => staff.id === Number(value)
-                      ) || null
-                    )
+                    setUpdateStaffData(row as Staff)
                     setIsUpdateModalOpen(true)
                   }}
                 >
