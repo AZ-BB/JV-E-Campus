@@ -27,6 +27,7 @@ import CreateRoleModal from "./create-role-modal"
 import Input from "@/components/ui/input"
 import UpdateRoleModal from "./update-role-modal"
 import DeleteDialog from "@/components/delete-dialog"
+import toaster from "@/components/ui/toast"
 
 export default function RolesTable({
   roles,
@@ -90,11 +91,16 @@ export default function RolesTable({
     })
   }
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (deleteConfirm.roleId) {
       console.log("Delete confirmed for role ID:", deleteConfirm.roleId)
       // Add your delete logic here
-      deleteRole(Number(deleteConfirm.roleId))
+      const response = await deleteRole(Number(deleteConfirm.roleId))
+      if (response.error) {
+        toaster.error(response.error)
+      } else {
+        response.message && toaster.success(response.message)
+      }
     }
     setDeleteConfirm({ isOpen: false, roleId: null, position: null })
   }

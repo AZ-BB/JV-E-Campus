@@ -3,7 +3,7 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalRoot, Mo
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import { createRole } from "@/actions/roles";
-import { Loader2 } from "lucide-react";
+import toaster from "@/components/ui/toast";
 
 export default function CreateRoleModal({
     isOpen,
@@ -39,6 +39,7 @@ export default function CreateRoleModal({
             setError(response.error)
             return
         }
+        response.message && toaster.success(response.message)
         onClose()
         setIsCreating(false)
     }
