@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/utils/cn'
-import Logout from './logout'
+import Logout from '@/components/logout'
 import { 
   Users, 
   UserCheck, 

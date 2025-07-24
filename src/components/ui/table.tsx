@@ -112,7 +112,7 @@ function Table({
     headers: {
         label: string;
         key: string;
-        cell?: (value: any) => React.ReactNode;
+        cell?: (value: any, row: any) => React.ReactNode;
         sortable?: boolean;
         sorted?: boolean;
         order?: "asc" | "desc";
@@ -148,7 +148,7 @@ function Table({
                 {data.map((row) => (
                     <TableRow key={row.id} className="hover:bg-admin-border transition-colors">
                         {headers.map((header) => (
-                            <TableCell key={header.componentKey}>{header.cell ? header.cell(row[header.key]) : row[header.key]}</TableCell>
+                            <TableCell key={header.componentKey}>{header.cell ? header.cell(row[header.key], row) : row[header.key]}</TableCell>
                         ))}
                     </TableRow>
                 ))}

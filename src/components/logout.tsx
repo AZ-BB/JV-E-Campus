@@ -1,7 +1,7 @@
 "use client"
 import { createSupabaseClient } from "@/utils/supabase-browser"
 import { useRouter } from "next/navigation"
-import Button from "../ui/button"
+import Button from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 const Logout = () => {
