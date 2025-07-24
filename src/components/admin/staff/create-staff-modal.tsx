@@ -12,7 +12,6 @@ import Input from "@/components/ui/input"
 import Button from "@/components/ui/button"
 import Checkbox from "@/components/ui/checkbox"
 import ProfilePicture from "@/components/ui/profile-picture"
-import { StaffCategory } from "@/db/enums"
 import {
   SelectContent,
   SelectItem,
@@ -20,8 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getBranchesDropList } from "@/actions/branches"
-import { getRolesDropList } from "@/actions/roles"
+import { getBranchesNames } from "@/actions/branches"
+import { getRolesNames } from "@/actions/roles"
 import countryList from "country-list"
 import toaster from "@/components/ui/toast"
 import { uploadFile } from "@/actions/upload"
@@ -39,7 +38,7 @@ export default function CreateStaffModal({
   const [branches, setBranches] = useState<{ label: string, value: number }[]>([])
   const [roles, setRoles] = useState<{ label: string, value: number }[]>([])
   const countries = countryList.getNames()
-  
+
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -57,19 +56,19 @@ export default function CreateStaffModal({
 
   useEffect(() => {
     const fetchBranchs = async () => {
-      const branchesResponse = await getBranchesDropList()
+      const branchesResponse = await getBranchesNames()
       if (branchesResponse.error) {
         setError(branchesResponse.error)
       } else {
-        setBranches(branchesResponse.data || [])
+        setBranches(branchesResponse.data?.map((branch) => ({ label: branch.name, value: branch.id })) || [])
       }
     }
     const fetchRoles = async () => {
-      const rolesResponse = await getRolesDropList()
+      const rolesResponse = await getRolesNames()
       if (rolesResponse.error) {
         setError(rolesResponse.error)
       } else {
-        setRoles(rolesResponse.data || [])
+        setRoles(rolesResponse.data?.map((role) => ({ label: role.name, value: role.id })) || [])
       }
     }
     fetchBranchs()
@@ -98,21 +97,21 @@ export default function CreateStaffModal({
 
   const handleCreateStaff = async () => {
     setIsCreating(true)
-    
+
     let finalProfilePictureUrl = ""
-    
+
     // Upload the profile picture first if one is selected
     if (selectedFile) {
       const name = uuidv4()
       const fileName = name + "." + selectedFile.type.split("/")[1]
       const uploadResponse = await uploadFile(selectedFile, "avatars", fileName)
-      
+
       if (uploadResponse.error) {
         setProfilePictureError(uploadResponse.error)
         setIsCreating(false)
         return
       }
-      
+
       finalProfilePictureUrl = fileName
     }
 

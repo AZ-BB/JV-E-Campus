@@ -18,8 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getBranchesDropList } from "@/actions/branches"
-import { getRolesDropList } from "@/actions/roles"
+import { getBranchesNames } from "@/actions/branches"
+import { getRolesNames } from "@/actions/roles"
 import countryList from "country-list"
 import { Staff } from "@/actions/users"
 import toaster from "@/components/ui/toast"
@@ -55,19 +55,19 @@ export default function UpdateStaffModal({
 
   useEffect(() => {
     const fetchBranchs = async () => {
-      const branchesResponse = await getBranchesDropList()
+      const branchesResponse = await getBranchesNames()
       if (branchesResponse.error) {
         setError(branchesResponse.error)
       } else {
-        setBranches(branchesResponse.data || [])
+        setBranches(branchesResponse.data?.map((branch) => ({ label: branch.name, value: branch.id })) || [])
       }
     }
     const fetchRoles = async () => {
-      const rolesResponse = await getRolesDropList()
+      const rolesResponse = await getRolesNames()
       if (rolesResponse.error) {
         setError(rolesResponse.error)
       } else {
-        setRoles(rolesResponse.data || [])
+        setRoles(rolesResponse.data?.map((role) => ({ label: role.name, value: role.id })) || [])
       }
     }
     fetchBranchs()
