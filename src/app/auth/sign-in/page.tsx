@@ -9,7 +9,7 @@ const StaticImage = () => {
   return (
     <div className="relative h-full overflow-hidden bg-gradient-to-br from-green-600 via-emerald-600 to-teal-700">
       {/* Static first image */}
-      <Image
+      <img
         src="/auth/1.jpeg"
         alt="JV Campus Training Center"
         className="w-full h-full object-cover"
@@ -115,7 +115,7 @@ export default function SignIn() {
           <div className="text-center mb-8">
             {/* Logo */}
             <div className="mb-6 flex justify-center p-2 py-4 bg-[#01a252] rounded-lg">
-              <Image
+              <img
                 src="/logo.jpg"
                 alt="JV Campus Logo"
                 className="h-20 w-auto rounded-lg"

@@ -25,19 +25,19 @@ export default async function AdminDashboard() {
           <div className="text-2xl font-bold text-admin-text">247</div>
           <p className="text-xs text-admin-text-muted mt-1">Admin & Staff combined</p>
         </div>
-        
+
         <div className="bg-admin-surface rounded-lg p-6 border border-admin-border">
           <h3 className="text-sm font-medium text-admin-text-muted mb-2">Active Staff</h3>
           <div className="text-2xl font-bold text-admin-text">189</div>
           <p className="text-xs text-admin-text-muted mt-1">Currently active</p>
         </div>
-        
+
         <div className="bg-admin-surface rounded-lg p-6 border border-admin-border">
           <h3 className="text-sm font-medium text-admin-text-muted mb-2">System Status</h3>
           <div className="text-2xl font-bold text-admin-success">●</div>
           <p className="text-xs text-admin-text-muted mt-1">All systems operational</p>
         </div>
-        
+
         <div className="bg-admin-surface rounded-lg p-6 border border-admin-border">
           <h3 className="text-sm font-medium text-admin-text-muted mb-2">Last Activity</h3>
           <div className="text-2xl font-bold text-admin-text">2 min</div>
@@ -62,7 +62,7 @@ export default async function AdminDashboard() {
                   <div className="text-xs text-admin-text-muted mt-1">Sarah Johnson joined as Training Coordinator • 5 minutes ago</div>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-3 p-3 rounded-lg bg-admin-border/50">
                 <div className="w-2 h-2 bg-admin-success rounded-full mt-2 flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
@@ -70,7 +70,7 @@ export default async function AdminDashboard() {
                   <div className="text-xs text-admin-text-muted mt-1">12 staff members completed Safety Protocols • 15 minutes ago</div>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-3 p-3 rounded-lg bg-admin-border/50">
                 <div className="w-2 h-2 bg-admin-accent rounded-full mt-2 flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
@@ -78,7 +78,7 @@ export default async function AdminDashboard() {
                   <div className="text-xs text-admin-text-muted mt-1">Database backup scheduled for tonight • 1 hour ago</div>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-3 p-3 rounded-lg bg-gray-700/50">
                 <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
@@ -86,7 +86,7 @@ export default async function AdminDashboard() {
                   <div className="text-xs text-gray-400 mt-1">Downtown Campus branch added to system • 2 hours ago</div>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-3 p-3 rounded-lg bg-gray-700/50">
                 <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
@@ -140,7 +140,7 @@ export default async function AdminDashboard() {
                 </div>
                 <span className="text-xs text-admin-success font-medium">Healthy</span>
               </div>
-              
+
               <div className="flex justify-between items-center p-3 bg-admin-border/50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 bg-admin-success rounded-full"></div>
@@ -148,7 +148,7 @@ export default async function AdminDashboard() {
                 </div>
                 <span className="text-xs text-admin-success font-medium">145ms</span>
               </div>
-              
+
               <div className="flex justify-between items-center p-3 bg-admin-border/50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 bg-admin-accent rounded-full"></div>
@@ -156,7 +156,7 @@ export default async function AdminDashboard() {
                 </div>
                 <span className="text-xs text-admin-accent font-medium">68% Full</span>
               </div>
-              
+
               <div className="flex justify-between items-center p-3 bg-admin-border/50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 bg-admin-success rounded-full"></div>
@@ -185,7 +185,7 @@ export default async function AdminDashboard() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-3 bg-admin-success/20 border border-admin-success/50 rounded-lg">
                 <div className="flex items-start space-x-3">
                   <div className="text-admin-success text-lg">✅</div>
@@ -195,7 +195,7 @@ export default async function AdminDashboard() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-3 bg-admin-accent/20 border border-admin-accent/50 rounded-lg">
                 <div className="flex items-start space-x-3">
                   <div className="text-admin-accent text-lg">⚠️</div>
@@ -205,7 +205,7 @@ export default async function AdminDashboard() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-3 bg-admin-secondary/20 border border-admin-secondary/50 rounded-lg">
                 <div className="flex items-start space-x-3">
                   <div className="text-admin-secondary text-lg">🎉</div>
