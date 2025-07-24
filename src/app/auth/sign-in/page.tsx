@@ -2,7 +2,6 @@
 import { createBrowserClient } from "@supabase/ssr"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 
 // Static image component with logo
 const StaticImage = () => {

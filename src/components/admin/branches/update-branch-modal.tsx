@@ -3,8 +3,8 @@ import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalRoot, Mo
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import { updateBranch } from "@/actions/branches";
-import { Loader2 } from "lucide-react";
 import { Branch } from "@/actions/branches";
+import toaster from "@/components/ui/toast";
 
 export default function UpdateBranchModal({
     isOpen,
@@ -42,6 +42,7 @@ export default function UpdateBranchModal({
             return
         }
         onClose()
+        response.message && toaster.success(response.message)
         setIsUpdating(false)
     }
 

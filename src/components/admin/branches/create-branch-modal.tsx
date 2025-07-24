@@ -2,12 +2,8 @@ import { useEffect, useState } from "react";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalRoot, ModalTitle } from "@/components/ui/modal";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
-import Checkbox from "@/components/ui/checkbox";
-import { StaffCategory } from "@/db/enums";
-import { SelectContent, SelectItem, SelectRoot, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { branches as branchesTable } from "@/db/schema/schema";
-import { createBranch, getBranches } from "@/actions/branches";
-import { Loader2 } from "lucide-react";
+import { createBranch } from "@/actions/branches";
+import toaster from "@/components/ui/toast";
 
 export default function CreateBranchModal({
     isOpen,
@@ -17,21 +13,9 @@ export default function CreateBranchModal({
     onClose: () => void;
 }) {
     const [error, setError] = useState<string | null>(null);
-    const [branches, setBranches] = useState<typeof branchesTable.$inferSelect[]>([]);
     const [isCreating, setIsCreating] = useState(false);
     const [branchName, setBranchName] = useState("");
 
-    useEffect(() => {
-        const fetchBranchs = async () => {
-            const branchesResponse = await getBranches();
-            if (branchesResponse.error) {
-                setError(branchesResponse.error)
-            } else {
-                setBranches(branchesResponse.data || []);
-            }
-        }
-        fetchBranchs();
-    }, []);
 
     useEffect(() => {
         setError(null)
@@ -53,6 +37,7 @@ export default function CreateBranchModal({
             return
         }
         onClose()
+        response.message && toaster.success(response.message)
         setIsCreating(false)
     }
 
