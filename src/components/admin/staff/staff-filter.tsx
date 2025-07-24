@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react"
-import Input from "./ui/input"
+import Input from "../../ui/input"
 import { useRouter } from "next/navigation"
 import debounce from "lodash.debounce"
-import { MultipleSelect } from "./ui/multiple-select"
+import { MultipleSelect } from "../../ui/multiple-select"
 import { getRolesNames } from "@/actions/roles"
 import { getBranchesNames } from "@/actions/branches"
 import { getAdminsNames } from "@/actions/users"
 
-export default function Filter({
+export default function StaffFilter({
     children
 }: {
     children: React.ReactNode
@@ -26,7 +26,6 @@ export default function Filter({
     const [selectedCreatedBy, setSelectedCreatedBy] = useState<string[]>([])
 
     useEffect(() => {
-
         const params = new URLSearchParams(window.location.search)
         const roles = params.get("roles")
         if (roles) {
@@ -73,7 +72,6 @@ export default function Filter({
 
         debouncedSearch()
 
-
         return () => {
             debouncedSearch.cancel()
         }
@@ -105,7 +103,7 @@ export default function Filter({
 
     return (
         <div className="flex justify-between items-center gap-4 py-4">
-            <div>
+            <div className="mt-5">
                 {children}
             </div>
 

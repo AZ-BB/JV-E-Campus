@@ -2,7 +2,7 @@
 import { GeneralActionResponse } from "@/types/general-action-response"
 import { db } from "@/db"
 import { branches, staff } from "@/db/schema/schema"
-import { count, eq, sql } from "drizzle-orm"
+import { asc, count, desc, eq, ilike, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
 
@@ -26,23 +26,56 @@ export const getBranchesNames = async (): Promise<GeneralActionResponse<{ id: nu
   }
 }
 
-export const getDetailedBranches = async (page: number = 1, limit: number = 20): Promise<
-  GeneralActionResponse<Branch[]>
-> => {
+export const getDetailedBranches = async ({
+  page = 1,
+  limit = 10,
+  search = "",
+  orderBy = "createdAt",
+  orderDirection = "desc",
+}: {
+  page?: number,
+  limit?: number,
+  search?: string,
+  orderBy?: keyof Branch,
+  orderDirection?: "asc" | "desc",
+}): Promise<GeneralActionResponse<{ rows: Branch[], count: number, numberOfPages: number }>> => {
   try {
-    const branchesData = await db
-      .select({
-        id: branches.id,
-        name: branches.name,
-        createdAt: branches.createdAt,
-        staffCount: count(staff.id),
-      })
-      .from(branches)
-      .leftJoin(staff, eq(branches.id, staff.branchId))
-      .groupBy(branches.id)
-      .limit(limit)
-      .offset((page - 1) * limit)
-    return { data: branchesData, error: null }
+
+    const branchSelection = {
+      id: branches.id,
+      name: branches.name,
+      createdAt: branches.createdAt,
+      staffCount: count(staff.id),
+    } as const
+
+    const tx = await db.transaction(async (tx) => {
+      const query = tx.select(branchSelection).from(branches)
+        .leftJoin(staff, eq(branches.id, staff.branchId))
+        .groupBy(branches.id)
+        .limit(limit)
+        .offset((page - 1) * limit)
+
+      if (search) {
+        query.where(ilike(branches.name, `%${search}%`))
+      }
+
+      const orderByColumn = branchSelection[orderBy as keyof typeof branchSelection] || branches.createdAt
+      query.orderBy(orderDirection === "asc" ? asc(orderByColumn) : desc(orderByColumn))
+
+      const rows = await query
+      const rowsCount = await tx.select({ count: count() }).from(branches)
+
+      return { rows, count: rowsCount[0].count, numberOfPages: Math.ceil(rowsCount[0].count / limit) }
+    })
+
+
+    return {
+      data: {
+        rows: tx.rows,
+        count: tx.count,
+        numberOfPages: tx.numberOfPages
+      }, error: null
+    }
   } catch (error) {
     console.error(error)
     return { data: null, error: responses.branch.fetchedAll.error.general }

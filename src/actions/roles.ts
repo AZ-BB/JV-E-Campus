@@ -2,7 +2,7 @@
 import { GeneralActionResponse } from "@/types/general-action-response"
 import { staff, staffRoles } from "@/db/schema/schema"
 import { db } from "@/db"
-import { count, eq, sql } from "drizzle-orm"
+import { asc, count, desc, eq, ilike, or, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
 
@@ -10,26 +10,56 @@ import responses from "@/responses/responses"
 export type Role = typeof staffRoles.$inferSelect & {
   number_of_staff: number
 }
-export const getRolesDetailed = async (
-  page: number = 1,
-  limit: number = 20
-): Promise<GeneralActionResponse<Role[]>> => {
+export const getRolesDetailed = async ({
+  page = 1,
+  limit = 10,
+  search = "",
+  orderBy = 'createdAt',
+  orderDirection = "desc",
+}: {
+  page?: number
+  limit?: number
+  search?: string,
+  orderBy?: keyof Role,
+  orderDirection?: "asc" | "desc",
+}): Promise<GeneralActionResponse<{ rows: Role[], count: number, numberOfPages: number }>> => {
   try {
-    const roles = await db
-      .select({
+
+    const tx = await db.transaction(async (tx) => {
+
+      const rolesSelection = {
         id: staffRoles.id,
         name: staffRoles.name,
         createdAt: staffRoles.createdAt,
         updatedAt: staffRoles.updatedAt,
         fullName: staffRoles.fullName,
         number_of_staff: count(staff.id),
-      })
-      .from(staffRoles)
-      .leftJoin(staff, eq(staffRoles.id, staff.staffRoleId))
-      .groupBy(staffRoles.id)
-      .limit(limit)
-      .offset((page - 1) * limit)
-    return { data: roles, error: null }
+      } as const
+
+      const query = tx.select(rolesSelection).from(staffRoles)
+        .leftJoin(staff, eq(staffRoles.id, staff.staffRoleId))
+        .groupBy(staffRoles.id)
+
+
+      if (search) {
+        query.where(or(ilike(staffRoles.name, `%${search}%`), ilike(staffRoles.fullName, `%${search}%`)))
+      }
+
+      const orderByColumn = rolesSelection[orderBy as keyof typeof rolesSelection] || staffRoles.createdAt
+      const rows = await query.limit(limit).offset((page - 1) * limit).orderBy(orderDirection === "asc" ? asc(orderByColumn) : desc(orderByColumn))
+
+      const rowsCount = await tx.select({ count: count() }).from(staffRoles)
+
+      return { rows, count: rowsCount[0].count, numberOfPages: Math.ceil(rowsCount[0].count / limit) }
+    })
+
+    return {
+      data: {
+        rows: tx.rows,
+        count: tx.count,
+        numberOfPages: tx.numberOfPages
+      }, error: null
+    }
   } catch (error) {
     console.error(error)
     return { data: null, error: responses.role.fetchedAll.error.general }
