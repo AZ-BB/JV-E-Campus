@@ -27,9 +27,9 @@ import { deleteStaffUser, Staff } from "@/actions/users"
 import CreateStaffModal from "./create-staff-modal"
 import Input from "@/components/ui/input"
 import UpdateStaffModal from "./update-staff-modal"
-import toaster from "@/components/ui/toast"
 import DeleteDialog from "@/components/delete-dialog"
 import Image from "next/image"
+import Avatar from "@/components/ui/avatar"
 
 export default function StaffTable({
   staffUsers,

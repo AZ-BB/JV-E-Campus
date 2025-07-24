@@ -4,8 +4,8 @@
 
 
 :root {
-    --color-bg: 249 250 251;         /* #F9FAFB */
-    --color-surface: 255 255 255;    /* #FFFFFF */
+    --color-bg: 255 255 255;         /* #FFFFFF */
+    --color-surface: 249 250 251;    /* #F9FAFB */
     --color-border: 229 231 235;     /* #E5E7EB */
     --color-text: 15 23 42;          /* #0F172A */
     --color-text-muted: 100 116 139; /* #64748B */
