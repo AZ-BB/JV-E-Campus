@@ -70,7 +70,7 @@ export default function CreateAdminModal({
                 {error && <p className="text-admin-accent text-sm">{error}</p>}
                 <ModalFooter>
                     <Button
-                        loading={isLoading}
+                        isLoading={isLoading}
                         className="px-4 py-2"
                         disabled={
                             !email.trim() ||

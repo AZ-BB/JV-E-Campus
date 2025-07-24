@@ -59,7 +59,7 @@ export default function CreateBranchModal({
                     <Button
                         disabled={!branchName.trim() || !!error}
                         onClick={handleCreateBranch}
-                        loading={isCreating}
+                        isLoading={isCreating}
                         className="px-4 py-2"
                     >
                         Create Branch

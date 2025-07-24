@@ -73,7 +73,7 @@ export default function UpdateBranchModal({
                     <Button
                         disabled={!branchName.trim() || !!error || isUpdating}
                         onClick={handleUpdateBranch}
-                        loading={isUpdating}
+                        isLoading={isUpdating}
                         className="px-4 py-2"
                     >
                         Update Branch

@@ -6,13 +6,17 @@ import { count, eq, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
 
-export const getRoles = async (): Promise<GeneralActionResponse<typeof staffRoles.$inferSelect[]>> => {
+
+export const getRolesDropList = async (): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
   try {
-    const roles = await db.select().from(staffRoles)
+    const roles = await db.select({
+      value: staffRoles.id,
+      label: staffRoles.name,
+    }).from(staffRoles)
     return { data: roles, error: null }
   } catch (error) {
     console.error(error)
-    return { data: null, error: responses.role.fetchedAll.error.general }
+    return { data: null, error: "Failed to fetch roles, please try again later" as string }
   }
 }
 
@@ -109,7 +113,7 @@ export const deleteRole = async (roleId: number): Promise<GeneralActionResponse<
       staffCount: count(staff.id),
     }).from(staff).where(eq(staff.staffRoleId, roleId))
     console.log("Result", result)
-    if(result[0]?.staffCount > 0) {
+    if (result[0]?.staffCount > 0) {
       console.error("Role has staff, please remove staff from this role first")
       return { data: null, error: responses.role.deleted.error.hasStaff }
     }

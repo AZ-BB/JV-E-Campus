@@ -6,26 +6,26 @@ import { count, eq, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
 
-export const getBranches = async (): Promise<
-  GeneralActionResponse<(typeof branches.$inferSelect)[]>
-> => {
-  try {
-    const branchesData = await db
-      .select()
-      .from(branches)
-    return { data: branchesData, error: null }
-  } catch (error) {
-    console.error(error)
-    return { data: null, error: responses.branch.fetchedAll.error.general }
-  }
-}
-
 export interface Branch {
   id: number
   name: string
   createdAt: string | null
   staffCount: number
 }
+
+export const getBranchesDropList = async (): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
+  try {
+    const branchesList = await db.select({
+      value: branches.id,
+      label: branches.name,
+    }).from(branches)
+    return { data: branchesList, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: "Failed to fetch branches, please try again later" as string }
+  }
+}
+
 export const getDetailedBranches = async (page: number = 1, limit: number = 20): Promise<
   GeneralActionResponse<Branch[]>
 > => {
@@ -126,3 +126,5 @@ export const deleteBranch = async (branchId: number): Promise<GeneralActionRespo
     return { data: null, error: responses.branch.deleted.error.general }
   }
 }
+
+

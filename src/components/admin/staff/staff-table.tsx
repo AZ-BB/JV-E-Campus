@@ -30,6 +30,8 @@ import UpdateStaffModal from "./update-staff-modal"
 import DeleteDialog from "@/components/delete-dialog"
 import Image from "next/image"
 import Avatar from "@/components/ui/avatar"
+import Filter from "@/components/filter"
+import toaster from "@/components/ui/toast"
 
 export default function StaffTable({
   staffUsers,
@@ -113,7 +115,7 @@ export default function StaffTable({
   return (
     <div className="relative">
       {/* Create Staff Button */}
-      <div className="mb-4 flex justify-between">
+      <Filter>
         <div className="flex gap-2">
           <Button
             onClick={() => setIsCreateModalOpen(true)}
@@ -132,13 +134,7 @@ export default function StaffTable({
             Refresh
           </Button>
         </div>
-        <div>
-          <Input
-            placeholder="Search"
-            className="w-80 bg-admin-surface border-admin-border"
-          />
-        </div>
-      </div>
+      </Filter>
 
       <Table
         headers={[

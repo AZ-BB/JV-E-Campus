@@ -1,70 +1,129 @@
 "use server"
 import { db } from "@/db"
-import {  UserRole } from "@/db/enums"
+import { UserRole } from "@/db/enums"
 import { branches, staff, staffRoles, users } from "@/db/schema/schema"
 import { createSupabaseAdminClient } from "@/utils/supabase-browser"
 import { createSupabaseServerClient } from "@/utils/supabase-server"
 import { GeneralActionResponse } from "@/types/general-action-response"
-import { aliasedTable, eq, sql } from "drizzle-orm"
+import { aliasedTable, and, asc, desc, eq, ilike, inArray, or, SQL, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
+import Staff from "@/app/staff/page"
 import responses from "@/responses/responses"
 
 
 
-// GETTERS
+// Export the type based on the query selection
 export type Staff = (typeof users.$inferSelect) & (typeof staff.$inferSelect) & {
   branchName: string
   createdByName: string
   staffRoleName: string
 }
-export const getStaffUsers = async (
-  page: number = 1,
-  limit: number = 20
-): Promise<GeneralActionResponse<Staff[]>> => {
+
+export const getStaffUsers = async ({
+  page = 1,
+  limit = 20,
+  search = "",
+  orderBy = "createdAt",
+  orderDirection = "desc",
+  filters = {
+    staffRoleIds: [],
+    branchIds: [],
+    createdByIds: [],
+    nationality: []
+  }
+}: {
+  page: number,
+  limit: number,
+  search: string,
+  orderBy: keyof Staff,
+  orderDirection: "asc" | "desc",
+  filters: {
+    staffRoleIds: number[],
+    branchIds: number[],
+    createdByIds: number[],
+    nationality: string[]
+  }
+}): Promise<GeneralActionResponse<Staff[]>> => {
   try {
     const usersCreator = aliasedTable(users, "usersCreator");
-    const result = await db
-      .select({
-        // Users table fields
-        id: users.id,
-        fullName: users.fullName,
-        email: users.email,
-        role: users.role,
-        language: users.language,
-        profilePictureUrl: users.profilePictureUrl,
-        createdBy: users.createdBy,
-        createdAt: users.createdAt,
-        authUserId: users.authUserId,
-        
-        // Staff table fields
-        staffId: staff.id,
-        userId: staff.userId,
-        nationality: staff.nationality,
-        phoneNumber: staff.phoneNumber,
-        staffCategory: staff.staffCategory,
-        staffProfilePictureUrl: staff.profilePictureUrl,
-        firstLogin: staff.firstLogin,
-        branchId: staff.branchId,
-        staffRoleId: staff.staffRoleId,
 
-        // Branches table fields
-        branchName: branches.name,
+    // GETTERS
+    // Define the staff query selection to be reused
+    const staffQuerySelection = {
+      // Users table fields
+      id: users.id,
+      fullName: users.fullName,
+      email: users.email,
+      role: users.role,
+      language: users.language,
+      profilePictureUrl: users.profilePictureUrl,
+      createdBy: users.createdBy,
+      createdAt: users.createdAt,
+      authUserId: users.authUserId,
 
-        // UsersCreator table fields
-        createdByName: usersCreator.fullName,
+      // Staff table fields
+      staffId: staff.id,
+      userId: staff.userId,
+      nationality: staff.nationality,
+      phoneNumber: staff.phoneNumber,
+      staffCategory: staff.staffCategory,
+      staffProfilePictureUrl: staff.profilePictureUrl,
+      firstLogin: staff.firstLogin,
+      branchId: staff.branchId,
+      staffRoleId: staff.staffRoleId,
 
-        // StaffRoles table fields
-        staffRoleName: staffRoles.name,
-      })
+      // Branches table fields
+      branchName: branches.name,
+
+      // UsersCreator table fields  
+      createdByName: users.fullName, // This will be overridden by the aliased table in the actual query
+
+      // StaffRoles table fields
+      staffRoleName: staffRoles.name,
+    } as const
+
+    // Use the shared query selection but override the createdByName field
+    const querySelection = {
+      ...staffQuerySelection,
+      createdByName: usersCreator.fullName, // Override with the aliased table
+    } as const
+
+    let query = db
+      .select(querySelection)
       .from(users)
       .innerJoin(staff, eq(users.id, staff.userId))
       .innerJoin(branches, eq(staff.branchId, branches.id))
       .leftJoin(usersCreator, eq(users.createdBy, usersCreator.id))
       .leftJoin(staffRoles, eq(staff.staffRoleId, staffRoles.id))
-      .where(eq(users.role, UserRole.STAFF))
-      .limit(limit)
-      .offset((page - 1) * limit)
-    
+
+    const conditions: any = [
+      eq(users.role, UserRole.STAFF),
+    ]
+
+    if (search) {
+      conditions.push(or(ilike(users.fullName, `%${search}%`), ilike(users.email, `%${search}%`)))
+    }
+
+    if (filters.staffRoleIds.length > 0) {
+      conditions.push(inArray(staff.staffRoleId, filters.staffRoleIds))
+    }
+    if (filters.branchIds.length > 0) {
+      conditions.push(inArray(staff.branchId, filters.branchIds))
+    }
+    if (filters.createdByIds.length > 0) {
+      conditions.push(inArray(users.createdBy, filters.createdByIds))
+    }
+    if (filters.nationality.length > 0) {
+      conditions.push(inArray(staff.nationality, filters.nationality))
+    }
+
+    query.where(and(...conditions))
+
+    // Use the query selection directly for orderBy mapping
+    const orderByColumn = querySelection[orderBy as keyof typeof querySelection] || users.createdAt
+
+    const result = await query.limit(limit).offset((page - 1) * limit).orderBy(orderDirection === "asc" ? asc(orderByColumn) : desc(orderByColumn))
+
     return { data: result, error: null }
   } catch (error) {
     console.error(error)
@@ -396,7 +455,7 @@ export const deleteStaffUser = async (userId: number): Promise<GeneralActionResp
     const result = await db.select({
       authUserId: users.authUserId,
     }).from(users).where(eq(users.id, userId))
-    if(!result[0]) {
+    if (!result[0]) {
       console.error("User not found")
       return { data: null, error: responses.staff.deleted.error.notFound }
     } else {
@@ -409,5 +468,22 @@ export const deleteStaffUser = async (userId: number): Promise<GeneralActionResp
   } catch (error) {
     console.error(error)
     return { data: null, error: responses.staff.deleted.error.general }
+  }
+}
+
+
+export const getAdminDropList = async (search: string = ""): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
+  try {
+    const conditions: any = [
+      eq(users.role, UserRole.ADMIN),
+    ]
+    if (search) {
+      conditions.push(ilike(users.fullName, `%${search}%`))
+    }
+    const result = await db.select({ id: users.id, fullName: users.fullName }).from(users).where(and(...conditions)).orderBy(asc(users.fullName)).limit(10)
+    return { data: result.map((user) => ({ label: user.fullName, value: user.id })), error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: [], error: error as string }
   }
 }

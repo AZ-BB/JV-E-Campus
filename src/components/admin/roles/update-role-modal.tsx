@@ -86,7 +86,7 @@ export default function UpdateRoleModal({
                     <Button
                         disabled={!roleName.trim() || !fullName.trim() || !!error || isUpdating}
                         onClick={handleUpdateRole}
-                        loading={isUpdating}
+                        isLoading={isUpdating}
                         className="px-4 py-2"
                     >
                         Update Role
