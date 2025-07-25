@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import Logout from "@/components/admin/logout";
+import Logout from "@/components/logout";
 import Image from 'next/image';
 
 export default function Staff() {

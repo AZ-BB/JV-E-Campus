@@ -125,6 +125,7 @@ export default function UserTable({
                         newQuery.set("page_size", size.toString())
                         router.push(`?${newQuery.toString()}`, { scroll: false })
                     }}
+                    rowsCount={users.data?.length || 0}
                 />
             </div>
         </div>

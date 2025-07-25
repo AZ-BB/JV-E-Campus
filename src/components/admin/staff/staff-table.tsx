@@ -137,6 +137,9 @@ export default function StaffTable({
       </StaffFilter>
 
       <Table
+        onRowClick={(row) => {
+          router.push(`/admin/staff/${row.id}`)
+        }}
         headers={[
           {
             label: "ID",
@@ -152,19 +155,9 @@ export default function StaffTable({
             key: "profilePictureUrl",
             componentKey: "profilePictureUrl",
             sortable: false,
-            cell: (value) => (
+            cell: (value, row) => (
               <div>
-                {value ? (
-                  <div className="w-10 h-10 overflow-hidden rounded-full">
-                    <img
-                      src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_NAME}/${process.env.NEXT_PUBLIC_STORAGE_AVATAR_DIRECTORY}/${value}`}
-                      alt="Profile Picture"
-                      className="w-full h-full object-cover object-center"
-                    />
-                  </div>
-                ) : (
-                  <User className="w-4 h-4" />
-                )}
+                <Avatar className="w-10 h-10" src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_NAME}/${process.env.NEXT_PUBLIC_STORAGE_AVATAR_DIRECTORY}/${value}`} alt="Profile Picture" fallback={row.fullName.split(" ")[0].charAt(0).toUpperCase() + (row.fullName.split(" ")[1]?.charAt(0).toUpperCase() || "")} />
               </div>
             ),
           },
@@ -271,16 +264,12 @@ export default function StaffTable({
             label: "Actions",
             key: "id",
             componentKey: "actions",
-            cell: (value) => (
+            cell: (value, row) => (
               <div className="flex gap-2">
                 <Button
                   className="w-8 h-8 flex justify-center items-center bg-admin-secondary hover:bg-admin-secondary/80"
                   onClick={() => {
-                    setUpdateStaffData(
-                      staffUsers.data?.rows?.find(
-                        (staff) => staff.id === Number(value)
-                      ) || null
-                    )
+                    setUpdateStaffData(row as Staff)
                     setIsUpdateModalOpen(true)
                   }}
                 >
