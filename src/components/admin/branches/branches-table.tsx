@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
-import Pagination from "../../ui/pagination"
+import Pagination from "../../pagination"
 import Button from "../../ui/button"
 import { Branch, deleteBranch } from "@/actions/branches"
 import CreateBranchModal from "./create-branch-modal"
@@ -28,11 +28,12 @@ import Input from "@/components/ui/input"
 import UpdateBranchModal from "./update-branch-modal"
 import DeleteDialog from "@/components/delete-dialog"
 import toaster from "@/components/ui/toast"
+import BranchesFilter from "./branches-filter"
 
 export default function BranchesTable({
   branches,
 }: {
-  branches: GeneralActionResponse<Branch[]>
+  branches: GeneralActionResponse<{ rows: Branch[], count: number, numberOfPages: number }>
 }) {
   const query = useSearchParams()
   const sort = query.get("sort") || "id"
@@ -112,7 +113,7 @@ export default function BranchesTable({
   return (
     <div className="relative">
       {/* Create Branch Button and Search */}
-      <div className="mb-4 flex justify-between">
+      <BranchesFilter>
         <div className="flex gap-2">
           <Button
             onClick={() => setIsCreateModalOpen(true)}
@@ -129,13 +130,7 @@ export default function BranchesTable({
             Refresh
           </Button>
         </div>
-        <div>
-          <Input
-            placeholder="Search"
-            className="w-80 bg-admin-surface border-admin-border"
-          />
-        </div>
-      </div>
+      </BranchesFilter>
 
       <Table
         headers={[
@@ -194,7 +189,7 @@ export default function BranchesTable({
                   className="w-8 h-8 flex justify-center items-center bg-admin-secondary hover:bg-admin-secondary/80"
                   onClick={() => {
                     setUpdateBranchData(
-                      branches.data?.find(
+                      branches.data?.rows.find(
                         (branch) => branch.id === Number(value)
                       ) || null
                     )
@@ -213,7 +208,7 @@ export default function BranchesTable({
             ),
           },
         ]}
-        data={branches.data || []}
+        data={branches.data?.rows || []}
         onSort={(column) => {
           const newOrder = order === "asc" ? "desc" : "asc"
           const newQuery = new URLSearchParams(query)
@@ -227,7 +222,8 @@ export default function BranchesTable({
         <Pagination
           currentPage={Number(page)}
           pageSize={Number(pageSize)}
-          maxPage={10}
+          maxPage={branches.data?.numberOfPages || 1}
+          rowsCount={branches.data?.count || 0}
           onChange={(page) => {
             console.log("Changed to page:", page)
             // You can integrate this with your routing logic

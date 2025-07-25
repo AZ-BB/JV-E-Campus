@@ -5,11 +5,10 @@ import { branches, staff, staffRoles, users } from "@/db/schema/schema"
 import { createSupabaseAdminClient } from "@/utils/supabase-browser"
 import { createSupabaseServerClient } from "@/utils/supabase-server"
 import { GeneralActionResponse } from "@/types/general-action-response"
-import { aliasedTable, and, asc, desc, eq, ilike, inArray, or, SQL, sql } from "drizzle-orm"
+import { aliasedTable, and, asc, count, desc, eq, ilike, inArray, or, SQL, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import Staff from "@/app/staff/page"
 import responses from "@/responses/responses"
-
 
 
 // Export the type based on the query selection
@@ -44,91 +43,93 @@ export const getStaffUsers = async ({
     createdByIds: number[],
     nationality: string[]
   }
-}): Promise<GeneralActionResponse<Staff[]>> => {
+}): Promise<GeneralActionResponse<{ rows: Staff[], count: number, numberOfPages: number }>> => {
   try {
     const usersCreator = aliasedTable(users, "usersCreator");
 
-    // GETTERS
-    // Define the staff query selection to be reused
-    const staffQuerySelection = {
-      // Users table fields
-      id: users.id,
-      fullName: users.fullName,
-      email: users.email,
-      role: users.role,
-      language: users.language,
-      profilePictureUrl: users.profilePictureUrl,
-      createdBy: users.createdBy,
-      createdAt: users.createdAt,
-      authUserId: users.authUserId,
+    const tx = await db.transaction(async (tx) => {
+      const rowsCount = await tx.select({
+        count: count(users.id),
+      }).from(users).where(eq(users.role, UserRole.STAFF))
 
-      // Staff table fields
-      staffId: staff.id,
-      userId: staff.userId,
-      nationality: staff.nationality,
-      phoneNumber: staff.phoneNumber,
-      staffCategory: staff.staffCategory,
-      staffProfilePictureUrl: staff.profilePictureUrl,
-      firstLogin: staff.firstLogin,
-      branchId: staff.branchId,
-      staffRoleId: staff.staffRoleId,
+      const staffQuerySelection = {
+        // Users table fields
+        id: users.id,
+        fullName: users.fullName,
+        email: users.email,
+        role: users.role,
+        language: users.language,
+        profilePictureUrl: users.profilePictureUrl,
+        createdBy: users.createdBy,
+        createdAt: users.createdAt,
+        authUserId: users.authUserId,
 
-      // Branches table fields
-      branchName: branches.name,
+        // Staff table fields
+        staffId: staff.id,
+        userId: staff.userId,
+        nationality: staff.nationality,
+        phoneNumber: staff.phoneNumber,
+        staffCategory: staff.staffCategory,
+        staffProfilePictureUrl: staff.profilePictureUrl,
+        firstLogin: staff.firstLogin,
+        branchId: staff.branchId,
+        staffRoleId: staff.staffRoleId,
 
-      // UsersCreator table fields  
-      createdByName: users.fullName, // This will be overridden by the aliased table in the actual query
+        // Branches table fields
+        branchName: branches.name,
 
-      // StaffRoles table fields
-      staffRoleName: staffRoles.name,
-    } as const
+        // StaffRoles table fields
+        staffRoleName: staffRoles.name,
+        createdByName: usersCreator.fullName,
+      } as const
 
-    // Use the shared query selection but override the createdByName field
-    const querySelection = {
-      ...staffQuerySelection,
-      createdByName: usersCreator.fullName, // Override with the aliased table
-    } as const
+      let query = db
+        .select(staffQuerySelection)
+        .from(users)
+        .innerJoin(staff, eq(users.id, staff.userId))
+        .innerJoin(branches, eq(staff.branchId, branches.id))
+        .leftJoin(usersCreator, eq(users.createdBy, usersCreator.id))
+        .leftJoin(staffRoles, eq(staff.staffRoleId, staffRoles.id))
 
-    let query = db
-      .select(querySelection)
-      .from(users)
-      .innerJoin(staff, eq(users.id, staff.userId))
-      .innerJoin(branches, eq(staff.branchId, branches.id))
-      .leftJoin(usersCreator, eq(users.createdBy, usersCreator.id))
-      .leftJoin(staffRoles, eq(staff.staffRoleId, staffRoles.id))
+      const conditions: any = [
+        eq(users.role, UserRole.STAFF),
+      ]
 
-    const conditions: any = [
-      eq(users.role, UserRole.STAFF),
-    ]
+      if (search) {
+        conditions.push(or(ilike(users.fullName, `%${search}%`), ilike(users.email, `%${search}%`)))
+      }
 
-    if (search) {
-      conditions.push(or(ilike(users.fullName, `%${search}%`), ilike(users.email, `%${search}%`)))
+      if (filters.staffRoleIds.length > 0) {
+        conditions.push(inArray(staff.staffRoleId, filters.staffRoleIds))
+      }
+      if (filters.branchIds.length > 0) {
+        conditions.push(inArray(staff.branchId, filters.branchIds))
+      }
+      if (filters.createdByIds.length > 0) {
+        conditions.push(inArray(users.createdBy, filters.createdByIds))
+      }
+      if (filters.nationality.length > 0) {
+        conditions.push(inArray(staff.nationality, filters.nationality))
+      }
+
+      query.where(and(...conditions))
+
+      const orderByColumn = staffQuerySelection[orderBy as keyof typeof staffQuerySelection] || users.createdAt
+      const rows = await query.limit(limit).offset((page - 1) * limit).orderBy(orderDirection === "asc" ? asc(orderByColumn) : desc(orderByColumn))
+
+      return { rows, count: rowsCount[0].count, numberOfPages: Math.ceil(rowsCount[0].count / limit) }
+    })
+
+    return {
+      data: {
+        rows: tx.rows,
+        count: tx.count,
+        numberOfPages: tx.numberOfPages
+      }, error: null
     }
-
-    if (filters.staffRoleIds.length > 0) {
-      conditions.push(inArray(staff.staffRoleId, filters.staffRoleIds))
-    }
-    if (filters.branchIds.length > 0) {
-      conditions.push(inArray(staff.branchId, filters.branchIds))
-    }
-    if (filters.createdByIds.length > 0) {
-      conditions.push(inArray(users.createdBy, filters.createdByIds))
-    }
-    if (filters.nationality.length > 0) {
-      conditions.push(inArray(staff.nationality, filters.nationality))
-    }
-
-    query.where(and(...conditions))
-
-    // Use the query selection directly for orderBy mapping
-    const orderByColumn = querySelection[orderBy as keyof typeof querySelection] || users.createdAt
-
-    const result = await query.limit(limit).offset((page - 1) * limit).orderBy(orderDirection === "asc" ? asc(orderByColumn) : desc(orderByColumn))
-
-    return { data: result, error: null }
   } catch (error) {
     console.error(error)
-    return { data: [], error: responses.staff.fetchedAll.error.general }
+    return { data: { rows: [], count: 0, numberOfPages: 0 }, error: responses.staff.fetchedAll.error.general }
   }
 }
 
@@ -199,6 +200,22 @@ export const getAdminUsers = async (
   } catch (error) {
     console.error(error)
     return { data: [], error: responses.staff.fetchedAll.error.general }
+  }
+}
+
+export const getAdminsNames = async (search: string = ""): Promise<GeneralActionResponse<{ id: number, fullName: string }[]>> => {
+  try {
+    const conditions: any = [
+      eq(users.role, UserRole.ADMIN),
+    ]
+    if (search) {
+      conditions.push(ilike(users.fullName, `%${search}%`))
+    }
+    const result = await db.select({ id: users.id, fullName: users.fullName }).from(users).where(and(...conditions)).orderBy(asc(users.fullName)).limit(10)
+    return { data: result, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: [], error: error as string }
   }
 }
 
@@ -420,17 +437,17 @@ export const createStaffUser = async (
     let userResult
     try {
       userResult = await db
-      .insert(users)
-      .values({
-        email: newUser.email,
-        role: UserRole.STAFF,
-        fullName: newUser.fullName,
-        createdBy: currentUser?.user?.user_metadata?.db_user_id,
-        language: "en",
-        authUserId: authData.user.id,
-        profilePictureUrl: newUser.profilePictureUrl || "",
-      })
-      .returning()
+        .insert(users)
+        .values({
+          email: newUser.email,
+          role: UserRole.STAFF,
+          fullName: newUser.fullName,
+          createdBy: currentUser?.user?.user_metadata?.db_user_id,
+          language: "en",
+          authUserId: authData.user.id,
+          profilePictureUrl: newUser.profilePictureUrl || "",
+        })
+        .returning()
     } catch (error) {
       console.error("Failed to create user rolling back auth user:", error)
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
@@ -487,10 +504,10 @@ export const createStaffUser = async (
 
 export const updateStaffUser = async (userId: number, data: Partial<CreateStaffUser>): Promise<GeneralActionResponse<void>> => {
   try {
-    if(data.fullName) {
-      await db.update(users).set({fullName: data.fullName, profilePictureUrl: data.profilePictureUrl}).where(eq(users.id, userId))
-    }else {
-      await db.update(users).set({profilePictureUrl: data.profilePictureUrl}).where(eq(users.id, userId))
+    if (data.fullName) {
+      await db.update(users).set({ fullName: data.fullName, profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
+    } else {
+      await db.update(users).set({ profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
     }
 
     await db.update(staff).set(data).where(eq(staff.userId, userId))
@@ -521,22 +538,5 @@ export const deleteStaffUser = async (userId: number): Promise<GeneralActionResp
   } catch (error) {
     console.error(error)
     return { data: null, error: responses.staff.deleted.error.general }
-  }
-}
-
-
-export const getAdminDropList = async (search: string = ""): Promise<GeneralActionResponse<{ label: string, value: number }[]>> => {
-  try {
-    const conditions: any = [
-      eq(users.role, UserRole.ADMIN),
-    ]
-    if (search) {
-      conditions.push(ilike(users.fullName, `%${search}%`))
-    }
-    const result = await db.select({ id: users.id, fullName: users.fullName }).from(users).where(and(...conditions)).orderBy(asc(users.fullName)).limit(10)
-    return { data: result.map((user) => ({ label: user.fullName, value: user.id })), error: null }
-  } catch (error) {
-    console.error(error)
-    return { data: [], error: error as string }
   }
 }

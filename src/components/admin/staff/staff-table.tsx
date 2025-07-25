@@ -21,7 +21,7 @@ import {
 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useRef } from "react"
-import Pagination from "../../ui/pagination"
+import Pagination from "../../pagination"
 import Button from "../../ui/button"
 import { deleteStaffUser, Staff } from "@/actions/users"
 import CreateStaffModal from "./create-staff-modal"
@@ -30,13 +30,13 @@ import UpdateStaffModal from "./update-staff-modal"
 import DeleteDialog from "@/components/delete-dialog"
 import Image from "next/image"
 import Avatar from "@/components/ui/avatar"
-import Filter from "@/components/filter"
+import StaffFilter from "@/components/admin/staff/staff-filter"
 import toaster from "@/components/ui/toast"
 
 export default function StaffTable({
   staffUsers,
 }: {
-  staffUsers: GeneralActionResponse<Staff[]>
+  staffUsers: GeneralActionResponse<{ rows: Staff[], count: number, numberOfPages: number }>
 }) {
   const query = useSearchParams()
   const sort = query.get("sort") || "id"
@@ -115,7 +115,7 @@ export default function StaffTable({
   return (
     <div className="relative">
       {/* Create Staff Button */}
-      <Filter>
+      <StaffFilter>
         <div className="flex gap-2">
           <Button
             onClick={() => setIsCreateModalOpen(true)}
@@ -134,7 +134,7 @@ export default function StaffTable({
             Refresh
           </Button>
         </div>
-      </Filter>
+      </StaffFilter>
 
       <Table
         onRowClick={(row) => {
@@ -285,7 +285,7 @@ export default function StaffTable({
             ),
           },
         ]}
-        data={staffUsers.data || []}
+        data={staffUsers.data?.rows || []}
         onSort={(column) => {
           const newOrder = order === "asc" ? "desc" : "asc"
           const newQuery = new URLSearchParams(query)
@@ -295,26 +295,25 @@ export default function StaffTable({
         }}
       />
 
-      <div className="mt-4 w-full flex justify-end">
-        <Pagination
-          currentPage={Number(page)}
-          pageSize={Number(pageSize)}
-          maxPage={10}
-          onChange={(page) => {
-            console.log("Changed to page:", page)
-            // You can integrate this with your routing logic
-            const newQuery = new URLSearchParams(query)
-            newQuery.set("page", page.toString())
-            router.push(`?${newQuery.toString()}`, { scroll: false })
-          }}
-          onSizeChange={(size) => {
-            console.log("Changed to size:", size)
-            const newQuery = new URLSearchParams(query)
-            newQuery.set("page_size", size.toString())
-            router.push(`?${newQuery.toString()}`, { scroll: false })
-          }}
-        />
-      </div>
+      <Pagination
+        rowsCount={staffUsers.data?.count || 0}
+        currentPage={Number(page)}
+        pageSize={Number(pageSize)}
+        maxPage={staffUsers.data?.numberOfPages || 1}
+        onChange={(page) => {
+          console.log("Changed to page:", page)
+          // You can integrate this with your routing logic
+          const newQuery = new URLSearchParams(query)
+          newQuery.set("page", page.toString())
+          router.push(`?${newQuery.toString()}`, { scroll: false })
+        }}
+        onSizeChange={(size) => {
+          console.log("Changed to size:", size)
+          const newQuery = new URLSearchParams(query)
+          newQuery.set("page_size", size.toString())
+          router.push(`?${newQuery.toString()}`, { scroll: false })
+        }}
+      />
 
       {/* Create Staff Modal */}
       <CreateStaffModal

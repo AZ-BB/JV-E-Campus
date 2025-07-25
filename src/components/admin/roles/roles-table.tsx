@@ -20,7 +20,7 @@ import {
 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
-import Pagination from "../../ui/pagination"
+import Pagination from "../../pagination"
 import Button from "../../ui/button"
 import { deleteRole, Role } from "@/actions/roles"
 import CreateRoleModal from "./create-role-modal"
@@ -28,11 +28,12 @@ import Input from "@/components/ui/input"
 import UpdateRoleModal from "./update-role-modal"
 import DeleteDialog from "@/components/delete-dialog"
 import toaster from "@/components/ui/toast"
+import RolesFilter from "./roles-filter"
 
 export default function RolesTable({
   roles,
 }: {
-  roles: GeneralActionResponse<Role[]>
+  roles: GeneralActionResponse<{ rows: Role[], count: number, numberOfPages: number }>
 }) {
   const query = useSearchParams()
   const sort = query.get("sort") || "id"
@@ -112,7 +113,7 @@ export default function RolesTable({
   return (
     <div className="relative">
       {/* Create Role Button and Search */}
-      <div className="mb-4 flex justify-between">
+      <RolesFilter>
         <div className="flex gap-2">
           <Button
             onClick={() => setIsCreateModalOpen(true)}
@@ -129,10 +130,7 @@ export default function RolesTable({
             Refresh
           </Button>
         </div>
-        <div>
-          <Input placeholder="Search" className="w-80 bg-admin-surface border-admin-border" />
-        </div>
-      </div>
+      </RolesFilter>
 
       <Table
         headers={[
@@ -180,7 +178,7 @@ export default function RolesTable({
               <div className="flex gap-2">
                 <Button className="w-8 h-8 flex justify-center items-center bg-admin-secondary hover:bg-admin-secondary/80"
                   onClick={() => {
-                    setUpdateRoleData(roles.data?.find((role) => role.id === Number(value)) || null)
+                    setUpdateRoleData(roles.data?.rows?.find((role) => role.id === Number(value)) || null)
                     setIsUpdateModalOpen(true)
                   }}>
                   <Pencil className="w-4 h-4" />
@@ -195,7 +193,7 @@ export default function RolesTable({
             ),
           },
         ]}
-        data={roles.data || []}
+        data={roles.data?.rows || []}
         onSort={(column) => {
           const newOrder = order === "asc" ? "desc" : "asc"
           const newQuery = new URLSearchParams(query)
@@ -207,9 +205,10 @@ export default function RolesTable({
 
       <div className="mt-4 w-full flex justify-end">
         <Pagination
+          rowsCount={roles.data?.count || 0}
           currentPage={Number(page)}
           pageSize={Number(pageSize)}
-          maxPage={10}
+          maxPage={roles.data?.numberOfPages || 1}
           onChange={(page) => {
             console.log("Changed to page:", page)
             // You can integrate this with your routing logic

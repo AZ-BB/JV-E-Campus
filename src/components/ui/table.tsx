@@ -106,7 +106,7 @@ TableCaption.displayName = "TableCaption";
 
 function Table({
     headers,
-    data,
+    data = [],
     onSort,
     onRowClick,
 }: {
@@ -158,6 +158,14 @@ function Table({
                         ))}
                     </TableRow>
                 ))}
+
+                {
+                    data.length === 0 && (
+                        <TableRow>
+                            <TableCell colSpan={headers.length} className="text-center">No data</TableCell>
+                        </TableRow>
+                    )
+                }
             </TableBody>
         </TableRoot>
     )
