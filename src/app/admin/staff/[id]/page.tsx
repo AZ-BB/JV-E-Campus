@@ -1,6 +1,5 @@
 import Breadcrumb from "@/components/ui/breadcrumb";
 import Avatar from "@/components/ui/avatar";
-import Button from "@/components/ui/button";
 import { 
   Mail, 
   Phone, 
@@ -10,13 +9,12 @@ import {
   User, 
   Building2, 
   Shield,
-  Edit,
-  Trash2,
   ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
 import { getStaffUserById } from "@/actions/users";
 import { notFound } from "next/navigation";
+import StaffActions from "@/components/admin/staff/[id]/staff-actions";
 
 export default async function StaffPage({ params }: { params: { id: string } }) {
     // Fetch staff data
@@ -58,7 +56,7 @@ export default async function StaffPage({ params }: { params: { id: string } }) 
                                 : ""
                             }
                             alt={staffData.fullName}
-                            fallback={staffData.fullName.split(" ").map(n => n[0]).join("").toUpperCase()}
+                            fallback={staffData.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
                         />
                     </div>
 
@@ -78,16 +76,7 @@ export default async function StaffPage({ params }: { params: { id: string } }) 
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex gap-2 mt-4 md:mt-0">
-                                <Button className="flex items-center p-2 px-4 gap-2 bg-admin-primary hover:bg-admin-primary/80">
-                                    <Edit className="w-4 h-4" />
-                                    Edit Staff
-                                </Button>
-                                <Button className="flex items-center p-2 px-4 gap-2 bg-admin-danger text-white hover:bg-admin-danger/80">
-                                    <Trash2 className="w-4 h-4" />
-                                    Delete
-                                </Button>
-                            </div>
+                            <StaffActions staffData={staffData} />
                         </div>
 
                         {/* Quick Stats */}
@@ -212,6 +201,8 @@ export default async function StaffPage({ params }: { params: { id: string } }) 
                     </div>
                 </div>
             </div>
+
+
         </div>
     )
 }
