@@ -1,4 +1,4 @@
-import { createStaffUser } from "@/actions/staff"
+import { createAdminUser } from "@/actions/users"
 import { useEffect, useState } from "react"
 import {
   ModalContent,
@@ -12,21 +12,11 @@ import Input from "@/components/ui/input"
 import Button from "@/components/ui/button"
 import Checkbox from "@/components/ui/checkbox"
 import ProfilePicture from "@/components/ui/profile-picture"
-import {
-  SelectContent,
-  SelectItem,
-  SelectRoot,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { getBranchesNames } from "@/actions/branches"
-import { getRolesNames } from "@/actions/roles"
-import countryList from "country-list"
 import toaster from "@/components/ui/toast"
 import { uploadFile } from "@/actions/upload"
 import { v4 as uuidv4 } from 'uuid'
 
-export default function CreateStaffModal({
+export default function CreateAdminModal({
   isOpen,
   onClose,
 }: {
@@ -35,18 +25,10 @@ export default function CreateStaffModal({
 }) {
   const [error, setError] = useState<string | null>(null)
 
-  const [branches, setBranches] = useState<{ label: string, value: number }[]>([])
-  const [roles, setRoles] = useState<{ label: string, value: number }[]>([])
-  const countries = countryList.getNames()
-
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [fullName, setFullName] = useState("")
-  const [branchId, setBranchId] = useState<number | null>(null)
-  const [staffRoleId, setStaffRoleId] = useState<number | null>(null)
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [nationality, setNationality] = useState("")
   const [profilePictureUrl, setProfilePictureUrl] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [profilePictureError, setProfilePictureError] = useState<string | null>(null)
@@ -54,40 +36,16 @@ export default function CreateStaffModal({
     useState(false)
   const [isCreating, setIsCreating] = useState(false)
 
-  useEffect(() => {
-    const fetchBranchs = async () => {
-      const branchesResponse = await getBranchesNames()
-      if (branchesResponse.error) {
-        setError(branchesResponse.error)
-      } else {
-        setBranches(branchesResponse.data?.map((branch) => ({ label: branch.name, value: branch.id })) || [])
-      }
-    }
-    const fetchRoles = async () => {
-      const rolesResponse = await getRolesNames()
-      if (rolesResponse.error) {
-        setError(rolesResponse.error)
-      } else {
-        setRoles(rolesResponse.data?.map((role) => ({ label: role.name, value: role.id })) || [])
-      }
-    }
-    fetchBranchs()
-    fetchRoles()
-  }, [])
 
   useEffect(() => {
     setError(null)
-  }, [email, password, fullName, branchId, staffRoleId])
+  }, [email, password, fullName])
 
   useEffect(() => {
     if (isOpen) {
       setEmail("")
       setPassword("")
       setFullName("")
-      setBranchId(null)
-      setStaffRoleId(null)
-      setPhoneNumber("")
-      setNationality("")
       setProfilePictureUrl("")
       setSelectedFile(null)
       setProfilePictureError(null)
@@ -115,15 +73,12 @@ export default function CreateStaffModal({
       finalProfilePictureUrl = fileName
     }
 
-    const response = await createStaffUser({
+    console.log(finalProfilePictureUrl)
+    const response = await createAdminUser({
       email,
       password,
       fullName,
-      branchId: branchId!,
-      staffRoleId: staffRoleId!,
-      phoneNumber: phoneNumber,
-      nationality: nationality,
-      profilePictureUrl: finalProfilePictureUrl,
+      profilePictureUrl: finalProfilePictureUrl
     })
     if (response.error) {
       setError(response.error)
@@ -165,8 +120,8 @@ export default function CreateStaffModal({
     <ModalRoot open={isOpen} onOpenChange={onClose}>
       <ModalContent>
         <ModalHeader>
-          <ModalTitle>Create Staff</ModalTitle>
-          <ModalDescription>Create a new staff user</ModalDescription>
+          <ModalTitle>Create Admin</ModalTitle>
+          <ModalDescription>Create a new admin user</ModalDescription>
         </ModalHeader>
 
         <div className="flex flex-col gap-2">
@@ -208,52 +163,7 @@ export default function CreateStaffModal({
             onChange={(e) => setFullName(e.target.value)}
             className="w-full"
           />
-          <SelectRoot onSelect={(value) => setStaffRoleId(Number(value))}>
-            <SelectTrigger className="w-full" label="Staff Role" required>
-              <SelectValue placeholder="Select Staff Role" />
-            </SelectTrigger>
-            <SelectContent>
-              {roles.map((role) => (
-                <SelectItem key={role.value} value={role.value.toString()}>
-                  {role.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </SelectRoot>
 
-          <SelectRoot onSelect={(value) => setBranchId(Number(value))}>
-            <SelectTrigger className="w-full" label="Branch" required>
-              <SelectValue placeholder="Select Branch" />
-            </SelectTrigger>
-            <SelectContent>
-              {branches.map((branch) => (
-                <SelectItem key={branch.value} value={branch.value.toString()}>
-                  {branch.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </SelectRoot>
-
-          <Input
-            type="text"
-            label="Phone Number"
-            placeholder="Phone Number"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            className="w-full"
-          />
-          <SelectRoot onSelect={(value) => setNationality(value as string)}>
-            <SelectTrigger className="w-full" label="Nationality">
-              <SelectValue placeholder="Select Nationality" />
-            </SelectTrigger>
-            <SelectContent>
-              {countries.map((country) => (
-                <SelectItem key={country} value={country}>
-                  {country}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </SelectRoot>
           <Checkbox
             checked={resetPasswordOnFirstLogin}
             onCheckedChange={() =>
@@ -273,14 +183,12 @@ export default function CreateStaffModal({
               !email.trim() ||
               !password.trim() ||
               !fullName.trim() ||
-              !staffRoleId ||
-              !branchId ||
               !!error ||
               isCreating
             }
             onClick={handleCreateStaff}
           >
-            Create Staff
+            Create Admin
           </Button>
         </ModalFooter>
       </ModalContent>

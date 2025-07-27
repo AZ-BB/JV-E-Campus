@@ -1,4 +1,4 @@
-import { getStaffStats, getStaffUsers } from "@/actions/users"
+import { getStaffStats, getStaffUsers } from "@/actions/staff"
 import StaffStats from "@/components/admin/staff/staff-stats"
 import StaffTable from "@/components/admin/staff/staff-table"
 
