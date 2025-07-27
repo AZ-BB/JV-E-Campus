@@ -7,114 +7,75 @@ import { createSupabaseServerClient } from "@/utils/supabase-server"
 import { GeneralActionResponse } from "@/types/general-action-response"
 import { aliasedTable, and, asc, count, desc, eq, ilike, inArray, or, SQL, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
-import Staff from "@/app/staff/page"
 import responses from "@/responses/responses"
 
 
 // Export the type based on the query selection
-export type Staff = (typeof users.$inferSelect) & (typeof staff.$inferSelect) & {
-  branchName: string
+export type Admin = (typeof users.$inferSelect) & {
   createdByName: string
-  staffRoleName: string
-  staffRoleFullName: string
+  created_users_count: number
 }
 
-export const getStaffUsers = async ({
+export const getAdmins = async ({
   page = 1,
   limit = 20,
   search = "",
   orderBy = "createdAt",
-  orderDirection = "desc",
-  filters = {
-    staffRoleIds: [],
-    branchIds: [],
-    createdByIds: [],
-    nationality: []
-  }
+  orderDirection = "desc"
 }: {
   page: number,
   limit: number,
   search: string,
-  orderBy: keyof Staff,
-  orderDirection: "asc" | "desc",
-  filters: {
-    staffRoleIds: number[],
-    branchIds: number[],
-    createdByIds: number[],
-    nationality: string[]
-  }
-}): Promise<GeneralActionResponse<{ rows: Staff[], count: number, numberOfPages: number }>> => {
+  orderBy: keyof Admin,
+  orderDirection: "asc" | "desc"
+}): Promise<GeneralActionResponse<{ rows: Admin[], count: number, numberOfPages: number }>> => {
   try {
     const usersCreator = aliasedTable(users, "usersCreator");
+    const usersCreatorFullName = aliasedTable(users, "usersCreatorFullName");
 
     const tx = await db.transaction(async (tx) => {
       const rowsCount = await tx.select({
         count: count(users.id),
-      }).from(users).where(eq(users.role, UserRole.STAFF))
+      }).from(users).where(eq(users.role, UserRole.ADMIN))
 
-      const staffQuerySelection = {
+
+
+      const usersQuerySelection = {
         // Users table fields
         id: users.id,
         fullName: users.fullName,
         email: users.email,
         role: users.role,
-        language: users.language,
         profilePictureUrl: users.profilePictureUrl,
         createdBy: users.createdBy,
         createdAt: users.createdAt,
         authUserId: users.authUserId,
 
-        // Staff table fields
-        staffId: staff.id,
-        userId: staff.userId,
-        nationality: staff.nationality,
-        phoneNumber: staff.phoneNumber,
-        staffCategory: staff.staffCategory,
-        staffProfilePictureUrl: staff.profilePictureUrl,
-        firstLogin: staff.firstLogin,
-        branchId: staff.branchId,
-        staffRoleId: staff.staffRoleId,
+        createdByFullName: usersCreatorFullName.fullName,
 
-        // Branches table fields
-        branchName: branches.name,
-
-        // StaffRoles table fields
-        staffRoleName: staffRoles.name,
-        createdByName: usersCreator.fullName,
+        created_users_count: count(users.id),
       } as const
 
       let query = db
-        .select(staffQuerySelection)
+        .select(usersQuerySelection)
         .from(users)
-        .innerJoin(staff, eq(users.id, staff.userId))
-        .innerJoin(branches, eq(staff.branchId, branches.id))
-        .leftJoin(usersCreator, eq(users.createdBy, usersCreator.id))
-        .leftJoin(staffRoles, eq(staff.staffRoleId, staffRoles.id))
+        .leftJoin(usersCreator, eq(users.id, usersCreator.createdBy))
+        .leftJoin(usersCreatorFullName, eq(users.createdBy, usersCreatorFullName.id))
+        .groupBy(users.id, usersCreatorFullName.fullName)
+
 
       const conditions: any = [
-        eq(users.role, UserRole.STAFF),
+        eq(users.role, UserRole.ADMIN),
       ]
 
       if (search) {
         conditions.push(or(ilike(users.fullName, `%${search}%`), ilike(users.email, `%${search}%`)))
       }
 
-      if (filters.staffRoleIds.length > 0) {
-        conditions.push(inArray(staff.staffRoleId, filters.staffRoleIds))
-      }
-      if (filters.branchIds.length > 0) {
-        conditions.push(inArray(staff.branchId, filters.branchIds))
-      }
-      if (filters.createdByIds.length > 0) {
-        conditions.push(inArray(users.createdBy, filters.createdByIds))
-      }
-      if (filters.nationality.length > 0) {
-        conditions.push(inArray(staff.nationality, filters.nationality))
-      }
 
       query.where(and(...conditions))
 
-      const orderByColumn = staffQuerySelection[orderBy as keyof typeof staffQuerySelection] || users.createdAt
+      const orderByColumn = usersQuerySelection[orderBy as keyof typeof usersQuerySelection] || users.createdAt
       const rows = await query.limit(limit).offset((page - 1) * limit).orderBy(orderDirection === "asc" ? asc(orderByColumn) : desc(orderByColumn))
 
       return { rows, count: rowsCount[0].count, numberOfPages: Math.ceil(rowsCount[0].count / limit) }
@@ -132,6 +93,7 @@ export const getStaffUsers = async ({
     return { data: { rows: [], count: 0, numberOfPages: 0 }, error: responses.staff.fetchedAll.error.general }
   }
 }
+
 
 export const getStaffUserById = async (userId: number): Promise<GeneralActionResponse<Staff | null>> => {
   try {
@@ -219,32 +181,37 @@ export const getAdminsNames = async (search: string = ""): Promise<GeneralAction
   }
 }
 
-export type StaffStats = {
-  staff_count: number
+
+
+export type UsersStats = {
+  users_count: number
 }
 
-export const getStaffStats = async (): Promise<GeneralActionResponse<StaffStats>> => {
+export const getUsersStats = async (): Promise<GeneralActionResponse<UsersStats>> => {
   try {
-    const result = await db.execute<{
-      count: number
-    }>(sql`
+      const result = await db.execute<{
+          count: number
+      }>(sql`
       SELECT
         COUNT(*)
-        FROM staff
+        FROM users
     `)
 
-    return { data: { staff_count: result.rows[0].count }, error: null }
+      return { data: { users_count: result.rows[0].count }, error: null }
   } catch (error) {
-    console.error(error)
-    return { data: { staff_count: 0 }, error: responses.staff.fetchedAll.error.general }
+      console.error(error)
+      return { data: { users_count: 0 }, error: responses.staff.fetchedAll.error.general }
   }
 }
+
+
 
 // CREATORS
 export interface CreateAdminUser {
   email: string
   password: string
   fullName: string
+  profilePictureUrl?: string
 }
 
 export const createAdminUser = async (
@@ -295,7 +262,7 @@ export const createAdminUser = async (
           authUserId: authData.user.id,
           createdBy: currentUser?.user?.user_metadata?.db_user_id || 1,
           language: "en",
-          profilePictureUrl: "",
+          profilePictureUrl: user.profilePictureUrl || "",
         })
         .returning()
 
@@ -377,132 +344,10 @@ export const createAdminUser = async (
   }
 }
 
-export interface CreateStaffUser {
-  email: string
-  password: string
-  fullName: string
-  branchId: number
-  staffRoleId: number
-  phoneNumber?: string
-  nationality?: string
-  profilePictureUrl?: string
-}
-
-export const createStaffUser = async (
-  newUser: CreateStaffUser
-): Promise<
-  GeneralActionResponse<
-    (typeof users.$inferSelect & typeof staff.$inferSelect) | null
-  >
-> => {
-  try {
-    if (
-      !newUser.email.trim() ||
-      !newUser.password.trim() ||
-      !newUser.fullName.trim() ||
-      !newUser.branchId ||
-      !newUser.staffRoleId
-    ) {
-      return {
-        data: null,
-        error:
-          responses.staff.created.error.missingFields,
-      }
-    }
-    const supabaseAdmin = createSupabaseAdminClient()
-    const supabase = await createSupabaseServerClient()
-    const { data: currentUser, error: currentUserError } =
-      await supabase.auth.getUser()
-
-    if (currentUserError) {
-      return { data: null, error: responses.staff.created.error.general }
-    }
-
-    const { data: authData, error: authError } =
-      await supabaseAdmin.auth.admin.createUser({
-        email: newUser.email,
-        password: newUser.password,
-        email_confirm: true,
-        user_metadata: {
-          role: UserRole.STAFF,
-          full_name: newUser.fullName,
-        },
-      })
-
-    if (authError) {
-      console.error("Failed to create auth user:", authError)
-      return { data: null, error: authError.message }
-    }
-
-    let userResult
-    try {
-      userResult = await db
-        .insert(users)
-        .values({
-          email: newUser.email,
-          role: UserRole.STAFF,
-          fullName: newUser.fullName,
-          createdBy: currentUser?.user?.user_metadata?.db_user_id,
-          language: "en",
-          authUserId: authData.user.id,
-          profilePictureUrl: newUser.profilePictureUrl || "",
-        })
-        .returning()
-    } catch (error) {
-      console.error("Failed to create user rolling back auth user:", error)
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
-      return { data: null, error: error as string } // Keep the supabase error message
-    }
-
-    try {
-      const staffResult = await db
-        .insert(staff)
-        .values({
-          userId: userResult[0].id,
-          branchId: newUser.branchId,
-          staffCategory: "MANAGER", // Deprecated
-          staffRoleId: newUser.staffRoleId,
-          phoneNumber: newUser.phoneNumber,
-          nationality: newUser.nationality,
-          firstLogin: true,
-          profilePictureUrl: newUser.profilePictureUrl,
-        })
-        .returning()
-
-      revalidatePath("/admin")
-      return { data: { ...userResult[0], ...staffResult[0] }, error: null, message: responses.staff.created.success }
-    } catch (error) {
-      console.error(
-        "Failed to create staff user, rolling back user creation:",
-        error
-      )
-      try {
-        await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
-        await db.delete(users).where(eq(users.id, userResult[0].id))
-      } catch (rollbackError) {
-        console.error("Failed to rollback user creation:", rollbackError)
-      }
-      return {
-        data: null,
-        error:
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred",
-      }
-    }
-  } catch (error) {
-    console.error("Unexpected error in createStaffUser:", error)
-    return {
-      data: null,
-      error:
-        error instanceof Error ? error.message : "An unexpected error occurred",
-    }
-  }
-}
 
 // UPDATERS
 
-export const updateStaffUser = async (userId: number, data: Partial<CreateStaffUser>): Promise<GeneralActionResponse<void>> => {
+export const updateAdminUser = async (userId: number, data: Partial<CreateAdminUser>): Promise<GeneralActionResponse<void>> => {
   try {
     if (data.fullName) {
       await db.update(users).set({ fullName: data.fullName, profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
@@ -510,33 +355,32 @@ export const updateStaffUser = async (userId: number, data: Partial<CreateStaffU
       await db.update(users).set({ profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
     }
 
-    await db.update(staff).set(data).where(eq(staff.userId, userId))
-    revalidatePath("/admin/staff")
-    return { data: null, error: null, message: responses.staff.updated.success }
+    revalidatePath("/admin/users")
+    return { data: null, error: null, message: responses.admin.updated.success }
   } catch (error) {
-    console.error("Unexpected error in updateStaffUser:", error)
-    return { data: null, error: responses.staff.updated.error.general }
+    console.error("Unexpected error in updateAdminUser:", error)
+    return { data: null, error: responses.admin.updated.error.general }
   }
 }
 
 // DELETERS
-export const deleteStaffUser = async (userId: number): Promise<GeneralActionResponse<void>> => {
+export const deleteAdminUser = async (userId: number): Promise<GeneralActionResponse<void>> => {
   try {
     const result = await db.select({
       authUserId: users.authUserId,
     }).from(users).where(eq(users.id, userId))
     if (!result[0]) {
       console.error("User not found")
-      return { data: null, error: responses.staff.deleted.error.notFound }
+      return { data: null, error: responses.admin.notFound.error }
     } else {
       const supabaseAdmin = createSupabaseAdminClient()
       console.log("Deleting user with auth user id:", result[0])
       await supabaseAdmin.auth.admin.deleteUser(result[0].authUserId!)
     }
-    revalidatePath("/admin/staff")
-    return { data: null, error: null, message: responses.staff.deleted.success }
+    revalidatePath("/admin/users")
+    return { data: null, error: null, message: responses.admin.deleted.success }
   } catch (error) {
     console.error(error)
-    return { data: null, error: responses.staff.deleted.error.general }
+    return { data: null, error: responses.admin.deleted.error.general }
   }
 }

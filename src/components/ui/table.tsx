@@ -113,7 +113,7 @@ function Table({
     headers: {
         label: string;
         key: string;
-        cell?: (value: any, row: any) => React.ReactNode;
+        cell?: (value: any, row?: any) => React.ReactNode;
         sortable?: boolean;
         sorted?: boolean;
         order?: "asc" | "desc";
