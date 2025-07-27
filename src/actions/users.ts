@@ -94,6 +94,77 @@ export const getAdmins = async ({
   }
 }
 
+
+export const getStaffUserById = async (userId: number): Promise<GeneralActionResponse<Staff | null>> => {
+  try {
+    const usersCreator = aliasedTable(users, "usersCreator");
+
+    const result = await db
+      .select({
+        // Users table fields
+        id: users.id,
+        fullName: users.fullName,
+        email: users.email,
+        role: users.role,
+        language: users.language,
+        profilePictureUrl: users.profilePictureUrl,
+        createdBy: users.createdBy,
+        createdAt: users.createdAt,
+        authUserId: users.authUserId,
+
+        // Staff table fields
+        staffId: staff.id,
+        userId: staff.userId,
+        nationality: staff.nationality,
+        phoneNumber: staff.phoneNumber,
+        staffCategory: staff.staffCategory,
+        staffProfilePictureUrl: staff.profilePictureUrl,
+        branchId: staff.branchId,
+        staffRoleId: staff.staffRoleId,
+
+        // Branches table fields
+        branchName: branches.name,
+
+        // UsersCreator table fields  
+        createdByName: usersCreator.fullName,
+
+        // StaffRoles table fields
+        staffRoleName: staffRoles.name,
+        staffRoleFullName: staffRoles.fullName,
+      })
+      .from(users)
+      .innerJoin(staff, eq(users.id, staff.userId))
+      .innerJoin(branches, eq(staff.branchId, branches.id))
+      .leftJoin(usersCreator, eq(users.createdBy, usersCreator.id))
+      .leftJoin(staffRoles, eq(staff.staffRoleId, staffRoles.id))
+      .where(and(eq(users.role, UserRole.STAFF), eq(users.id, userId)))
+      .limit(1)
+
+    return { data: result[0] || null, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: responses.staff.fetchedAll.error.general }
+  }
+}
+
+export const getAdminUsers = async (
+  page: number = 1,
+  limit: number = 20
+): Promise<GeneralActionResponse<(typeof users.$inferSelect)[]>> => {
+  try {
+    const result = await db
+      .select()
+      .from(users)
+      .where(eq(users.role, UserRole.ADMIN))
+      .limit(limit)
+      .offset((page - 1) * limit)
+    return { data: result, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: [], error: responses.staff.fetchedAll.error.general }
+  }
+}
+
 export const getAdminsNames = async (search: string = ""): Promise<GeneralActionResponse<{ id: number, fullName: string }[]>> => {
   try {
     const conditions: any = [

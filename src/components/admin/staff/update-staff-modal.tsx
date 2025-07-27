@@ -89,6 +89,7 @@ export default function UpdateStaffModal({
       setProfilePictureTempUrl("")
       setSelectedFile(null)
       setProfilePictureError(null)
+      setIsUpdating(false)
     }
   }, [isOpen, staffData])
 

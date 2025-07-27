@@ -108,6 +108,7 @@ function Table({
     headers,
     data = [],
     onSort,
+    onRowClick,
 }: {
     headers: {
         label: string;
@@ -120,6 +121,7 @@ function Table({
     }[];
     data: { id: number, [key: string]: any }[];
     onSort?: (column: string) => void;
+    onRowClick?: (row: any) => void;
 }) {
     return (
         <TableRoot>
@@ -146,7 +148,11 @@ function Table({
             </TableHeader>
             <TableBody>
                 {data.map((row) => (
-                    <TableRow key={row.id} className="hover:bg-admin-border transition-colors">
+                    <TableRow 
+                        key={row.id} 
+                        className={`hover:bg-admin-border transition-colors ${onRowClick ? "cursor-pointer" : ""}`}
+                        onClick={() => onRowClick?.(row)}
+                    >
                         {headers.map((header) => (
                             <TableCell key={header.componentKey}>{header.cell ? header.cell(row[header.key], row) : row[header.key]}</TableCell>
                         ))}
