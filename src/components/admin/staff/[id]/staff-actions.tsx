@@ -6,7 +6,7 @@ import Button from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import UpdateStaffModal from "@/components/admin/staff/update-staff-modal";
 import DeleteModal from "@/components/delete-modal";
-import { deleteStaffUser, Staff, getStaffUserById } from "@/actions/users";
+import { deleteStaffUser, Staff, getStaffUserById } from "@/actions/staff";
 import toaster from "@/components/ui/toast";
 
 interface StaffActionsProps {

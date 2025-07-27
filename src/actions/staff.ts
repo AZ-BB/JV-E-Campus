@@ -16,6 +16,7 @@ export type Staff = (typeof users.$inferSelect) & (typeof staff.$inferSelect) & 
     branchName: string
     createdByName: string
     staffRoleName: string
+    staffRoleFullName: string
 }
 
 export const getStaffUsers = async ({
@@ -150,6 +151,60 @@ export const getStaffStats = async (): Promise<GeneralActionResponse<StaffStats>
     } catch (error) {
         console.error(error)
         return { data: { staff_count: 0 }, error: responses.staff.fetchedAll.error.general }
+    }
+}
+
+
+
+export const getStaffUserById = async (userId: number): Promise<GeneralActionResponse<Staff | null>> => {
+    try {
+        const usersCreator = aliasedTable(users, "usersCreator");
+
+        const result = await db
+            .select({
+                // Users table fields
+                id: users.id,
+                fullName: users.fullName,
+                email: users.email,
+                role: users.role,
+                language: users.language,
+                profilePictureUrl: users.profilePictureUrl,
+                createdBy: users.createdBy,
+                createdAt: users.createdAt,
+                authUserId: users.authUserId,
+
+                // Staff table fields
+                staffId: staff.id,
+                userId: staff.userId,
+                nationality: staff.nationality,
+                phoneNumber: staff.phoneNumber,
+                staffCategory: staff.staffCategory,
+                staffProfilePictureUrl: staff.profilePictureUrl,
+                branchId: staff.branchId,
+                staffRoleId: staff.staffRoleId,
+
+                // Branches table fields
+                branchName: branches.name,
+
+                // UsersCreator table fields  
+                createdByName: usersCreator.fullName,
+
+                // StaffRoles table fields
+                staffRoleName: staffRoles.name,
+                staffRoleFullName: staffRoles.fullName,
+            })
+            .from(users)
+            .innerJoin(staff, eq(users.id, staff.userId))
+            .innerJoin(branches, eq(staff.branchId, branches.id))
+            .leftJoin(usersCreator, eq(users.createdBy, usersCreator.id))
+            .leftJoin(staffRoles, eq(staff.staffRoleId, staffRoles.id))
+            .where(and(eq(users.role, UserRole.STAFF), eq(users.id, userId)))
+            .limit(1)
+
+        return { data: result[0] || null, error: null }
+    } catch (error) {
+        console.error(error)
+        return { data: null, error: responses.staff.fetchedAll.error.general }
     }
 }
 
