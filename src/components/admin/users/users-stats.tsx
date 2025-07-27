@@ -8,7 +8,7 @@ export default function UsersStats({ usersStats }: { usersStats: GeneralActionRe
     {
       title: "Total Users",
       value: usersStatsData?.users_count || 0,
-      icon: "�",
+      icon: "👨‍🍳",
       unit: usersStatsData?.users_count === 1 ? "person" : "people",
       bgColor: "bg-admin-surface",
       textColor: "text-admin-primary",

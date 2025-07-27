@@ -1,31 +1,31 @@
 import Breadcrumb from "@/components/ui/breadcrumb";
 import Avatar from "@/components/ui/avatar";
-import { 
-  Mail, 
-  Phone, 
-  Globe, 
-  MapPin, 
-  Calendar, 
-  User, 
-  Building2, 
-  Shield,
-  ArrowLeft
+import {
+    Mail,
+    Phone,
+    Globe,
+    MapPin,
+    Calendar,
+    User,
+    Building2,
+    Shield,
+    ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
-import { getStaffUserById } from "@/actions/users";
+import { getStaffUserById } from "@/actions/staff";
 import { notFound } from "next/navigation";
 import StaffActions from "@/components/admin/staff/[id]/staff-actions";
 
 export default async function StaffPage({ params }: { params: { id: string } }) {
     // Fetch staff data
     const staffResponse = await getStaffUserById(parseInt(params.id));
-    
+
     if (staffResponse.error || !staffResponse.data) {
         notFound();
     }
 
     const staffData = staffResponse.data;
-    
+
     const breadcrumbItems = [
         { label: "Staff", href: "/admin/staff" },
         { label: staffData.fullName }
@@ -34,10 +34,10 @@ export default async function StaffPage({ params }: { params: { id: string } }) 
     return (
         <div className="p-6 pt-4">
             <Breadcrumb items={breadcrumbItems} className="mb-6" />
-            
+
             {/* Back Button */}
-            <Link 
-                href="/admin/staff" 
+            <Link
+                href="/admin/staff"
                 className="inline-flex items-center gap-2 text-admin-textMuted hover:text-admin-primary transition-colors mb-6"
             >
                 <ArrowLeft className="w-4 h-4" />
@@ -49,10 +49,10 @@ export default async function StaffPage({ params }: { params: { id: string } }) 
                 <div className="flex flex-col md:flex-row items-start gap-6">
                     {/* Profile Picture */}
                     <div className="flex-shrink-0">
-                        <Avatar 
-                            className="w-32 h-32" 
-                            src={staffData.profilePictureUrl && process.env.NEXT_PUBLIC_SUPABASE_URL ? 
-                                `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_NAME}/${process.env.NEXT_PUBLIC_STORAGE_AVATAR_DIRECTORY}/${staffData.profilePictureUrl}` 
+                        <Avatar
+                            className="w-32 h-32"
+                            src={staffData.profilePictureUrl && process.env.NEXT_PUBLIC_SUPABASE_URL ?
+                                `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_NAME}/${process.env.NEXT_PUBLIC_STORAGE_AVATAR_DIRECTORY}/${staffData.profilePictureUrl}`
                                 : ""
                             }
                             alt={staffData.fullName}
