@@ -5,7 +5,7 @@ import debounce from "lodash.debounce"
 import { MultipleSelect } from "../../ui/multiple-select"
 import { getRolesNames } from "@/actions/roles"
 import { getBranchesNames } from "@/actions/branches"
-import { getAdminsNames } from "@/actions/users"
+import { getAdminsNames } from "@/actions/admins"
 
 export default function StaffFilter({
     children

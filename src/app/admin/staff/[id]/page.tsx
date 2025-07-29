@@ -15,6 +15,7 @@ import Link from "next/link";
 import { getStaffUserById } from "@/actions/staff";
 import { notFound } from "next/navigation";
 import StaffActions from "@/components/admin/staff/[id]/staff-actions";
+import { mapAvatarImageUrl } from "@/utils/utils";
 
 export default async function StaffPage({ params }: { params: { id: string } }) {
     // Fetch staff data
@@ -51,10 +52,7 @@ export default async function StaffPage({ params }: { params: { id: string } }) 
                     <div className="flex-shrink-0">
                         <Avatar
                             className="w-32 h-32"
-                            src={staffData.profilePictureUrl && process.env.NEXT_PUBLIC_SUPABASE_URL ?
-                                `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_NAME}/${process.env.NEXT_PUBLIC_STORAGE_AVATAR_DIRECTORY}/${staffData.profilePictureUrl}`
-                                : ""
-                            }
+                            src={mapAvatarImageUrl(staffData.profilePictureUrl || "")}
                             alt={staffData.fullName}
                             fallback={staffData.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
                         />

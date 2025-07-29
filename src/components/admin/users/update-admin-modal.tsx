@@ -1,4 +1,4 @@
-import { updateAdminUser } from "@/actions/users"
+import { updateAdminUser } from "@/actions/admins"
 import { useEffect, useState } from "react"
 import {
   ModalContent,
@@ -11,7 +11,7 @@ import {
 import Input from "@/components/ui/input"
 import Button from "@/components/ui/button"
 import ProfilePicture from "@/components/ui/profile-picture"
-import { Admin } from "@/actions/users"
+import { Admin } from "@/actions/admins"
 import toaster from "@/components/ui/toast"
 import { v4 as uuidv4 } from "uuid"
 import { uploadFile } from "@/actions/upload"
@@ -19,11 +19,11 @@ import { uploadFile } from "@/actions/upload"
 export default function UpdateAdminModal({
   isOpen,
   onClose,
-  staffData,
+  userData,
 }: {
   isOpen: boolean
   onClose: () => void
-  staffData: Admin | null
+  userData: Admin | null
 }) {
   const [error, setError] = useState<string | null>(null)
 
@@ -42,15 +42,15 @@ export default function UpdateAdminModal({
   }, [email, fullName])
 
   useEffect(() => {
-    if (isOpen && staffData) {
-      setEmail(staffData.email || "")
-      setFullName(staffData.fullName || "")
-      setProfilePictureUrl(staffData.profilePictureUrl || "")
+    if (isOpen && userData) {
+      setEmail(userData.email || "")
+      setFullName(userData.fullName || "")
+      setProfilePictureUrl(userData.profilePictureUrl || "")
       setProfilePictureTempUrl("")
       setSelectedFile(null)
       setProfilePictureError(null)
     }
-  }, [isOpen, staffData])
+  }, [isOpen, userData])
 
   const handleProfilePictureUpload = async (file: File) => {
     setProfilePictureError(null)
@@ -66,14 +66,14 @@ export default function UpdateAdminModal({
   }
 
   const handleUpdateStaff = async () => {
-    if (!staffData) return
+    if (!userData) return
     setIsUpdating(true)
     let finalProfilePictureUrl = profilePictureUrl
     let databaseProfilePictureUrl = profilePictureUrl
     if (selectedFile) {
-      if (staffData.profilePictureUrl) {
-        finalProfilePictureUrl = staffData.profilePictureUrl
-        databaseProfilePictureUrl = staffData.profilePictureUrl.split(".").slice(0, -1).join(".") +
+      if (userData.profilePictureUrl) {
+        finalProfilePictureUrl = userData.profilePictureUrl
+        databaseProfilePictureUrl = userData.profilePictureUrl.split(".").slice(0, -1).join(".") +
           "." +
           selectedFile.type.split("/")[1]
       } else {
@@ -92,7 +92,7 @@ export default function UpdateAdminModal({
         return
       }
     }
-    const response = await updateAdminUser(staffData.id, {
+    const response = await updateAdminUser(userData.id, {
       fullName,
       profilePictureUrl: finalProfilePictureUrl
     })

@@ -39,7 +39,7 @@ export default function BranchesTable({
   const sort = query.get("sort") || "id"
   const order = query.get("order") || "asc"
   const page = query.get("page") || "1"
-  const pageSize = query.get("page_size") || "10"
+  const pageSize = query.get("limit") || "10"
   const router = useRouter()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -234,7 +234,7 @@ export default function BranchesTable({
           onSizeChange={(size) => {
             console.log("Changed to size:", size)
             const newQuery = new URLSearchParams(query)
-            newQuery.set("page_size", size.toString())
+            newQuery.set("limit", size.toString())
             router.push(`?${newQuery.toString()}`, { scroll: false })
           }}
         />

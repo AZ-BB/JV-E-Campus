@@ -18,12 +18,12 @@ import DeleteDialog from "@/components/delete-dialog"
 import Avatar from "@/components/ui/avatar"
 import toaster from "@/components/ui/toast"
 import { mapAvatarImageUrl } from "@/utils/utils"
-import { Admin, deleteAdminUser } from "@/actions/users"
-import UsersFilter from "./users-filter"
+import { Admin, deleteAdminUser } from "@/actions/admins"
+import AdminsFilter from "./admin-filter"
 import CreateAdminModal from "./create-admin-modal"
 import UpdateAdminModal from "./update-admin-modal"
 
-export default function UsersTable({
+export default function AdminsTable({
     admins,
 }: {
     admins: GeneralActionResponse<{ rows: Admin[], count: number, numberOfPages: number }>
@@ -34,12 +34,12 @@ export default function UsersTable({
     const sort = query.get("sort") || "id"
     const order = query.get("order") || "asc"
     const page = query.get("page") || "1"
-    const pageSize = query.get("page_size") || "10"
+    const pageSize = query.get("limit") || "10"
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
 
-    const [updateStaffData, setUpdateStaffData] = useState<Admin | null>(null)
+    const [updateUserData, setUpdateUserData] = useState<Admin | null>(null)
 
     const deleteButtonRefs = useRef<Record<string, HTMLDivElement | null>>({})
     const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -78,7 +78,7 @@ export default function UsersTable({
     return (
         <div className="relative">
             {/* Create Staff Button */}
-            <UsersFilter>
+            <AdminsFilter>
                 <div className="flex gap-2">
                     <Button
                         onClick={() => setIsCreateModalOpen(true)}
@@ -97,9 +97,12 @@ export default function UsersTable({
                         Refresh
                     </Button>
                 </div>
-            </UsersFilter>
+            </AdminsFilter>
 
             <Table
+                onRowClick={(row) => {
+                    router.push(`/admin/users/${row.id}`)
+                }}
                 headers={[
                     {
                         label: "ID",
@@ -186,8 +189,9 @@ export default function UsersTable({
                             <div className="flex gap-2">
                                 <Button
                                     className="w-8 h-8 flex justify-center items-center bg-admin-secondary hover:bg-admin-secondary/80"
-                                    onClick={() => {
-                                        setUpdateStaffData(
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        setUpdateUserData(
                                             admins.data?.rows?.find(
                                                 (admin) => admin.id === Number(value)
                                             ) || null
@@ -206,7 +210,10 @@ export default function UsersTable({
                                 >
                                     <Button
                                         className="w-8 h-8 flex justify-center items-center bg-admin-accent hover:bg-admin-accent/80"
-                                        onClick={() => handleDeleteClick(value)}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            handleDeleteClick(value)
+                                        }}
                                     >
                                         <Trash className="w-4 h-4" />
                                     </Button>
@@ -240,7 +247,7 @@ export default function UsersTable({
                 onSizeChange={(size) => {
                     console.log("Changed to size:", size)
                     const newQuery = new URLSearchParams(query)
-                    newQuery.set("page_size", size.toString())
+                    newQuery.set("limit", size.toString())
                     router.push(`?${newQuery.toString()}`, { scroll: false })
                 }}
             />
@@ -254,7 +261,7 @@ export default function UsersTable({
             <UpdateAdminModal
                 isOpen={isUpdateModalOpen}
                 onClose={() => setIsUpdateModalOpen(false)}
-                staffData={updateStaffData}
+                userData={updateUserData}
             />
             {/* Delete Confirmation Dialog */}
             <DeleteDialog
