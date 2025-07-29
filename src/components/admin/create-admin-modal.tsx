@@ -1,4 +1,4 @@
-import { createAdminUser } from "@/actions/users";
+import { createAdminUser } from "@/actions/admins";
 import { useEffect, useState } from "react";
 import { ModalContent, ModalDescription, ModalFooter, ModalHeader, ModalRoot, ModalTitle } from "../ui/modal";
 import Input from "../ui/input";

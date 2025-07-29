@@ -1,8 +1,8 @@
-import { getAdmins, getUsersStats } from "@/actions/users"
-import UsersStats from "@/components/admin/users/users-stats"
-import UsersTable from "@/components/admin/users/users-table"
+import { getAdmins, getUsersStats } from "@/actions/admins"
+import UsersStats from "@/components/admin/users/admin-stats"
+import AdminsTable from "@/components/admin/users/admins-table"
 
-export default async function UsersPage({
+export default async function AdminsPage({
   searchParams
 }: {
   searchParams: Promise<{
@@ -25,6 +25,7 @@ export default async function UsersPage({
     limit = '10'
   } = await searchParams
 
+  console.log(search, sort, order, page, limit)
   const admins = await getAdmins(
     {
       page: Number(page),
@@ -39,7 +40,7 @@ export default async function UsersPage({
     <div>
       <UsersStats usersStats={usersStats} />
       <div className="p-4 pt-0">
-        <UsersTable admins={admins} />
+        <AdminsTable admins={admins} />
       </div>
     </div>
   )

@@ -12,13 +12,13 @@ import responses from "@/responses/responses"
 
 // Export the type based on the query selection
 export type Admin = (typeof users.$inferSelect) & {
-  createdByName: string
+  createdByFullName: string
   created_users_count: number
 }
 
 export const getAdmins = async ({
   page = 1,
-  limit = 20,
+  limit = 10,
   search = "",
   orderBy = "createdAt",
   orderDirection = "desc"
@@ -37,8 +37,6 @@ export const getAdmins = async ({
       const rowsCount = await tx.select({
         count: count(users.id),
       }).from(users).where(eq(users.role, UserRole.ADMIN))
-
-
 
       const usersQuerySelection = {
         // Users table fields
@@ -95,7 +93,6 @@ export const getAdmins = async ({
 }
 
 
-
 export const getAdminUsers = async (
   page: number = 1,
   limit: number = 20
@@ -138,18 +135,61 @@ export type UsersStats = {
 
 export const getUsersStats = async (): Promise<GeneralActionResponse<UsersStats>> => {
   try {
-      const result = await db.execute<{
-          count: number
-      }>(sql`
+    const result = await db.execute<{
+      count: number
+    }>(sql`
       SELECT
         COUNT(*)
         FROM users
     `)
 
-      return { data: { users_count: result.rows[0].count }, error: null }
+    return { data: { users_count: result.rows[0].count }, error: null }
   } catch (error) {
-      console.error(error)
-      return { data: { users_count: 0 }, error: responses.staff.fetchedAll.error.general }
+    console.error(error)
+    return { data: { users_count: 0 }, error: responses.staff.fetchedAll.error.general }
+  }
+}
+
+
+export const getAdminUserById = async (userId: number): Promise<GeneralActionResponse<Admin | null>> => {
+  try {
+    const usersCreator = aliasedTable(users, "usersCreator");
+    const usersCreatorFullName = aliasedTable(users, "usersCreatorFullName");
+
+    const usersQuerySelection = {
+      // Users table fields
+      id: users.id,
+      fullName: users.fullName,
+      email: users.email,
+      role: users.role,
+      profilePictureUrl: users.profilePictureUrl,
+      createdBy: users.createdBy,
+      createdAt: users.createdAt,
+      authUserId: users.authUserId,
+
+      createdByFullName: usersCreatorFullName.fullName,
+
+      created_users_count: count(users.id),
+    } as const
+
+    let query = db
+      .select(usersQuerySelection)
+      .from(users)
+      .leftJoin(usersCreator, eq(users.id, usersCreator.createdBy))
+      .leftJoin(usersCreatorFullName, eq(users.createdBy, usersCreatorFullName.id))
+      .groupBy(users.id, usersCreatorFullName.fullName)
+      .where(eq(users.id, userId))
+
+    const result = await query.limit(1)
+
+    if (result.length === 0) {
+      return { data: null, error: responses.admin.notFound.error }
+    }
+
+    return { data: result[0] || null, error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: responses.staff.fetchedAll.error.general }
   }
 }
 

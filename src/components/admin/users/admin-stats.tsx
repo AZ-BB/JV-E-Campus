@@ -1,4 +1,4 @@
-import { UsersStats as UsersStatsType } from "@/actions/users"
+import { UsersStats as UsersStatsType } from "@/actions/admins"
 import { GeneralActionResponse } from "@/types/general-action-response"
 
 export default function UsersStats({ usersStats }: { usersStats: GeneralActionResponse<UsersStatsType> }) {
