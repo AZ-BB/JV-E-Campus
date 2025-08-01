@@ -5,6 +5,8 @@ import { db } from "@/db"
 import { asc, count, desc, eq, ilike, or, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
+import { Logger } from "@/utils/logger"
+import { getCurrentUser } from "@/utils/utils"
 
 
 export type Role = typeof staffRoles.$inferSelect & {
@@ -119,6 +121,17 @@ export const getRolesStats = async (): Promise<
 export const createRole = async (role: { name: string, fullName: string }): Promise<GeneralActionResponse<typeof staffRoles.$inferSelect>> => {
   try {
     const result = await db.insert(staffRoles).values(role).returning()
+
+    // LOG
+    const currentUser = await getCurrentUser()
+    Logger.log({
+      type: "CREATE_ROLE",
+      actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+      actedOnId: result[0].id,
+      actedOnType: "ROLE",
+      message: "Role created with name: " + result[0].name,
+    })
+
     revalidatePath("/admin/roles")
     return { data: result[0], error: null, message: responses.role.created.success }
   } catch (error) {
@@ -129,9 +142,29 @@ export const createRole = async (role: { name: string, fullName: string }): Prom
 
 export const updateRole = async (roleId: number, data: { name: string, fullName: string }): Promise<GeneralActionResponse<typeof staffRoles.$inferSelect>> => {
   try {
-    const result = await db.update(staffRoles).set(data).where(eq(staffRoles.id, roleId)).returning()
+    const result = await db
+      .update(staffRoles)
+      .set(data)
+      .where(eq(staffRoles.id, roleId)).returning()
+
+    if (!result[0]) {
+      console.error("Role not found")
+      return { data: null, error: 'Role not found' }
+    }
+
+    // LOG
+    const currentUser = await getCurrentUser()
+    Logger.log({
+      type: "UPDATE_ROLE",
+      actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+      actedOnId: roleId,
+      actedOnType: "ROLE",
+      message: "Role updated with id: " + result[0].id + " and name: " + result[0].name,
+    })
+
     revalidatePath("/admin/roles")
     return { data: result[0], error: null, message: responses.role.updated.success }
+
   } catch (error) {
     console.error(error)
     return { data: null, error: responses.role.updated.error.general }
@@ -140,15 +173,32 @@ export const updateRole = async (roleId: number, data: { name: string, fullName:
 
 export const deleteRole = async (roleId: number): Promise<GeneralActionResponse<void>> => {
   try {
-    const result = await db.select({
-      staffCount: count(staff.id),
-    }).from(staff).where(eq(staff.staffRoleId, roleId))
-    console.log("Result", result)
+    const result = await db
+      .select({
+        staffCount: count(staff.id),
+        name: staffRoles.name,
+      })
+      .from(staff)
+      .where(eq(staff.staffRoleId, roleId))
+
+
     if (result[0]?.staffCount > 0) {
       console.error("Role has staff, please remove staff from this role first")
       return { data: null, error: responses.role.deleted.error.hasStaff }
     }
+
     await db.delete(staffRoles).where(eq(staffRoles.id, roleId))
+
+    // LOG
+    const currentUser = await getCurrentUser()
+    Logger.log({
+      type: "DELETE_ROLE",
+      actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+      actedOnId: roleId,
+      actedOnType: "ROLE",
+      message: "Role deleted with id: " + roleId + " and name: " + result[0].name,
+    })
+
     revalidatePath("/admin/roles")
     return { data: null, error: null, message: responses.role.deleted.success }
   } catch (error) {

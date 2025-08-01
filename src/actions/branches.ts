@@ -5,6 +5,9 @@ import { branches, staff } from "@/db/schema/schema"
 import { asc, count, desc, eq, ilike, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
+import { createSupabaseServerClient } from "@/utils/supabase-server"
+import { Logger } from "@/utils/logger"
+import { getCurrentUser } from "@/utils/utils"
 
 export interface Branch {
   id: number
@@ -117,9 +120,22 @@ export const createBranch = async (branch: {
   name: string
 }): Promise<GeneralActionResponse<typeof branches.$inferSelect>> => {
   try {
+    const currentUser = await getCurrentUser()
+
     const result = await db.insert(branches).values({
       name: branch.name.trim(),
     }).returning()
+
+    Logger.log({
+      type: "CREATE_BRANCH",
+      actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+      actedOnId: result[0].id,
+      actedOnType: "BRANCH",
+      message: "Branch created with name: " + result[0].name,
+      metadata: {
+        name: result[0].name
+      }
+    })
     revalidatePath("/admin/branches")
     return { data: result[0], error: null, message: responses.branch.created.success }
   } catch (error) {
@@ -133,6 +149,18 @@ export const createBranch = async (branch: {
 export const updateBranch = async (branchId: number, data: { name: string }): Promise<GeneralActionResponse<typeof branches.$inferSelect>> => {
   try {
     const result = await db.update(branches).set({ name: data.name.trim() }).where(eq(branches.id, branchId)).returning()
+
+    const currentUser = await getCurrentUser()
+
+    // LOG
+    Logger.log({
+      type: "UPDATE_BRANCH",
+      actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+      actedOnId: branchId,
+      actedOnType: "BRANCH",
+      message: "Branch updated with name: " + data.name,
+    })
+
     revalidatePath("/admin/branches")
     return { data: result[0], error: null, message: responses.branch.updated.success }
   } catch (error) {
@@ -145,13 +173,28 @@ export const updateBranch = async (branchId: number, data: { name: string }): Pr
 export const deleteBranch = async (branchId: number): Promise<GeneralActionResponse<void>> => {
   try {
     const result = await db.select({
+      name: branches.name,
       staffCount: count(staff.id),
     }).from(staff).where(eq(staff.branchId, branchId))
+
     if (result[0]?.staffCount > 0) {
       console.error("Branch has staff, please remove staff from this branch first")
       return { data: null, error: responses.branch.deleted.error.hasStaff }
     }
+
     await db.delete(branches).where(eq(branches.id, branchId))
+
+    // LOG
+    const currentUser = await getCurrentUser()
+
+    Logger.log({
+      type: "DELETE_BRANCH",
+      actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+      actedOnId: branchId,
+      actedOnType: "BRANCH",
+      message: "Branch deleted with id: " + branchId + " and name: " + result[0].name,
+    })
+
     revalidatePath("/admin/branches")
     return { data: null, error: null, message: responses.branch.deleted.success }
   } catch (error) {

@@ -1,6 +1,16 @@
 import { createSupabaseServerClient } from "@/utils/supabase-server"
+import { Suspense } from "react"
+import LogsSection from "@/components/logs/logs-section"
+import LogsSkeleton from "@/components/logs/logs-skeleton"
+import { Activity } from "lucide-react"
 
-export default async function AdminDashboard() {
+export default async function AdminDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  // Await searchParams for Next.js compatibility
+  const resolvedSearchParams = await searchParams;
   const supabase = await createSupabaseServerClient()
   const {
     data: { user },
@@ -46,60 +56,24 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-admin-surface rounded-lg border border-admin-border">
-          <div className="p-6 border-b border-admin-border">
-            <h2 className="text-xl font-semibold text-admin-text">Recent Activity</h2>
-            <p className="text-sm text-admin-text-muted">Latest system activities and user actions</p>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3 p-3 rounded-lg bg-admin-border/50">
-                <div className="w-2 h-2 bg-admin-primary rounded-full mt-2 flex-shrink-0"></div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-admin-text">New staff member added</div>
-                  <div className="text-xs text-admin-text-muted mt-1">Sarah Johnson joined as Training Coordinator • 5 minutes ago</div>
-                </div>
-              </div>
+      <div className="flex lg:grid-cols-3 gap-6 mb-8">
 
-              <div className="flex items-start space-x-3 p-3 rounded-lg bg-admin-border/50">
-                <div className="w-2 h-2 bg-admin-success rounded-full mt-2 flex-shrink-0"></div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-admin-text">Training module completed</div>
-                  <div className="text-xs text-admin-text-muted mt-1">12 staff members completed Safety Protocols • 15 minutes ago</div>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 p-3 rounded-lg bg-admin-border/50">
-                <div className="w-2 h-2 bg-admin-accent rounded-full mt-2 flex-shrink-0"></div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-admin-text">System maintenance scheduled</div>
-                  <div className="text-xs text-admin-text-muted mt-1">Database backup scheduled for tonight • 1 hour ago</div>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 p-3 rounded-lg bg-gray-700/50">
-                <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-white">New branch created</div>
-                  <div className="text-xs text-gray-400 mt-1">Downtown Campus branch added to system • 2 hours ago</div>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 p-3 rounded-lg bg-gray-700/50">
-                <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0"></div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm text-white">Role permissions updated</div>
-                  <div className="text-xs text-gray-400 mt-1">Manager role permissions modified by Admin • 3 hours ago</div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="w-3/4">
+                     {/* Recent Activity Section */}
+           <div className="">
+             <Suspense fallback={<LogsSkeleton showActor={true} title="Recent Activity" rowCount={10} />}>
+               <LogsSection 
+                 title="Recent Activity"
+                 icon={<Activity className="w-5 h-5" />}
+                 searchParams={resolvedSearchParams}
+                 searchPlaceholder="Search activity..."
+               />
+             </Suspense>
+           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-admin-surface rounded-lg border border-admin-border">
+        <div className="w-1/4 bg-admin-surface rounded-lg border border-admin-border">
           <div className="p-6 border-b border-admin-border">
             <h2 className="text-xl font-semibold text-admin-text">Quick Actions</h2>
             <p className="text-sm text-admin-text-muted">Common administrative tasks</p>
