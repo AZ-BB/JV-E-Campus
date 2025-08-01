@@ -17,9 +17,13 @@ import { notFound } from "next/navigation";
 import StaffActions from "@/components/admin/staff/[id]/staff-actions";
 import { mapAvatarImageUrl } from "@/utils/utils";
 
-export default async function StaffPage({ params }: { params: { id: string } }) {
+export default async function StaffPage({
+    params,
+}: {
+    params: Promise<{ id: string }>
+}) {
     // Fetch staff data
-    const staffResponse = await getStaffUserById(parseInt(params.id));
+    const staffResponse = await getStaffUserById(parseInt((await params).id));
 
     if (staffResponse.error || !staffResponse.data) {
         notFound();

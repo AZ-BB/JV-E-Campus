@@ -2,12 +2,8 @@ import { useEffect, useState } from "react"
 import Input from "../../ui/input"
 import { useRouter } from "next/navigation"
 import debounce from "lodash.debounce"
-import { MultipleSelect } from "../../ui/multiple-select"
-import { getRolesNames } from "@/actions/roles"
-import { getBranchesNames } from "@/actions/branches"
-import { getAdminsNames } from "@/actions/admins"
 
-export default function UsersFilter({
+export default function AdminsFilter({
     children    
 }: {
     children: React.ReactNode

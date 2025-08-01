@@ -8,6 +8,8 @@ import { GeneralActionResponse } from "@/types/general-action-response"
 import { aliasedTable, and, asc, count, desc, eq, ilike, inArray, or, SQL, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
+import { Logger } from "@/utils/logger"
+import { getCurrentUser } from "@/utils/utils"
 
 
 // Export the type based on the query selection
@@ -236,9 +238,7 @@ export const createAdminUser = async (
     authUserId = authData.user.id
 
     // Step 2: Create Database User
-    const supabase = await createSupabaseServerClient()
-    const { data: currentUser } =
-      await supabase.auth.getUser()
+    const currentUser = await getCurrentUser()
 
     let dbResult
     try {
@@ -301,6 +301,17 @@ export const createAdminUser = async (
       }
     }
 
+    Logger.log({
+      type: "CREATE_ADMIN_USER",
+      actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+      actedOnId: dbUserId,
+      actedOnType: "ADMIN_USER",
+      message: "Admin user created with email: " + user.email,
+      metadata: {
+        fullName: user.fullName
+      }
+    })
+
     revalidatePath("/admin")
     return { data: null, error: null, message: responses.staff.created.success }
   } catch (error) {
@@ -344,6 +355,18 @@ export const updateAdminUser = async (userId: number, data: Partial<CreateAdminU
       await db.update(users).set({ profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
     }
 
+    const currentUser = await getCurrentUser()
+
+    Logger.log({
+      type: "UPDATE_ADMIN_USER",
+      actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+      actedOnId: userId,
+      actedOnType: "ADMIN_USER",
+      message: "Admin user updated with email: " + data.email,
+      metadata: {
+        fullName: data.fullName
+      }
+    })
     revalidatePath("/admin/users")
     return { data: null, error: null, message: responses.admin.updated.success }
   } catch (error) {
@@ -357,6 +380,7 @@ export const deleteAdminUser = async (userId: number): Promise<GeneralActionResp
   try {
     const result = await db.select({
       authUserId: users.authUserId,
+      email: users.email,
     }).from(users).where(eq(users.id, userId))
     if (!result[0]) {
       console.error("User not found")
@@ -366,6 +390,20 @@ export const deleteAdminUser = async (userId: number): Promise<GeneralActionResp
       console.log("Deleting user with auth user id:", result[0])
       await supabaseAdmin.auth.admin.deleteUser(result[0].authUserId!)
     }
+
+    const currentUser = await getCurrentUser()
+
+    Logger.log({
+      type: "DELETE_ADMIN_USER",
+      actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+      actedOnId: userId,
+      actedOnType: "ADMIN_USER",
+      message: "Admin user deleted with email: " + result[0].email,
+      metadata: {
+        email: result[0].email
+      }
+    })
+
     revalidatePath("/admin/users")
     return { data: null, error: null, message: responses.admin.deleted.success }
   } catch (error) {

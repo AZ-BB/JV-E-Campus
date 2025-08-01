@@ -9,6 +9,8 @@ import { aliasedTable, and, asc, count, desc, eq, ilike, inArray, or, SQL, sql }
 import { revalidatePath } from "next/cache"
 import Staff from "@/app/staff/page"
 import responses from "@/responses/responses"
+import { Logger } from "@/utils/logger"
+import { getCurrentUser } from "@/utils/utils"
 
 // GETTERS
 
@@ -245,13 +247,7 @@ export const createStaffUser = async (
             }
         }
         const supabaseAdmin = createSupabaseAdminClient()
-        const supabase = await createSupabaseServerClient()
-        const { data: currentUser, error: currentUserError } =
-            await supabase.auth.getUser()
-
-        if (currentUserError) {
-            return { data: null, error: responses.staff.created.error.general }
-        }
+        const currentUser = await getCurrentUser()
 
         const { data: authData, error: authError } =
             await supabaseAdmin.auth.admin.createUser({
@@ -304,6 +300,16 @@ export const createStaffUser = async (
                 })
                 .returning()
 
+
+            // LOG
+            Logger.log({
+                type: "CREATE_STAFF_USER",
+                actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+                actedOnId: userResult[0].id,
+                actedOnType: "STAFF_USER",
+                message: "Staff user created with email: " + newUser.email,
+            })
+
             revalidatePath("/admin")
             return { data: { ...userResult[0], ...staffResult[0] }, error: null, message: responses.staff.created.success }
         } catch (error) {
@@ -346,6 +352,16 @@ export const updateStaffUser = async (userId: number, data: Partial<CreateStaffU
             await db.update(users).set({ profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
         }
 
+        // LOG
+        const currentUser = await getCurrentUser()
+        Logger.log({
+            type: "UPDATE_STAFF_USER",
+            actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+            actedOnId: userId,
+            actedOnType: "STAFF_USER",
+            message: "Staff user updated with email: " + data.email,
+        })
+
         await db.update(staff).set(data).where(eq(staff.userId, userId))
         revalidatePath("/admin/staff")
         return { data: null, error: null, message: responses.staff.updated.success }
@@ -360,6 +376,7 @@ export const deleteStaffUser = async (userId: number): Promise<GeneralActionResp
     try {
         const result = await db.select({
             authUserId: users.authUserId,
+            email: users.email,
         }).from(users).where(eq(users.id, userId))
         if (!result[0]) {
             console.error("User not found")
@@ -369,6 +386,17 @@ export const deleteStaffUser = async (userId: number): Promise<GeneralActionResp
             console.log("Deleting user with auth user id:", result[0])
             await supabaseAdmin.auth.admin.deleteUser(result[0].authUserId!)
         }
+
+        // LOG
+        const currentUser = await getCurrentUser()
+        Logger.log({
+            type: "DELETE_STAFF_USER",
+            actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+            actedOnId: userId,
+            actedOnType: "STAFF_USER",
+            message: "Staff user deleted with email: " + result[0].email,
+        })
+
         revalidatePath("/admin/staff")
         return { data: null, error: null, message: responses.staff.deleted.success }
     } catch (error) {
