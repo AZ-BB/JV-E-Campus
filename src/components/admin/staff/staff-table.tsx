@@ -23,7 +23,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useState, useRef } from "react"
 import Pagination from "../../pagination"
 import Button from "../../ui/button"
-import { deleteStaffUser, Staff } from "@/actions/users"
+import { deleteStaffUser, Staff } from "@/actions/staff"
 import CreateStaffModal from "./create-staff-modal"
 import Input from "@/components/ui/input"
 import UpdateStaffModal from "./update-staff-modal"
@@ -32,65 +32,39 @@ import Image from "next/image"
 import Avatar from "@/components/ui/avatar"
 import StaffFilter from "@/components/admin/staff/staff-filter"
 import toaster from "@/components/ui/toast"
+import { mapAvatarImageUrl } from "@/utils/utils"
 
 export default function StaffTable({
   staffUsers,
 }: {
   staffUsers: GeneralActionResponse<{ rows: Staff[], count: number, numberOfPages: number }>
 }) {
+  const router = useRouter()
   const query = useSearchParams()
+
   const sort = query.get("sort") || "id"
   const order = query.get("order") || "asc"
   const page = query.get("page") || "1"
-  const pageSize = query.get("page_size") || "10"
-  const router = useRouter()
+  const pageSize = query.get("limit") || "10"
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState<{
-    isOpen: boolean
-    staffId: string | null
-    position: { top: number; left: number } | null
-  }>({
-    isOpen: false,
-    staffId: null,
-    position: null,
-  })
+
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
   const [updateStaffData, setUpdateStaffData] = useState<Staff | null>(null)
-  const handleDeleteClick = (staffId: string, event: React.MouseEvent) => {
-    const button = event.currentTarget
-    const buttonRect = button.getBoundingClientRect()
-    const container = button.closest(".relative") as HTMLElement
-    const containerRect = container?.getBoundingClientRect()
 
-    if (!containerRect) return
+  const deleteButtonRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean
+    staffId?: string
+  }>({
+    isOpen: false,
+    staffId: undefined,
+  })
 
-    const dialogWidth = 256 // w-64 = 16rem = 256px
-    const dialogHeight = 100 // Approximate height
-
-    // Calculate position relative to the container
-    const relativeButtonTop = buttonRect.top - containerRect.top
-    const relativeButtonLeft = buttonRect.left - containerRect.left
-
-    // Calculate initial position (above and centered to button)
-    let top = relativeButtonTop - dialogHeight - 10
-    let left = relativeButtonLeft + buttonRect.width / 2 - dialogWidth / 2
-
-    // Adjust if dialog would go off-screen horizontally
-    if (left < 10) {
-      left = 10 // Keep 10px from left edge
-    } else if (left + dialogWidth > containerRect.width - 10) {
-      left = containerRect.width - dialogWidth - 10 // Keep 10px from right edge
-    }
-
-    // Adjust if dialog would go off-screen vertically (show below button instead)
-    if (top < 10) {
-      top = relativeButtonTop + buttonRect.height + 10 // Show below button with 10px gap
-    }
-
+  const handleDeleteClick = (staffId: string) => {
     setDeleteConfirm({
       isOpen: true,
       staffId,
-      position: { top, left },
     })
   }
 
@@ -105,11 +79,11 @@ export default function StaffTable({
         response.message && toaster.success(response.message)
       }
     }
-    setDeleteConfirm({ isOpen: false, staffId: null, position: null })
+    setDeleteConfirm({ isOpen: false })
   }
 
   const handleDeleteCancel = () => {
-    setDeleteConfirm({ isOpen: false, staffId: null, position: null })
+    setDeleteConfirm({ isOpen: false })
   }
 
   return (
@@ -156,9 +130,12 @@ export default function StaffTable({
             componentKey: "profilePictureUrl",
             sortable: false,
             cell: (value, row) => (
-              <div>
-                <Avatar className="w-10 h-10" src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${process.env.NEXT_PUBLIC_SUPABASE_STORAGE_NAME}/${process.env.NEXT_PUBLIC_STORAGE_AVATAR_DIRECTORY}/${value}`} alt="Profile Picture" fallback={row.fullName.split(" ")[0].charAt(0).toUpperCase() + (row.fullName.split(" ")[1]?.charAt(0).toUpperCase() || "")} />
-              </div>
+              <Avatar
+                src={mapAvatarImageUrl(value) || ""}
+                alt="Profile Picture"
+                className="w-8 h-8"
+                fallback={row.fullName.split(" ").slice(0, 2).map((name: string) => name[0]).join("") || "N/A"}
+              />
             ),
           },
           {
@@ -275,12 +252,20 @@ export default function StaffTable({
                 >
                   <Pencil className="w-4 h-4" />
                 </Button>
-                <Button
-                  className="w-8 h-8 flex justify-center items-center bg-admin-accent hover:bg-admin-accent/80"
-                  onClick={(event) => handleDeleteClick(value, event)}
+                <div 
+                  ref={(el) => {
+                    if (el) {
+                      deleteButtonRefs.current[value] = el
+                    }
+                  }}
                 >
-                  <Trash className="w-4 h-4" />
-                </Button>
+                  <Button
+                    className="w-8 h-8 flex justify-center items-center bg-admin-accent hover:bg-admin-accent/80"
+                    onClick={() => handleDeleteClick(value)}
+                  >
+                    <Trash className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             ),
           },
@@ -310,7 +295,7 @@ export default function StaffTable({
         onSizeChange={(size) => {
           console.log("Changed to size:", size)
           const newQuery = new URLSearchParams(query)
-          newQuery.set("page_size", size.toString())
+          newQuery.set("limit", size.toString())
           router.push(`?${newQuery.toString()}`, { scroll: false })
         }}
       />
@@ -327,14 +312,17 @@ export default function StaffTable({
         staffData={updateStaffData}
       />
       {/* Delete Confirmation Dialog */}
-      {deleteConfirm.isOpen && deleteConfirm.position && (
-        <DeleteDialog
-          handleDeleteCancel={handleDeleteCancel}
-          handleDeleteConfirm={handleDeleteConfirm}
-          deleteConfirm={deleteConfirm}
-          text="Are you sure you want to delete this staff member?"
-        />
-      )}
+      <DeleteDialog
+        handleDeleteCancel={handleDeleteCancel}
+        handleDeleteConfirm={handleDeleteConfirm}
+        deleteConfirm={deleteConfirm}
+        text="Are you sure you want to delete this staff member?"
+        buttonRef={{
+          current: deleteConfirm.staffId 
+            ? deleteButtonRefs.current[deleteConfirm.staffId] 
+            : null
+        }}
+      />
     </div>
   )
 }

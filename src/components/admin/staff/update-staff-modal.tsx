@@ -1,4 +1,4 @@
-import { updateStaffUser } from "@/actions/users"
+import { updateStaffUser, Staff } from "@/actions/staff"
 import { useEffect, useState } from "react"
 import {
   ModalContent,
@@ -21,7 +21,6 @@ import {
 import { getBranchesNames } from "@/actions/branches"
 import { getRolesNames } from "@/actions/roles"
 import countryList from "country-list"
-import { Staff } from "@/actions/users"
 import toaster from "@/components/ui/toast"
 import { v4 as uuidv4 } from "uuid"
 import { uploadFile } from "@/actions/upload"

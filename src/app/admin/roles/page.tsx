@@ -5,13 +5,13 @@ import { getRolesStats, getRolesDetailed, Role } from "@/actions/roles"
 export default async function RolesPage({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     page: string
     limit: string
     search: string
     sort: string
     order: "asc" | "desc"
-  }
+  }>
 }) {
 
   const {

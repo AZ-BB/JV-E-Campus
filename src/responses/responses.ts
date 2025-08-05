@@ -32,6 +32,9 @@ export default {
                 general: "Failed to fetch all admins, please try again later"
             },
         },
+        notFound: {
+            error: "Admin not found"
+        }
     },
     staff: {
         created: {

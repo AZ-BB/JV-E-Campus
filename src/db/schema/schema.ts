@@ -1,4 +1,4 @@
-import { pgTable, foreignKey, unique, serial, varchar, text, integer, timestamp, uuid, boolean, numeric, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, unique, serial, varchar, text, integer, timestamp, uuid, boolean, jsonb, numeric, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const lessonLevel = pgEnum("lesson_level", ['BEGINNER', 'INTERMEDIATE', 'EXPERT'])
@@ -117,6 +117,23 @@ export const sections = pgTable("sections", {
 			foreignColumns: [users.id],
 			name: "sections_updated_by_fkey"
 		}).onDelete("set null"),
+]);
+
+export const actionLogs = pgTable("action_logs", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	date: timestamp({ withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	type: text().notNull(),
+	actorId: integer("actor_id").notNull(),
+	actedOnId: integer("acted_on_id"),
+	actedOnType: text("acted_on_type"),
+	message: text().notNull(),
+	metadata: jsonb().default({}),
+}, (table) => [
+	foreignKey({
+			columns: [table.actorId],
+			foreignColumns: [users.id],
+			name: "action_logs_actor_id_fkey"
+		}),
 ]);
 
 export const lessons = pgTable("lessons", {

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { usersInAuth, users, branches, staff, staffRoles, modules, sections, lessons, bookmarks, progress } from "./schema";
+import { usersInAuth, users, branches, staff, staffRoles, modules, sections, actionLogs, lessons, bookmarks, progress } from "./schema";
 
 export const usersRelations = relations(users, ({one, many}) => ({
 	usersInAuth: one(usersInAuth, {
@@ -27,6 +27,7 @@ export const usersRelations = relations(users, ({one, many}) => ({
 	sections_updatedBy: many(sections, {
 		relationName: "sections_updatedBy_users_id"
 	}),
+	actionLogs: many(actionLogs),
 	lessons_createdBy: many(lessons, {
 		relationName: "lessons_createdBy_users_id"
 	}),
@@ -94,6 +95,13 @@ export const sectionsRelations = relations(sections, ({one, many}) => ({
 		relationName: "sections_updatedBy_users_id"
 	}),
 	lessons: many(lessons),
+}));
+
+export const actionLogsRelations = relations(actionLogs, ({one}) => ({
+	user: one(users, {
+		fields: [actionLogs.actorId],
+		references: [users.id]
+	}),
 }));
 
 export const lessonsRelations = relations(lessons, ({one, many}) => ({

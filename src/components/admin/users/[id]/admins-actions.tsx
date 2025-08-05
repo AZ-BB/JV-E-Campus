@@ -4,16 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
-import UpdateStaffModal from "@/components/admin/staff/update-staff-modal";
 import DeleteModal from "@/components/delete-modal";
-import { deleteStaffUser, Staff, getStaffUserById } from "@/actions/staff";
+import { deleteAdminUser, Admin } from "@/actions/admins";
 import toaster from "@/components/ui/toast";
+import UpdateAdminModal from "../update-admin-modal";
 
-interface StaffActionsProps {
-    staffData: Staff;
+interface UserActionsProps {
+    userData: Admin;
 }
 
-export default function StaffActions({ staffData }: StaffActionsProps) {
+export default function UserActions({ userData }: UserActionsProps) {
     const router = useRouter();
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -27,13 +27,13 @@ export default function StaffActions({ staffData }: StaffActionsProps) {
     };
 
     const handleDeleteConfirm = async () => {
-        if (staffData?.id) {
-            const response = await deleteStaffUser(Number(staffData.id));
+        if (userData?.id) {
+            const response = await deleteAdminUser(Number(userData.id));
             if (response.error) {
                 toaster.error(response.error);
             } else {
                 response.message && toaster.success(response.message);
-                router.push('/admin/staff');
+                router.push('/admin/users');
             }
         }
     };
@@ -52,14 +52,14 @@ export default function StaffActions({ staffData }: StaffActionsProps) {
         <>
             {/* Action Buttons */}
             <div className="flex gap-2 mt-4 md:mt-0">
-                <Button 
+                <Button
                     className="flex items-center p-2 px-4 gap-2 bg-admin-primary hover:bg-admin-primary/80"
                     onClick={handleEditClick}
                 >
                     <Edit className="w-4 h-4" />
-                    Edit Staff
+                    Edit User
                 </Button>
-                <Button 
+                <Button
                     className="flex items-center p-2 px-4 gap-2 bg-admin-accent text-white hover:bg-admin-accent/80"
                     onClick={handleDeleteClick}
                 >
@@ -68,11 +68,11 @@ export default function StaffActions({ staffData }: StaffActionsProps) {
                 </Button>
             </div>
 
-            {/* Update Staff Modal */}
-            <UpdateStaffModal
+            {/* Update User Modal */}
+            <UpdateAdminModal
                 isOpen={isUpdateModalOpen}
                 onClose={handleModalClose}
-                staffData={staffData}
+                userData={userData}
             />
 
             {/* Delete Confirmation Modal */}
@@ -80,8 +80,8 @@ export default function StaffActions({ staffData }: StaffActionsProps) {
                 isOpen={isDeleteModalOpen}
                 onClose={handleDeleteModalClose}
                 onConfirm={handleDeleteConfirm}
-                itemName={staffData.fullName}
-                itemType="Staff Member"
+                itemName={userData.fullName}
+                itemType="User"
             />
         </>
     );

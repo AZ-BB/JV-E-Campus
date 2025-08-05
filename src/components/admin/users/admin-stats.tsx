@@ -1,23 +1,23 @@
-import { StaffStats as StaffStatsType } from "@/actions/staff"
+import { UsersStats as UsersStatsType } from "@/actions/admins"
 import { GeneralActionResponse } from "@/types/general-action-response"
 
-export default function StaffStats({ staffStats }: { staffStats: GeneralActionResponse<StaffStatsType> }) {
-  const { data: staffStatsData, error: staffStatsError } = staffStats
+export default function UsersStats({ usersStats }: { usersStats: GeneralActionResponse<UsersStatsType> }) {
+  const { data: usersStatsData, error: usersStatsError } = usersStats
 
   const statsItems = [
     {
-      title: "Total Staff",
-      value: staffStatsData?.staff_count || 0,
+      title: "Total Users",
+      value: usersStatsData?.users_count || 0,
       icon: "👨‍🍳",
-      unit: staffStatsData?.staff_count === 1 ? "person" : "people",
+      unit: usersStatsData?.users_count === 1 ? "person" : "people",
       bgColor: "bg-admin-surface",
       textColor: "text-admin-primary",
       borderColor: "border-admin-border",
       hoverColor: "hover:bg-admin-border"
     },
     {
-      title: "Active Staff",
-      value: Math.floor((staffStatsData?.staff_count || 0) * 0.85),
+      title: "Active Users",
+      value: Math.floor((usersStatsData?.users_count || 0) * 0.85),
       icon: "✅",
       unit: "active",
       bgColor: "bg-admin-surface",
@@ -26,8 +26,8 @@ export default function StaffStats({ staffStats }: { staffStats: GeneralActionRe
       hoverColor: "hover:bg-admin-border"
     },
     {
-      title: "New Hires",
-      value: Math.floor((staffStatsData?.staff_count || 0) * 0.1),
+      title: "New Users",
+      value: Math.floor((usersStatsData?.users_count || 0) * 0.1),
       icon: "🆕",
       unit: "this month",
       bgColor: "bg-admin-surface",
@@ -47,10 +47,10 @@ export default function StaffStats({ staffStats }: { staffStats: GeneralActionRe
     }
   ]
 
-  if (staffStatsError) {
+  if (usersStatsError) {
     return (
       <div className="bg-admin-accent/20 border border-admin-accent rounded-lg p-3">
-        <p className="text-admin-accent">Error loading staff statistics</p>
+        <p className="text-admin-accent">Error loading users statistics</p>
       </div>
     )
   }
@@ -58,8 +58,8 @@ export default function StaffStats({ staffStats }: { staffStats: GeneralActionRe
   return (
     <div className="space-y-3 p-4">
       <div>
-        <h1 className="text-2xl font-bold text-admin-text mb-1">Staff Statistics</h1>
-        <p className="text-admin-text-muted text-sm">Overview of your team composition</p>
+        <h1 className="text-2xl font-bold text-admin-text mb-1">Users Statistics</h1>
+        <p className="text-admin-text-muted text-sm">Overview of your users</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
