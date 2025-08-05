@@ -121,9 +121,13 @@ export default function AdminSidebar({ currentUser }: { currentUser: UserMetadat
           {/* Header */}
           <div className="p-4 border-b border-admin-border">
             <div className="flex items-center justify-between">
-              {!isSidebarCollapsed && (
+              {!isSidebarCollapsed ? (
                 <div className="flex items-center justify-between gap-2 w-full">
                   <h1 className="text-xl font-bold text-admin-text">Admin Panel</h1>
+                  <ThemeSwitch />
+                </div>
+              ) : (
+                <div className="flex justify-center w-full">
                   <ThemeSwitch />
                 </div>
               )}

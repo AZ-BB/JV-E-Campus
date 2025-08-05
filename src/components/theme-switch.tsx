@@ -17,10 +17,9 @@ export default function ThemeSwitch() {
 
 
     if (theme === "dark") {
-        return <Moon size={20} onClick={() => setTheme("light")} />
+        return <Moon size={20} className="cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setTheme("light")} />
     }
 
-    if (theme === "light") {
-        return <Sun size={20} onClick={() => setTheme("dark")} />
-    }
+    // For light theme or system theme that resolves to light
+    return <Sun size={20} className="cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setTheme("dark")} />
 }
