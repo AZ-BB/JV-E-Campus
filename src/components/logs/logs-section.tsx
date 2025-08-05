@@ -1,6 +1,6 @@
-import { Logger } from "@/utils/logger";
 import LogsTable from "./logs-table";
 import LogsFilter from "./logs-filter";
+import { getLogs } from "@/actions/logs";
 
 interface LogsSectionProps {
     actorId?: number; // Optional - if provided, shows logs for specific actor
@@ -16,7 +16,7 @@ interface LogsSectionProps {
     searchPlaceholder?: string;
 }
 
-export default async function LogsSection({ 
+export default async function LogsSection({
     actorId,
     title,
     icon,
@@ -30,23 +30,23 @@ export default async function LogsSection({
     const logType = searchParams.logType || "";
     const actedOnType = searchParams.actedOnType || "";
 
-    // Fetch logs with filtering and pagination
-    const [logs, logsCount] = await Promise.all([
-        Logger.getUnifiedLogs({
-            actorId, // Will be undefined for system-wide logs
-            page,
-            limit,
-            search,
-            logType,
-            actedOnType
-        }),
-        Logger.getUnifiedLogsCount({
-            actorId, // Will be undefined for system-wide logs
-            search,
-            logType,
-            actedOnType
-        })
-    ]);
+    const { data, error } = await getLogs({
+        actorId,
+        page,
+        limit,
+        search,
+        logType,
+        actedOnType
+    })
+
+    if (error) {
+        return <div className="bg-admin-surface border border-admin-border rounded-lg p-6">
+            <p className="text-admin-text-muted">Error fetching logs</p>
+        </div>
+    }
+
+    const logs = data?.logs || [];
+    const logsCount = data?.logsCount || 0;
 
     const numberOfPages = Math.ceil(logsCount / limit);
 
@@ -58,9 +58,9 @@ export default async function LogsSection({
                     {title} ({logsCount})
                 </h2>
             </LogsFilter>
-            
-            <LogsTable 
-                logs={logs} 
+
+            <LogsTable
+                logs={logs}
                 currentPage={page}
                 pageSize={limit}
                 totalCount={logsCount}

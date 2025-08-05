@@ -6,8 +6,8 @@ import { asc, count, desc, eq, ilike, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
 import { createSupabaseServerClient } from "@/utils/supabase-server"
-import { Logger } from "@/utils/logger"
 import { getCurrentUser } from "@/utils/utils"
+import { createLog } from "./logs"
 
 export interface Branch {
   id: number
@@ -126,7 +126,7 @@ export const createBranch = async (branch: {
       name: branch.name.trim(),
     }).returning()
 
-    Logger.log({
+    createLog({
       type: "CREATE_BRANCH",
       actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
       actedOnId: result[0].id,
@@ -153,7 +153,7 @@ export const updateBranch = async (branchId: number, data: { name: string }): Pr
     const currentUser = await getCurrentUser()
 
     // LOG
-    Logger.log({
+    createLog({
       type: "UPDATE_BRANCH",
       actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
       actedOnId: branchId,
@@ -187,7 +187,7 @@ export const deleteBranch = async (branchId: number): Promise<GeneralActionRespo
     // LOG
     const currentUser = await getCurrentUser()
 
-    Logger.log({
+    createLog({
       type: "DELETE_BRANCH",
       actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
       actedOnId: branchId,

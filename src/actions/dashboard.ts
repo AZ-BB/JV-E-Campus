@@ -28,7 +28,7 @@ export async function getDashboardData(): Promise<GeneralActionResponse<{
             const totalAdmins = await tx.select({ count: count() }).from(users).where(eq(users.role, UserRole.ADMIN))
             const totalStaff = await tx.select({ count: count() }).from(users).where(eq(users.role, UserRole.STAFF))
 
-            const recentLogs = await tx.select().from(actionLogs).orderBy(desc(actionLogs.date)).limit(10)
+            const recentLogs = await tx.select().from(actionLogs).orderBy(desc(actionLogs.date)).limit(8)
 
             return {
                 totalUsers: totalUsers[0].count,

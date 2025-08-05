@@ -5,8 +5,8 @@ import { db } from "@/db"
 import { asc, count, desc, eq, ilike, or, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
-import { Logger } from "@/utils/logger"
 import { getCurrentUser } from "@/utils/utils"
+import { createLog } from "./logs"
 
 
 export type Role = typeof staffRoles.$inferSelect & {
@@ -124,7 +124,7 @@ export const createRole = async (role: { name: string, fullName: string }): Prom
 
     // LOG
     const currentUser = await getCurrentUser()
-    Logger.log({
+    createLog({
       type: "CREATE_ROLE",
       actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
       actedOnId: result[0].id,
@@ -154,7 +154,7 @@ export const updateRole = async (roleId: number, data: { name: string, fullName:
 
     // LOG
     const currentUser = await getCurrentUser()
-    Logger.log({
+    createLog({
       type: "UPDATE_ROLE",
       actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
       actedOnId: roleId,
@@ -191,7 +191,7 @@ export const deleteRole = async (roleId: number): Promise<GeneralActionResponse<
 
     // LOG
     const currentUser = await getCurrentUser()
-    Logger.log({
+    createLog({
       type: "DELETE_ROLE",
       actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
       actedOnId: roleId,

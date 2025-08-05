@@ -9,8 +9,8 @@ import { aliasedTable, and, asc, count, desc, eq, ilike, inArray, or, SQL, sql }
 import { revalidatePath } from "next/cache"
 import Staff from "@/app/page"
 import responses from "@/responses/responses"
-import { Logger } from "@/utils/logger"
 import { getCurrentUser } from "@/utils/utils"
+import { createLog } from "./logs"
 
 // GETTERS
 
@@ -302,7 +302,7 @@ export const createStaffUser = async (
 
 
             // LOG
-            Logger.log({
+            createLog({
                 type: "CREATE_STAFF_USER",
                 actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
                 actedOnId: userResult[0].id,
@@ -346,23 +346,31 @@ export const createStaffUser = async (
 
 export const updateStaffUser = async (userId: number, data: Partial<CreateStaffUser>): Promise<GeneralActionResponse<void>> => {
     try {
+        let result
         if (data.fullName) {
-            await db.update(users).set({ fullName: data.fullName, profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
+            result = await db.update(users).set({ fullName: data.fullName, profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId)).returning({
+                email: users.email
+            })
         } else {
-            await db.update(users).set({ profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
+            result = await db.update(users).set({ profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId)).returning({
+                email: users.email
+            })
         }
 
         // LOG
         const currentUser = await getCurrentUser()
-        Logger.log({
+        await db.update(staff).set(data).where(eq(staff.userId, userId))
+
+        createLog({
             type: "UPDATE_STAFF_USER",
             actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
             actedOnId: userId,
             actedOnType: "STAFF_USER",
-            message: "Staff user updated with email: " + data.email,
+            message: "Staff user updated with email: " + result[0].email,
+            metadata: {
+                fullName: data.fullName
+            }
         })
-
-        await db.update(staff).set(data).where(eq(staff.userId, userId))
         revalidatePath("/admin/staff")
         return { data: null, error: null, message: responses.staff.updated.success }
     } catch (error) {
@@ -389,7 +397,7 @@ export const deleteStaffUser = async (userId: number): Promise<GeneralActionResp
 
         // LOG
         const currentUser = await getCurrentUser()
-        Logger.log({
+        createLog({
             type: "DELETE_STAFF_USER",
             actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
             actedOnId: userId,
