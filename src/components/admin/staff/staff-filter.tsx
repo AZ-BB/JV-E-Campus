@@ -13,6 +13,8 @@ export default function StaffFilter({
     children: React.ReactNode
 }) {
 
+    const [initialLoad, setInitialLoad] = useState(false)
+
     const router = useRouter()
     const [search, setSearch] = useState("")
 
@@ -26,43 +28,50 @@ export default function StaffFilter({
     const [selectedCreatedBy, setSelectedCreatedBy] = useState<string[]>([])
 
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search)
-        const roles = params.get("roles")
-        if (roles) {
-            setSelectedRoles(roles.split(","))
+        async function fetchData() {
+            const roles = await getRolesNames()
+            if (roles.data) {
+                setRoles(roles.data.map((role) => ({ label: role.name, value: role.id.toString() })))
+            }
+
+            const branches = await getBranchesNames()
+            if (branches.data) {
+                setBranches(branches.data.map((branch) => ({ label: branch.name, value: branch.id.toString() })))
+            }
+
+            const createdBy = await getAdminsNames()
+            if (createdBy.data) {
+                setCreatedBy(createdBy.data.map((admin) => ({ label: admin.fullName, value: admin.id.toString() })))
+            }
+
+            setInitialLoad(true)
         }
 
-        const createdBy = params.get("createdBy")
-        if (createdBy) {
-            setSelectedCreatedBy(createdBy.split(","))
-        }
-
-        const branchId = params.get("branchIds")
-        if (branchId) {
-            setSelectedBranches(branchId.split(","))
-        }
-
-        getRolesNames().then((res) => {
-            if (res.data) {
-                setRoles(res.data.map((role) => ({ label: role.name, value: role.id.toString() })))
-            }
-        })
-
-        getBranchesNames().then((res) => {
-            if (res.data) {
-                setBranches(res.data.map((branch) => ({ label: branch.name, value: branch.id.toString() })))
-            }
-        })
-
-        getAdminsNames().then((res) => {
-            if (res.data) {
-                setCreatedBy(res.data.map((admin) => ({ label: admin.fullName, value: admin.id.toString() })))
-            }
-        })
+        fetchData()
 
     }, [])
 
+    function handleSelectCreatedBy(value: string[]) {
+        const params = new URLSearchParams(window.location.search)
+        params.set("createdByIds", value.join(","))
+        router.push(`?${params.toString()}`)
+    }
+
+    function handleSelectRoles(value: string[]) {
+        const params = new URLSearchParams(window.location.search)
+        params.set("roles", value.join(","))
+        router.push(`?${params.toString()}`)
+    }
+
+    function handleSelectBranches(value: string[]) {
+        const params = new URLSearchParams(window.location.search)
+        params.set("branchIds", value.join(","))
+        router.push(`?${params.toString()}`)
+    }
+
     useEffect(() => {
+        if (!initialLoad) return
+        
         const params = new URLSearchParams(window.location.search)
 
         const debouncedSearch = debounce(() => {
@@ -77,30 +86,6 @@ export default function StaffFilter({
         }
     }, [search])
 
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search)
-        params.set("roles", selectedRoles.join(","))
-        router.push(`?${params.toString()}`)
-    }, [selectedRoles])
-
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search)
-        params.set("createdBy", selectedCreatedBy.join(","))
-        router.push(`?${params.toString()}`)
-    }, [selectedCreatedBy])
-
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search)
-        params.set("branchIds", selectedBranches.join(","))
-        router.push(`?${params.toString()}`)
-    }, [selectedBranches])
-
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search)
-        params.set("createdByIds", selectedCreatedBy.join(","))
-        router.push(`?${params.toString()}`)
-    }, [selectedCreatedBy])
-
     return (
         <div className="flex justify-between items-center gap-4 py-4">
             <div className="mt-5">
@@ -113,9 +98,7 @@ export default function StaffFilter({
                     className="w-44 h-10"
                     options={createdBy.map((admin) => ({ label: admin.label, value: admin.value }))}
                     value={selectedCreatedBy}
-                    onValueChange={(value) => {
-                        setSelectedCreatedBy(value)
-                    }}
+                    onValueChange={handleSelectCreatedBy}
                     labelClassName="text-xs"
                     label="Created By"
                     placeholder="Select Admin.."
@@ -125,9 +108,7 @@ export default function StaffFilter({
                     className="w-44 h-10"
                     options={roles.map((role) => ({ label: role.label, value: role.value }))}
                     value={selectedRoles}
-                    onValueChange={(value) => {
-                        setSelectedRoles(value)
-                    }}
+                    onValueChange={handleSelectRoles}
                     labelClassName="text-xs"
                     label="Staff Role"
                     placeholder="Select Staff Role.."
@@ -137,9 +118,7 @@ export default function StaffFilter({
                     className="w-44 h-10"
                     options={branches.map((branch) => ({ label: branch.label, value: branch.value }))}
                     value={selectedBranches}
-                    onValueChange={(value) => {
-                        setSelectedBranches(value)
-                    }}
+                    onValueChange={handleSelectBranches}
                     labelClassName="text-xs"
                     label="Branch"
                     placeholder="Select Branch.."
