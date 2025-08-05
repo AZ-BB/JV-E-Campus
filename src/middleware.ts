@@ -40,8 +40,7 @@ export async function middleware(req: NextRequest) {
 
   if (user) {
     const userRoleFromMetadata = user.user_metadata?.role;
-    console.log('User role from metadata:', userRoleFromMetadata);
-
+  
     // Check Auth
     if (url.startsWith('/auth') && user) {
       if (userRoleFromMetadata === UserRole.ADMIN) {

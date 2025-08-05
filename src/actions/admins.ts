@@ -8,8 +8,8 @@ import { GeneralActionResponse } from "@/types/general-action-response"
 import { aliasedTable, and, asc, count, desc, eq, ilike, inArray, or, SQL, sql } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import responses from "@/responses/responses"
-import { Logger } from "@/utils/logger"
 import { getCurrentUser } from "@/utils/utils"
+import { createLog } from "./logs"
 
 
 // Export the type based on the query selection
@@ -301,7 +301,7 @@ export const createAdminUser = async (
       }
     }
 
-    Logger.log({
+    createLog({
       type: "CREATE_ADMIN_USER",
       actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
       actedOnId: dbUserId,
@@ -349,20 +349,27 @@ export const createAdminUser = async (
 
 export const updateAdminUser = async (userId: number, data: Partial<CreateAdminUser>): Promise<GeneralActionResponse<void>> => {
   try {
+
+    let result
+
     if (data.fullName) {
-      await db.update(users).set({ fullName: data.fullName, profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
+      result = await db.update(users).set({ fullName: data.fullName, profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId)).returning({
+        email: users.email
+      })
     } else {
-      await db.update(users).set({ profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId))
+      result = await db.update(users).set({ profilePictureUrl: data.profilePictureUrl }).where(eq(users.id, userId)).returning({
+        email: users.email
+      })
     }
 
     const currentUser = await getCurrentUser()
 
-    Logger.log({
+    createLog({
       type: "UPDATE_ADMIN_USER",
       actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
       actedOnId: userId,
       actedOnType: "ADMIN_USER",
-      message: "Admin user updated with email: " + data.email,
+      message: "Admin user updated with email: " + result[0].email,
       metadata: {
         fullName: data.fullName
       }
@@ -393,7 +400,7 @@ export const deleteAdminUser = async (userId: number): Promise<GeneralActionResp
 
     const currentUser = await getCurrentUser()
 
-    Logger.log({
+    createLog({
       type: "DELETE_ADMIN_USER",
       actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
       actedOnId: userId,

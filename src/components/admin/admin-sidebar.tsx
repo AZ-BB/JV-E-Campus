@@ -5,19 +5,20 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/utils/cn'
 import Logout from '@/components/logout'
-import { 
-  Users, 
-  UserCheck, 
-  Home, 
-  Settings, 
-  Menu, 
+import {
+  Users,
+  UserCheck,
+  Home,
+  Settings,
+  Menu,
   X,
-  ChevronLeft, 
+  ChevronLeft,
   Building,
   Truck,
   Package,
   Book,
-  ChefHat
+  ChefHat,
+  Activity
 } from 'lucide-react'
 import { UserMetadata } from '@supabase/supabase-js'
 import ThemeSwitch from '../theme-switch'
@@ -31,7 +32,7 @@ const navigationItems = [
   },
   {
     href: '/admin/staff',
-    label: 'Staff Management', 
+    label: 'Staff Management',
     icon: UserCheck,
     description: 'Manage staff accounts'
   },
@@ -70,6 +71,12 @@ const navigationItems = [
     label: 'Admin Management',
     icon: Users,
     description: 'Manage admin users'
+  },
+  {
+    href: '/admin/logs',
+    label: 'Logs',
+    icon: Activity,
+    description: 'View system logs'
   }
 ]
 
@@ -100,7 +107,7 @@ export default function AdminSidebar({ currentUser }: { currentUser: UserMetadat
 
       {/* Mobile overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
           onClick={toggleSidebar}
         />
@@ -150,15 +157,15 @@ export default function AdminSidebar({ currentUser }: { currentUser: UserMetadat
           <nav className="flex-1 px-2 py-4 space-y-1">
             {navigationItems.map((item) => {
               const Icon = item.icon
-              const isActive = pathname === item.href || 
-                             (item.href !== '/admin' && pathname.startsWith(item.href))
-              
+              const isActive = pathname === item.href ||
+                (item.href !== '/admin' && pathname.startsWith(item.href))
+
               return (
                 <Link key={item.href} href={item.href}>
                   <div className={cn(
                     "flex items-center my-1 px-3 py-2 rounded-md text-sm font-medium transition-colors group",
-                    isActive 
-                      ? "bg-admin-primary text-white" 
+                    isActive
+                      ? "bg-admin-primary text-white"
                       : "text-admin-text-muted hover:bg-admin-border hover:text-admin-text",
                     isSidebarCollapsed && "justify-center"
                   )}>

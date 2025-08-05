@@ -76,6 +76,9 @@ export default async function AdminDashboard({
         <div className="h-full grid grid-cols-1 lg:grid-cols-4 gap-4">
 
           <div className="lg:col-span-3 bg-admin-surface rounded-lg p-4 lg:p-6 border border-admin-border min-h-0 overflow-auto">
+            <div className="text-lg lg:text-xl font-semibold text-admin-text mb-2">
+              Recent Activity
+            </div>
             <LogsTable
               logs={dashboardData?.recentLogs || []}
               currentPage={1}

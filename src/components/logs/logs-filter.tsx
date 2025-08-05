@@ -96,12 +96,6 @@ export default function LogsFilter({
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-between items-center gap-4 py-4">
-                <div className="mt-5">
-                    {children}
-                </div>
-            </div>
-
             {/* Filter Row */}
             <div className="flex items-center justify-between gap-4 pb-4 border-b border-admin-border">
                 <div className="flex items-center gap-4">
@@ -148,6 +142,25 @@ export default function LogsFilter({
                             </SelectContent>
                         </SelectRoot>
                     </div>
+
+                    {(search || (logType && logType !== "ALL") || (actedOnType && actedOnType !== "ALL")) && (
+                        <button
+                            onClick={() => {
+                                setSearch("");
+                                setLogType("ALL");
+                                setActedOnType("ALL");
+                                const params = new URLSearchParams(window.location.search);
+                                params.delete("search");
+                                params.delete("logType");
+                                params.delete("actedOnType");
+                                params.set("page", "1");
+                                router.push(`?${params.toString()}`, { scroll: false });
+                            }}
+                            className="text-sm text-admin-primary hover:text-admin-primary/80 underline"
+                        >
+                            Clear Filters
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex justify-between items-center gap-4">
@@ -158,25 +171,6 @@ export default function LogsFilter({
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-
-                {(search || (logType && logType !== "ALL") || (actedOnType && actedOnType !== "ALL")) && (
-                    <button
-                        onClick={() => {
-                            setSearch("");
-                            setLogType("ALL");
-                            setActedOnType("ALL");
-                            const params = new URLSearchParams(window.location.search);
-                            params.delete("search");
-                            params.delete("logType");
-                            params.delete("actedOnType");
-                            params.set("page", "1");
-                            router.push(`?${params.toString()}`, { scroll: false });
-                        }}
-                        className="text-sm text-admin-primary hover:text-admin-primary/80 underline"
-                    >
-                        Clear Filters
-                    </button>
-                )}
             </div>
         </div>
     );
