@@ -61,15 +61,20 @@ export async function middleware(req: NextRequest) {
       const redirectUrl = new URL('/unauthorized', req.url);
       return NextResponse.redirect(redirectUrl);
     }
+    if(url == "/" && userRoleFromMetadata === UserRole.ADMIN) {
+      const redirectUrl = new URL('/admin', req.url);
+      return NextResponse.redirect(redirectUrl);
+    }
+
 
     // Check staff access
-    if (url.startsWith('/staff') && userRoleFromMetadata !== UserRole.STAFF) {
+    if (!url.startsWith('/admin') && userRoleFromMetadata !== UserRole.STAFF) {
       const redirectUrl = new URL('/unauthorized', req.url);
       return NextResponse.redirect(redirectUrl);
     }
   } else {
     // User is not authenticated, redirect to sign-in for protected routes
-    if (url.startsWith('/admin') || url.startsWith('/staff')) {
+    if (url.startsWith('/admin')) {
       const redirectUrl = new URL('/auth/sign-in', req.url);
       return NextResponse.redirect(redirectUrl);
     }

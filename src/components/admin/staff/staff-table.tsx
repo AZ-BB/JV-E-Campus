@@ -28,6 +28,7 @@ import CreateStaffModal from "./create-staff-modal"
 import Input from "@/components/ui/input"
 import UpdateStaffModal from "./update-staff-modal"
 import DeleteDialog from "@/components/delete-dialog"
+import DeleteModal from "@/components/delete-modal"
 import Image from "next/image"
 import Avatar from "@/components/ui/avatar"
 import StaffFilter from "@/components/admin/staff/staff-filter"
@@ -61,6 +62,14 @@ export default function StaffTable({
     staffId: undefined,
   })
 
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    staff?: Staff
+  }>({
+    isOpen: false,
+    staff: undefined,
+  })
+
   const handleDeleteClick = (staffId: string) => {
     setDeleteConfirm({
       isOpen: true,
@@ -68,18 +77,30 @@ export default function StaffTable({
     })
   }
 
-  const handleDeleteConfirm = async () => {
-    console.log("Delete confirmed for staff ID:", deleteConfirm.staffId)
+  const handleDeleteConfirm = () => {
     if (deleteConfirm.staffId) {
-      console.log("Delete confirmed for staff ID:", deleteConfirm.staffId)
-      const response = await deleteStaffUser(Number(deleteConfirm.staffId))
+      // Find the staff member data
+      const staff = staffUsers.data?.rows.find(s => s.id === Number(deleteConfirm.staffId))
+      if (staff) {
+        setDeleteModal({
+          isOpen: true,
+          staff
+        })
+      }
+    }
+    setDeleteConfirm({ isOpen: false })
+  }
+
+  const handleDeleteModalConfirm = async () => {
+    if (deleteModal.staff) {
+      const response = await deleteStaffUser(Number(deleteModal.staff.id))
       if (response.error) {
         toaster.error(response.error)
       } else {
         response.message && toaster.success(response.message)
       }
     }
-    setDeleteConfirm({ isOpen: false })
+    setDeleteModal({ isOpen: false })
   }
 
   const handleDeleteCancel = () => {
@@ -245,7 +266,8 @@ export default function StaffTable({
               <div className="flex gap-2">
                 <Button
                   className="w-8 h-8 flex justify-center items-center bg-admin-secondary hover:bg-admin-secondary/80"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation()
                     setUpdateStaffData(row as Staff)
                     setIsUpdateModalOpen(true)
                   }}
@@ -261,7 +283,10 @@ export default function StaffTable({
                 >
                   <Button
                     className="w-8 h-8 flex justify-center items-center bg-admin-accent hover:bg-admin-accent/80"
-                    onClick={() => handleDeleteClick(value)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteClick(value)
+                    }}
                   >
                     <Trash className="w-4 h-4" />
                   </Button>
@@ -322,6 +347,16 @@ export default function StaffTable({
             ? deleteButtonRefs.current[deleteConfirm.staffId] 
             : null
         }}
+      />
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false })}
+        onConfirm={handleDeleteModalConfirm}
+        itemName={deleteModal.staff?.fullName || ""}
+        itemType="Staff Member"
+        title="Delete Staff Member"
+        description={`This action cannot be undone. This will permanently delete the staff member "${deleteModal.staff?.fullName}" and all associated data.`}
       />
     </div>
   )
