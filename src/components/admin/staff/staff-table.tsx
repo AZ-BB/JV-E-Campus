@@ -326,16 +326,24 @@ export default function StaffTable({
       />
 
       {/* Create Staff Modal */}
-      <CreateStaffModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
+      {
+        isCreateModalOpen && (
+          <CreateStaffModal
+            isOpen={isCreateModalOpen}
+            onClose={() => setIsCreateModalOpen(false)}
+          />
+        )
+      }
       {/* Update Staff Modal */}
-      <UpdateStaffModal
-        isOpen={isUpdateModalOpen}
-        onClose={() => setIsUpdateModalOpen(false)}
-        staffData={updateStaffData}
-      />
+      {
+        isUpdateModalOpen && (
+          <UpdateStaffModal
+            isOpen={isUpdateModalOpen}
+            onClose={() => setIsUpdateModalOpen(false)}
+            staffData={updateStaffData}
+          />
+        )
+      }
       {/* Delete Confirmation Dialog */}
       <DeleteDialog
         handleDeleteCancel={handleDeleteCancel}
@@ -343,8 +351,8 @@ export default function StaffTable({
         deleteConfirm={deleteConfirm}
         text="Are you sure you want to delete this staff member?"
         buttonRef={{
-          current: deleteConfirm.staffId 
-            ? deleteButtonRefs.current[deleteConfirm.staffId] 
+          current: deleteConfirm.staffId
+            ? deleteButtonRefs.current[deleteConfirm.staffId]
             : null
         }}
       />
