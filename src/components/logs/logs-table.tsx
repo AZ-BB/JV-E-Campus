@@ -11,23 +11,28 @@ import {
     User
 } from "lucide-react";
 import Pagination from "../pagination";
+import { actionLogs } from "@/db/schema/schema";
 
 interface LogsTableProps {
-    logs: any[];
+    logs: typeof actionLogs.$inferSelect[];
+    pagination?: boolean;
     currentPage: number;
     pageSize: number;
     totalCount: number;
     numberOfPages: number;
-    showActor?: boolean; // Whether to show the actor column (for system-wide logs)
+    showActor?: boolean;
+    enableExpanding?: boolean;
 }
 
-export default function LogsTable({ 
-    logs, 
-    currentPage, 
-    pageSize, 
-    totalCount, 
+export default function LogsTable({
+    logs,
+    currentPage,
+    pageSize,
+    totalCount,
     numberOfPages,
-    showActor = false
+    showActor = false,
+    pagination = true,
+    enableExpanding = true
 }: LogsTableProps) {
     const router = useRouter();
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -56,7 +61,7 @@ export default function LogsTable({
 
     const getActionUrl = (log: any) => {
         if (!log.actedOnId || !log.actedOnType) return null;
-        
+
         switch (log.actedOnType) {
             case 'ADMIN_USER':
                 return `/admin/users/${log.actedOnId}`;
@@ -157,7 +162,7 @@ export default function LogsTable({
                                         </span>
                                     </td>
                                     <td className="py-3 px-4">
-                                        {actionUrl && (
+                                        {!log.type.includes('DELETE') && actionUrl && (
                                             <Link
                                                 href={actionUrl}
                                                 className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-admin-primary/10 text-admin-primary hover:bg-admin-primary/20 rounded transition-colors"
@@ -168,7 +173,7 @@ export default function LogsTable({
                                         )}
                                     </td>
                                     <td className="py-3 px-4">
-                                        {hasMetadata && (
+                                        {enableExpanding && hasMetadata && (
                                             <button
                                                 onClick={() => toggleRow(log.id)}
                                                 className="p-1 hover:bg-admin-primary/10 rounded transition-colors"
@@ -201,7 +206,7 @@ export default function LogsTable({
             </table>
 
             {/* Pagination */}
-            {totalCount > 0 && (
+            {pagination && totalCount > 0 && (
                 <div className="mt-6">
                     <Pagination
                         currentPage={currentPage}
