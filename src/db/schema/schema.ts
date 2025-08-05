@@ -1,4 +1,4 @@
-import { pgTable, foreignKey, unique, serial, varchar, text, integer, timestamp, uuid, boolean, jsonb, numeric, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, serial, integer, timestamp, unique, varchar, text, uuid, boolean, jsonb, numeric, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const lessonLevel = pgEnum("lesson_level", ['BEGINNER', 'INTERMEDIATE', 'EXPERT'])
@@ -8,6 +8,24 @@ export const staffCategory = pgEnum("staff_category", ['FOH', 'BOH', 'MANAGER'])
 export const trainingStatus = pgEnum("training_status", ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED'])
 export const userRole = pgEnum("user_role", ['ADMIN', 'STAFF'])
 
+
+export const modulesRoles = pgTable("modules_roles", {
+	id: serial().primaryKey().notNull(),
+	moduleId: integer("module_id"),
+	roleId: integer("role_id"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+}, (table) => [
+	foreignKey({
+			columns: [table.moduleId],
+			foreignColumns: [modules.id],
+			name: "modules_roles_module_id_fkey"
+		}).onDelete("cascade"),
+	foreignKey({
+			columns: [table.roleId],
+			foreignColumns: [staffRoles.id],
+			name: "modules_roles_role_id_fkey"
+		}).onDelete("cascade"),
+]);
 
 export const users = pgTable("users", {
 	id: serial().primaryKey().notNull(),

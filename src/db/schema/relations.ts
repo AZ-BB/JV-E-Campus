@@ -1,5 +1,36 @@
 import { relations } from "drizzle-orm/relations";
-import { usersInAuth, users, branches, staff, staffRoles, modules, sections, actionLogs, lessons, bookmarks, progress } from "./schema";
+import { modules, modulesRoles, staffRoles, usersInAuth, users, branches, staff, sections, actionLogs, lessons, bookmarks, progress } from "./schema";
+
+export const modulesRolesRelations = relations(modulesRoles, ({one}) => ({
+	module: one(modules, {
+		fields: [modulesRoles.moduleId],
+		references: [modules.id]
+	}),
+	staffRole: one(staffRoles, {
+		fields: [modulesRoles.roleId],
+		references: [staffRoles.id]
+	}),
+}));
+
+export const modulesRelations = relations(modules, ({one, many}) => ({
+	modulesRoles: many(modulesRoles),
+	user_createdBy: one(users, {
+		fields: [modules.createdBy],
+		references: [users.id],
+		relationName: "modules_createdBy_users_id"
+	}),
+	user_updatedBy: one(users, {
+		fields: [modules.updatedBy],
+		references: [users.id],
+		relationName: "modules_updatedBy_users_id"
+	}),
+	sections: many(sections),
+}));
+
+export const staffRolesRelations = relations(staffRoles, ({many}) => ({
+	modulesRoles: many(modulesRoles),
+	staff: many(staff),
+}));
 
 export const usersRelations = relations(users, ({one, many}) => ({
 	usersInAuth: one(usersInAuth, {
@@ -59,24 +90,6 @@ export const staffRelations = relations(staff, ({one}) => ({
 
 export const branchesRelations = relations(branches, ({many}) => ({
 	staff: many(staff),
-}));
-
-export const staffRolesRelations = relations(staffRoles, ({many}) => ({
-	staff: many(staff),
-}));
-
-export const modulesRelations = relations(modules, ({one, many}) => ({
-	user_createdBy: one(users, {
-		fields: [modules.createdBy],
-		references: [users.id],
-		relationName: "modules_createdBy_users_id"
-	}),
-	user_updatedBy: one(users, {
-		fields: [modules.updatedBy],
-		references: [users.id],
-		relationName: "modules_updatedBy_users_id"
-	}),
-	sections: many(sections),
 }));
 
 export const sectionsRelations = relations(sections, ({one, many}) => ({
