@@ -18,7 +18,10 @@ import {
   Package,
   Book,
   ChefHat,
-  Activity
+  Activity,
+  BookCopy,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react'
 import { UserMetadata } from '@supabase/supabase-js'
 import ThemeSwitch from '../theme-switch'
@@ -35,12 +38,6 @@ const navigationItems = [
     label: 'Staff Management',
     icon: UserCheck,
     description: 'Manage staff accounts'
-  },
-  {
-    href: '/admin/training-modules',
-    label: 'Training Modules',
-    icon: Truck,
-    description: 'Manage different training modules'
   },
   {
     href: '/admin/products',
@@ -80,18 +77,43 @@ const navigationItems = [
   }
 ]
 
+const trainingModulesItems = [
+  {
+    href: '/admin/modules',
+    label: 'Modules',
+    description: 'Manage training modules'
+  },
+  {
+    href: '/admin/careers',
+    label: 'Careers',
+    description: 'Explore career paths'
+  }
+]
+
 export default function AdminSidebar({ currentUser }: { currentUser: UserMetadata | undefined }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isTrainingModulesExpanded, setIsTrainingModulesExpanded] = useState(true)
   const pathname = usePathname()
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
   const toggleCollapse = () => setIsSidebarCollapsed(!isSidebarCollapsed)
+  const toggleTrainingModules = () => setIsTrainingModulesExpanded(!isTrainingModulesExpanded)
 
   useEffect(() => {
     const root = document.documentElement
     root.style.setProperty('--sidebar-width', isSidebarCollapsed ? '4rem' : '16rem')
   }, [isSidebarCollapsed])
+
+  // Check if user is currently on a training modules page
+  const isOnTrainingModulesPage = pathname.startsWith('/admin/modules') || pathname.startsWith('/admin/careers')
+
+  // Auto-expand Training Modules section when user is on one of its pages
+  useEffect(() => {
+    if (isOnTrainingModulesPage && !isTrainingModulesExpanded) {
+      setIsTrainingModulesExpanded(true)
+    }
+  }, [pathname, isTrainingModulesExpanded, isOnTrainingModulesPage])
 
   return (
     <>
@@ -155,31 +177,105 @@ export default function AdminSidebar({ currentUser }: { currentUser: UserMetadat
 
           {/* Navigation */}
           <nav className="flex-1 px-2 py-4 space-y-1">
-            {navigationItems.map((item) => {
+            {navigationItems.map((item, index) => {
               const Icon = item.icon
               const isActive = pathname === item.href ||
                 (item.href !== '/admin' && pathname.startsWith(item.href))
 
               return (
-                <Link key={item.href} href={item.href}>
-                  <div className={cn(
-                    "flex items-center my-1 px-3 py-2 rounded-md text-sm font-medium transition-colors group",
-                    isActive
-                      ? "bg-admin-primary text-white"
-                      : "text-admin-text-muted hover:bg-admin-border hover:text-admin-text",
-                    isSidebarCollapsed && "justify-center"
-                  )}>
-                    <Icon size={20} className="flex-shrink-0" />
-                    {!isSidebarCollapsed && (
-                      <div className="ml-3">
-                        <div className="font-medium">{item.label}</div>
-                        <div className={`text-xs ${isActive ? "text-white" : "text-admin-text-muted"} group-hover:text-admin-text`}>
-                          {item.description}
+                <React.Fragment key={item.href}>
+                  <Link href={item.href}>
+                    <div className={cn(
+                      "flex items-center my-1 px-3 py-2 rounded-md text-sm font-medium transition-colors group",
+                      isActive
+                        ? "bg-admin-primary text-white"
+                        : "text-admin-text-muted hover:bg-admin-border hover:text-admin-text",
+                      isSidebarCollapsed && "justify-center"
+                    )}>
+                      <Icon size={20} className="flex-shrink-0" />
+                      {!isSidebarCollapsed && (
+                        <div className="ml-3">
+                          <div className="font-medium">{item.label}</div>
+                          <div className={`text-xs ${isActive ? "text-white" : "text-admin-text-muted"} group-hover:text-admin-text`}>
+                            {item.description}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </Link>
+                      )}
+                    </div>
+                  </Link>
+
+                  {/* Training Modules Section - appears after Staff Management */}
+                  {item.label === 'Staff Management' && (
+                    <div className="mt-2 mb-2">
+                      {/* Training Modules Header */}
+                      <button 
+                        onClick={isOnTrainingModulesPage ? undefined : toggleTrainingModules}
+                        disabled={isOnTrainingModulesPage}
+                        className={cn(
+                          "w-full flex items-center px-3 py-2 text-sm font-medium text-admin-text transition-colors rounded-md",
+                          isOnTrainingModulesPage 
+                            ? "cursor-default" 
+                            : "hover:bg-admin-border cursor-pointer",
+                          isSidebarCollapsed && "justify-center"
+                        )}
+                      >
+                        <BookCopy size={20} className="flex-shrink-0" />
+                        {!isSidebarCollapsed && (
+                          <>
+                            <div className="ml-3 flex-1 text-left">
+                              <div className="font-medium">Training Modules</div>
+                              <div className="text-xs text-admin-text-muted">
+                                Learning and development
+                              </div>
+                            </div>
+                            <div className="ml-2">
+                              {!isOnTrainingModulesPage && (
+                                <>
+                                  {isTrainingModulesExpanded ? (
+                                    <ChevronDown size={16} className="text-admin-text-muted" />
+                                  ) : (
+                                    <ChevronRight size={16} className="text-admin-text-muted" />
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </button>
+
+                      {/* Training Modules Sub-items */}
+                      {!isSidebarCollapsed && isTrainingModulesExpanded && (
+                        <div className="ml-2 space-y-1">
+                          {trainingModulesItems.map((subItem) => {
+                            const isSubActive = pathname === subItem.href ||
+                              (subItem.href !== '/admin' && pathname.startsWith(subItem.href))
+
+                            return (
+                              <Link key={subItem.href} href={subItem.href}>
+                                <div className={cn(
+                                  "flex items-center my-1 px-2 py-2 rounded-md text-sm font-medium transition-colors group",
+                                  isSubActive
+                                    ? "bg-admin-primary text-white"
+                                    : "text-admin-text-muted hover:bg-admin-border hover:text-admin-text"
+                                )}>
+                                  <div className="w-5 h-5 flex items-center justify-center">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
+                                  </div>
+                                  <div className="ml-3">
+                                    <div className="font-medium">{subItem.label}</div>
+                                    <div className={`text-xs ${isSubActive ? "text-white" : "text-admin-text-muted"} group-hover:text-admin-text`}>
+                                      {subItem.description}
+                                    </div>
+                                  </div>
+                                </div>
+                              </Link>
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </React.Fragment>
               )
             })}
           </nav>
