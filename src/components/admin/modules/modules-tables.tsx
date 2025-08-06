@@ -13,7 +13,7 @@ import { Pencil, RefreshCcw, Trash } from "lucide-react"
 export default function ModulesTables({
     data,
 }: {
-    data: GeneralActionResponse<{ rows: typeof modules.$inferSelect[], count: number, numberOfPages: number }>
+    data: GeneralActionResponse<{ rows: (typeof modules.$inferSelect & { createdByFullName: string | null })[], count: number, numberOfPages: number }>
 }) {
 
     const router = useRouter()

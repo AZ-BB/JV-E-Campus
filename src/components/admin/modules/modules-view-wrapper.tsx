@@ -9,27 +9,23 @@ import Pagination from "@/components/pagination"
 import { GeneralActionResponse } from "@/types/general-action-response"
 import { modules } from '@/db/schema/schema'
 
-type ModuleWithCreator = typeof modules.$inferSelect & {
-    createdByFullName: string | null
-}
-
 export default function ModulesViewWrapper({
     initialView,
     modulesData
 }: {
     initialView: 'table' | 'grid'
-    modulesData: GeneralActionResponse<{ rows: ModuleWithCreator[], count: number, numberOfPages: number }>
+    modulesData: GeneralActionResponse<{ rows: (typeof modules.$inferSelect & { createdByFullName: string | null })[], count: number, numberOfPages: number }>
 }) {
     const [view, setView] = useState<'table' | 'grid'>(initialView)
     const router = useRouter()
     const searchParams = useSearchParams()
-    
+
     const page = searchParams.get("page") || "1"
     const pageSize = searchParams.get("limit") || "10"
 
     const handleViewChange = (newView: 'table' | 'grid') => {
         setView(newView)
-        
+
         // Update URL with new view parameter
         const params = new URLSearchParams(searchParams)
         params.set("view", newView)
@@ -38,9 +34,9 @@ export default function ModulesViewWrapper({
 
     return (
         <div className="pb-4">
-            <ModulesFilter 
-                view={view} 
-                onViewChange={handleViewChange} 
+            <ModulesFilter
+                view={view}
+                onViewChange={handleViewChange}
             />
 
             {view === 'table' ? (
@@ -48,7 +44,7 @@ export default function ModulesViewWrapper({
             ) : (
                 <div>
                     <ModulesGrid data={modulesData} />
-                    
+
                     {/* Pagination for Grid View */}
                     <div className="px-4">
                         <Pagination
