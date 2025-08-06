@@ -41,13 +41,13 @@ export default function LogsTable({
     // Get badge color based on action type
     const getBadgeColor = (logType: string) => {
         if (logType.includes('CREATE')) {
-            return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-800/60 dark:text-green-200 dark:border-green-700';
+            return 'text-green-700 dark:text-green-200';
         } else if (logType.includes('DELETE')) {
-            return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-800/60 dark:text-red-200 dark:border-red-700';
+            return 'text-red-700 dark:text-red-200';
         } else if (logType.includes('UPDATE')) {
-            return 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-800/60 dark:text-orange-200 dark:border-orange-700';
+            return 'text-orange-700 dark:text-orange-200';
         }
-        return 'bg-admin-primary/10 text-admin-primary border-admin-primary/20';
+        return 'text-admin-primary';
     };
 
     const toggleRow = (logId: string) => {
@@ -94,13 +94,22 @@ export default function LogsTable({
     // Define headers for the table
     const headers = [
         {
-            label: "Action",
+            label: "Activity",
             key: "type",
             componentKey: "action",
-            cell: (value: string) => (
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getBadgeColor(value)}`}>
-                    {value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                </span>
+            cell: (value: string, row: any) => (
+                <div className="flex flex-col space-y-1">
+                    <span className={`inline-flex items-center text-xs font-medium ${getBadgeColor(value)} w-fit`}>
+                        {value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                    </span>
+                    {/* Show actor info on mobile when showActor is true */}
+                    {showActor && (
+                        <div className="flex items-center gap-1 sm:hidden">
+                            <User className="w-3 h-3 text-admin-textMuted" />
+                            <span className="text-admin-textMuted text-xs">Admin #{row.actorId}</span>
+                        </div>
+                    )}
+                </div>
             )
         },
         ...(showActor ? [{
@@ -110,7 +119,7 @@ export default function LogsTable({
             cell: (value: string, row: any) => {
                 const actorUrl = getActorUrl(row);
                 return (
-                    <div className="flex items-center gap-2">
+                    <div className="hidden sm:flex items-center gap-2">
                         <User className="w-4 h-4 text-admin-textMuted" />
                         {actorUrl ? (
                             <Link
@@ -127,17 +136,26 @@ export default function LogsTable({
             }
         }] : []),
         {
-            label: "Target",
+            label: "Target & Date",
             key: "message",
             componentKey: "target",
             cell: (value: string, row: any) => (
-                <div className="flex flex-col">
+                <div className="flex flex-col space-y-1">
                     <span className="text-admin-text text-sm">{value}</span>
                     {row.actedOnType && (
                         <span className="text-admin-textMuted text-xs">
                             {row.actedOnType.replace(/_/g, ' ').toLowerCase()}
                         </span>
                     )}
+                    {/* Show date on mobile */}
+                    <span className="text-admin-textMuted text-xs sm:hidden">
+                        {row.date ? new Date(row.date).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        }) : "Unknown"}
+                    </span>
                 </div>
             )
         },
@@ -146,7 +164,7 @@ export default function LogsTable({
             key: "date",
             componentKey: "date",
             cell: (value: string) => (
-                <span className="text-admin-textMuted text-sm">
+                <span className="text-admin-textMuted text-sm hidden sm:inline">
                     {value ? new Date(value).toLocaleString('en-US', {
                         year: 'numeric',
                         month: 'short',
@@ -158,37 +176,26 @@ export default function LogsTable({
             )
         },
         {
-            label: "Actions",
+            label: "",
             key: "actions",
             componentKey: "actions",
             cell: (value: any, row: any) => {
                 const actionUrl = getActionUrl(row);
+                const metadata = row.metadata as Record<string, any> | null;
+                const hasMetadata = metadata && typeof metadata === 'object' && metadata !== null && Object.keys(metadata).length > 0;
+                const isExpanded = expandedRows.has(row.id.toString());
+                
                 return (
-                    <>
+                    <div className="flex items-center gap-1">
                         {!row.type.includes('DELETE') && actionUrl && (
                             <Link
                                 href={actionUrl}
                                 className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-admin-primary/10 text-admin-primary hover:bg-admin-primary/20 rounded transition-colors"
                             >
                                 <Eye className="w-3 h-3" />
-                                View
+                                <span className="hidden sm:inline">View</span>
                             </Link>
                         )}
-                    </>
-                );
-            }
-        },
-        {
-            label: "",
-            key: "expand",
-            componentKey: "expand",
-            cell: (value: any, row: any) => {
-                const metadata = row.metadata as Record<string, any> | null;
-                const hasMetadata = metadata && typeof metadata === 'object' && metadata !== null && Object.keys(metadata).length > 0;
-                const isExpanded = expandedRows.has(row.id.toString());
-                
-                return (
-                    <>
                         {enableExpanding && hasMetadata && (
                             <button
                                 onClick={() => toggleRow(row.id.toString())}
@@ -201,7 +208,7 @@ export default function LogsTable({
                                 )}
                             </button>
                         )}
-                    </>
+                    </div>
                 );
             }
         }
