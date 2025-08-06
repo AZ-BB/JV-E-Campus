@@ -1,5 +1,10 @@
 import { getModules } from "@/actions/modules"
+import { getRole } from "@/actions/roles"
 import ModulesViewWrapper from "@/components/admin/modules/modules-view-wrapper"
+import Breadcrumb from "@/components/ui/breadcrumb"
+import Button from "@/components/ui/button"
+import { ArrowLeft, Plus } from "lucide-react"
+import Link from "next/link"
 
 export default async function CareerPage({
     params,
@@ -37,16 +42,40 @@ export default async function CareerPage({
         }
     })
 
+    const roleData = await getRole(Number(id))
+
+    const breadcrumbItems = [
+        { label: "Careers", href: "/admin/careers" },
+        { label: roleData.data?.name || "Role" }
+    ];
+
     return (
         <div className="p-2">
-            <div className="pb-4">
-                <h1 className="text-2xl font-bold text-admin-text mb-1">Career Management</h1>
-                <p className="text-admin-text-muted text-sm">Overview of your careers</p>
+            <Breadcrumb items={breadcrumbItems} className="mb-6" />
+
+            {/* Back Button */}
+            <div className="flex justify-between items-center">
+                <Link
+                    href="/admin/careers"
+                    className="inline-flex items-center gap-2 text-admin-textMuted hover:text-admin-primary transition-colors mb-6"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Careers List
+                </Link>
+
+
+                <div>
+                    <Button className="flex items-center gap-1 bg-admin-primary p-2 text-admin-primary-foreground hover:bg-admin-primary/80">
+                        <Plus className="w-4 h-4" />
+                        Add Module
+                    </Button>
+                </div>
             </div>
 
             <ModulesViewWrapper
                 initialView={view as 'table' | 'grid'}
                 modulesData={modulesData}
+                showRoleFilter={false}
             />
         </div>
     )

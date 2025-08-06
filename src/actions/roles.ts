@@ -118,6 +118,25 @@ export const getRolesStats = async (): Promise<
   }
 }
 
+
+export const getRole = async (id: number): Promise<GeneralActionResponse<typeof staffRoles.$inferSelect>> => {
+  try {
+    const result = await db.select({
+      id: staffRoles.id,
+      name: staffRoles.name,
+      fullName: staffRoles.fullName,
+      createdAt: staffRoles.createdAt,
+      updatedAt: staffRoles.updatedAt,
+    }).from(staffRoles).where(eq(staffRoles.id, id))
+    return { data: result[0], error: null }
+  } catch (error) {
+    console.error(error)
+    return { data: null, error: responses.role.fetchedAll.error.general }
+  }
+}
+
+// CREATE
+
 export const createRole = async (role: { name: string, fullName: string }): Promise<GeneralActionResponse<typeof staffRoles.$inferSelect>> => {
   try {
     const result = await db.insert(staffRoles).values(role).returning()
