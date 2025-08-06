@@ -5,14 +5,12 @@ const TableRoot = React.forwardRef<
     HTMLTableElement,
     React.TableHTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-    <div className="bg-gray-800 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-            <table
-                ref={ref}
-                className={`min-w-full divide-y divide-admin-border ${className}`}
-                {...props}
-            />
-        </div>
+    <div className="overflow-x-auto">
+        <table
+            ref={ref}
+            className={`w-full border-collapse ${className}`}
+            {...props}
+        />
     </div>
 ));
 TableRoot.displayName = "TableRoot";
@@ -25,7 +23,7 @@ const TableHeader = React.forwardRef<
     ...props }, ref) => (
     <thead
         ref={ref}
-        className={`bg-admin-surface ${className}`}
+        className={className}
         {...props}
     />
 ));
@@ -37,7 +35,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <tbody
         ref={ref}
-        className={`bg-admin-surface divide-y divide-admin-border ${className}`}
+        className={className}
         {...props}
     />
 ));
@@ -49,7 +47,7 @@ const TableFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <tfoot
         ref={ref}
-        className={`bg-admin-surface border-t border-admin-border font-medium ${className}`}
+        className={`border-t border-admin-border font-medium ${className}`}
         {...props}
     />
 ));
@@ -73,7 +71,7 @@ const TableHead = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <th
         ref={ref}
-        className={`px-6 bg-admin-primary text-white py-3 text-left text-xs font-medium text-admin-text-muted uppercase tracking-wider ${className}`}
+        className={`text-left py-3 px-4 font-medium text-admin-text text-sm ${className}`}
         {...props}
     />
 ));
@@ -85,7 +83,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <td
         ref={ref}
-        className={`px-6 py-4 whitespace-nowrap text-sm text-admin-text ${className}`}
+        className={`py-3 px-4 text-sm text-admin-text ${className}`}
         {...props}
     />
 ));
@@ -126,10 +124,10 @@ function Table({
     return (
         <TableRoot>
             <TableHeader>
-                <TableRow>
+                <TableRow className="border border-admin-border bg-admin-surface">
                     {headers.map((header) => (
                         <TableHead key={header.componentKey} onClick={() => header.sortable ? onSort?.(header.key) : null}>
-                            <div className={`flex justify-between items-center gap-2 font-medium ${header.sortable ? "cursor-pointer" : ""}`}>
+                            <div className={`flex items-center gap-2 ${header.sortable ? "cursor-pointer" : ""}`}>
                                 <span>
                                     {header.label}
                                 </span>
@@ -146,11 +144,11 @@ function Table({
                     ))}
                 </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="border border-admin-border">
                 {data.map((row) => (
-                    <TableRow 
-                        key={row.id} 
-                        className={`hover:bg-admin-border transition-colors ${onRowClick ? "cursor-pointer" : ""}`}
+                    <TableRow
+                        key={row.id}
+                        className={`border-b border-admin-border hover:bg-admin-surface/50 transition-colors ${onRowClick ? "cursor-pointer" : ""}`}
                         onClick={() => onRowClick?.(row)}
                     >
                         {headers.map((header) => (
@@ -161,7 +159,7 @@ function Table({
 
                 {
                     data.length === 0 && (
-                        <TableRow>
+                        <TableRow className="border border-admin-border rounded-b-lg">
                             <TableCell colSpan={headers.length} className="text-center">No data</TableCell>
                         </TableRow>
                     )
