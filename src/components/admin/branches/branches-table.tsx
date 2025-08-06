@@ -22,18 +22,21 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import Pagination from "../../pagination"
 import Button from "../../ui/button"
-import { Branch, deleteBranch } from "@/actions/branches"
+import { Branch, BranchesStats as BranchesStatsType, deleteBranch } from "@/actions/branches"
 import CreateBranchModal from "./create-branch-modal"
 import Input from "@/components/ui/input"
 import UpdateBranchModal from "./update-branch-modal"
 import DeleteDialog from "@/components/delete-dialog"
 import toaster from "@/components/ui/toast"
 import BranchesFilter from "./branches-filter"
+import BranchesStats from "./branches-stats"
 
 export default function BranchesTable({
   branches,
+  branchesStats,
 }: {
   branches: GeneralActionResponse<{ rows: Branch[], count: number, numberOfPages: number }>
+  branchesStats: GeneralActionResponse<BranchesStatsType>
 }) {
   const query = useSearchParams()
   const sort = query.get("sort") || "id"
@@ -112,25 +115,28 @@ export default function BranchesTable({
 
   return (
     <div className="relative">
-      {/* Create Branch Button and Search */}
-      <BranchesFilter>
+      <BranchesStats branchesStats={branchesStats}>
         <div className="flex gap-2">
           <Button
             onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center gap-2 bg-admin-primary text-admin-textSecondary px-4 py-2 rounded-md hover:bg-admin-primary/80 disabled:hover:bg-admin-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-admin-primary text-admin-textSecondary px-3 py-1.5 rounded-md hover:bg-admin-primary/80 disabled:hover:bg-admin-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus className="w-4 h-4" />
             Create Branch
           </Button>
           <Button
             onClick={() => window.location.reload()}
-            className="flex items-center gap-2 bg-admin-secondary text-admin-textSecondary px-4 py-2 rounded-md hover:bg-admin-secondary/80 disabled:hover:bg-admin-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-admin-secondary text-admin-textSecondary px-3 py-1.5 rounded-md hover:bg-admin-secondary/80 disabled:hover:bg-admin-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCcw className="w-4 h-4" />
             Refresh
           </Button>
         </div>
-      </BranchesFilter>
+      </BranchesStats>
+
+
+      {/* Create Branch Button and Search */}
+      <BranchesFilter />
 
       <Table
         headers={[

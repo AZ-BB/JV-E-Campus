@@ -3,11 +3,7 @@ import Input from "../../ui/input"
 import { useRouter } from "next/navigation"
 import debounce from "lodash.debounce"
 
-export default function BranchesFilter({
-    children
-}: {
-    children: React.ReactNode
-}) {
+export default function BranchesFilter() {
 
     const router = useRouter()
     const [search, setSearch] = useState("")
@@ -36,13 +32,8 @@ export default function BranchesFilter({
     }, [search])
 
     return (
-        <div className="flex justify-between items-center gap-4 py-4">
-            <div className="mt-5">
-                {children}
-            </div>
-
-            <div className="flex justify-between items-center gap-4">
-
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 py-4">
+            <div className="flex lg:justify-end items-center gap-4 w-full lg:w-auto">
                 <Input
                     labelClassName="text-xs"
                     label="Search"

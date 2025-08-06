@@ -37,11 +37,11 @@ export default async function AdminsPage({
 
   const usersStats = await getUsersStats()
   return (
-    <div>
-      <UsersStats usersStats={usersStats} />
-      <div className="p-4 pt-0">
-        <AdminsTable admins={admins} />
-      </div>
+    <div className="p-4 pt-0">
+      <AdminsTable
+        admins={admins}
+        usersStats={usersStats}
+      />
     </div>
   )
 }

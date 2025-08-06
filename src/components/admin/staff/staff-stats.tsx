@@ -1,7 +1,7 @@
 import { StaffStats as StaffStatsType } from "@/actions/staff"
 import { GeneralActionResponse } from "@/types/general-action-response"
 
-export default function StaffStats({ staffStats }: { staffStats: GeneralActionResponse<StaffStatsType> }) {
+export default function StaffStats({ children, staffStats }: { children: React.ReactNode, staffStats: GeneralActionResponse<StaffStatsType> }) {
   const { data: staffStatsData, error: staffStatsError } = staffStats
 
   const statsItems = [
@@ -56,10 +56,16 @@ export default function StaffStats({ staffStats }: { staffStats: GeneralActionRe
   }
 
   return (
-    <div className="space-y-3 p-4">
-      <div>
-        <h1 className="text-2xl font-bold text-admin-text mb-1">Staff Statistics</h1>
-        <p className="text-admin-text-muted text-sm">Overview of your team composition</p>
+    <div className="space-y-3">
+      <div className="flex flex-col lg:flex-row justify-between">
+        <div className="">
+          <h1 className="text-2xl font-bold text-admin-text mb-1">Staff Statistics</h1>
+          <p className="text-admin-text-muted text-sm">Overview of your team composition</p>
+        </div>
+
+        <div className="flex lg:justify-end items-center gap-4 w-full lg:w-auto">
+          {children}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

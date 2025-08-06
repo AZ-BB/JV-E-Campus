@@ -1,7 +1,7 @@
-import { RolesStats as RolesStatsTypes } from "@/actions/roles"
+import { RolesStats as RolesStatsType } from "@/actions/roles"
 import { GeneralActionResponse } from "@/types/general-action-response"
 
-export default function RolesStats({ rolesStats }: { rolesStats: GeneralActionResponse<RolesStatsTypes> }) {
+export default function RolesStats({ children, rolesStats }: { children: React.ReactNode, rolesStats: GeneralActionResponse<RolesStatsType> }) {
   const { data: rolesStatsData, error: rolesStatsError } = rolesStats
 
   const statsItems = [
@@ -56,12 +56,18 @@ export default function RolesStats({ rolesStats }: { rolesStats: GeneralActionRe
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold text-admin-text mb-2">Roles</h1>
-        <p className="text-admin-text-muted">Overview of system roles</p>
+    <div className="space-y-3">
+      <div className="flex flex-col lg:flex-row justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-admin-text mb-2">Roles</h1>
+          <p className="text-admin-text-muted">Overview of system roles</p>
+        </div>
+
+        <div className="flex lg:justify-end items-center gap-4 w-full lg:w-auto">
+          {children}
+        </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsItems.map((stat, index) => (
           <div
@@ -76,7 +82,7 @@ export default function RolesStats({ rolesStats }: { rolesStats: GeneralActionRe
                 Active
               </div> */}
             </div>
-            
+
             <div className="space-y-2">
               <h3 className="text-admin-text-muted font-medium text-sm uppercase tracking-wide">
                 {stat.title}
