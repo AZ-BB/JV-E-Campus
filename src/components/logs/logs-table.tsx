@@ -11,6 +11,7 @@ import {
     User
 } from "lucide-react";
 import Pagination from "../pagination";
+import { Table } from "../ui/table";
 import { actionLogs } from "@/db/schema/schema";
 
 interface LogsTableProps {
@@ -90,120 +91,154 @@ export default function LogsTable({
         );
     }
 
-    const colSpan = showActor ? 6 : 5;
+    // Define headers for the table
+    const headers = [
+        {
+            label: "Action",
+            key: "type",
+            componentKey: "action",
+            cell: (value: string) => (
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getBadgeColor(value)}`}>
+                    {value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                </span>
+            )
+        },
+        ...(showActor ? [{
+            label: "Actor",
+            key: "actorId",
+            componentKey: "actor",
+            cell: (value: string, row: any) => {
+                const actorUrl = getActorUrl(row);
+                return (
+                    <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-admin-textMuted" />
+                        {actorUrl ? (
+                            <Link
+                                href={actorUrl}
+                                className="text-admin-primary hover:text-admin-primary/80 text-sm font-medium"
+                            >
+                                Admin #{value}
+                            </Link>
+                        ) : (
+                            <span className="text-admin-text text-sm">Admin #{value}</span>
+                        )}
+                    </div>
+                );
+            }
+        }] : []),
+        {
+            label: "Target",
+            key: "message",
+            componentKey: "target",
+            cell: (value: string, row: any) => (
+                <div className="flex flex-col">
+                    <span className="text-admin-text text-sm">{value}</span>
+                    {row.actedOnType && (
+                        <span className="text-admin-textMuted text-xs">
+                            {row.actedOnType.replace(/_/g, ' ').toLowerCase()}
+                        </span>
+                    )}
+                </div>
+            )
+        },
+        {
+            label: "Date",
+            key: "date",
+            componentKey: "date",
+            cell: (value: string) => (
+                <span className="text-admin-textMuted text-sm">
+                    {value ? new Date(value).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : "Unknown"}
+                </span>
+            )
+        },
+        {
+            label: "Actions",
+            key: "actions",
+            componentKey: "actions",
+            cell: (value: any, row: any) => {
+                const actionUrl = getActionUrl(row);
+                return (
+                    <>
+                        {!row.type.includes('DELETE') && actionUrl && (
+                            <Link
+                                href={actionUrl}
+                                className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-admin-primary/10 text-admin-primary hover:bg-admin-primary/20 rounded transition-colors"
+                            >
+                                <Eye className="w-3 h-3" />
+                                View
+                            </Link>
+                        )}
+                    </>
+                );
+            }
+        },
+        {
+            label: "",
+            key: "expand",
+            componentKey: "expand",
+            cell: (value: any, row: any) => {
+                const metadata = row.metadata as Record<string, any> | null;
+                const hasMetadata = metadata && typeof metadata === 'object' && metadata !== null && Object.keys(metadata).length > 0;
+                const isExpanded = expandedRows.has(row.id.toString());
+                
+                return (
+                    <>
+                        {enableExpanding && hasMetadata && (
+                            <button
+                                onClick={() => toggleRow(row.id.toString())}
+                                className="p-1 hover:bg-admin-primary/10 rounded transition-colors"
+                            >
+                                {isExpanded ? (
+                                    <ChevronDown className="w-4 h-4 text-admin-textMuted" />
+                                ) : (
+                                    <ChevronRight className="w-4 h-4 text-admin-textMuted" />
+                                )}
+                            </button>
+                        )}
+                    </>
+                );
+            }
+        }
+    ];
+
+    // Transform logs data to include id as number for the Table component
+    const tableData = logs.map((log, index) => ({
+        ...log,
+        id: typeof log.id === 'string' ? parseInt(log.id) || index : log.id || index
+    }));
 
     return (
-        <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-                <thead>
-                    <tr className="border-b border-admin-border">
-                        <th className="text-left py-3 px-4 font-medium text-admin-text text-sm">Action</th>
-                        {showActor && (
-                            <th className="text-left py-3 px-4 font-medium text-admin-text text-sm">Actor</th>
-                        )}
-                        <th className="text-left py-3 px-4 font-medium text-admin-text text-sm">Target</th>
-                        <th className="text-left py-3 px-4 font-medium text-admin-text text-sm">Date</th>
-                        <th className="text-left py-3 px-4 font-medium text-admin-text text-sm">Actions</th>
-                        <th className="w-8 py-3 px-4"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {logs.map((log) => {
-                        const isExpanded = expandedRows.has(log.id);
-                        const actionUrl = getActionUrl(log);
-                        const actorUrl = getActorUrl(log);
-                        const metadata = log.metadata as Record<string, any> | null;
-                        const hasMetadata = metadata && typeof metadata === 'object' && metadata !== null && Object.keys(metadata).length > 0;
-
-                        return (
-                            <React.Fragment key={log.id}>
-                                <tr className="border-b border-admin-border hover:bg-admin-surface/50 transition-colors">
-                                    <td className="py-3 px-4">
-                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getBadgeColor(log.type)}`}>
-                                            {log.type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                                        </span>
-                                    </td>
-                                    {showActor && (
-                                        <td className="py-3 px-4">
-                                            <div className="flex items-center gap-2">
-                                                <User className="w-4 h-4 text-admin-textMuted" />
-                                                {actorUrl ? (
-                                                    <Link
-                                                        href={actorUrl}
-                                                        className="text-admin-primary hover:text-admin-primary/80 text-sm font-medium"
-                                                    >
-                                                        Admin #{log.actorId}
-                                                    </Link>
-                                                ) : (
-                                                    <span className="text-admin-text text-sm">Admin #{log.actorId}</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                    )}
-                                    <td className="py-3 px-4">
-                                        <div className="flex flex-col">
-                                            <span className="text-admin-text text-sm">{log.message}</span>
-                                            {log.actedOnType && (
-                                                <span className="text-admin-textMuted text-xs">
-                                                    {log.actedOnType.replace(/_/g, ' ').toLowerCase()}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="py-3 px-4">
-                                        <span className="text-admin-textMuted text-sm">
-                                            {log.date ? new Date(log.date).toLocaleString('en-US', {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            }) : "Unknown"}
-                                        </span>
-                                    </td>
-                                    <td className="py-3 px-4">
-                                        {!log.type.includes('DELETE') && actionUrl && (
-                                            <Link
-                                                href={actionUrl}
-                                                className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-admin-primary/10 text-admin-primary hover:bg-admin-primary/20 rounded transition-colors"
-                                            >
-                                                <Eye className="w-3 h-3" />
-                                                View
-                                            </Link>
-                                        )}
-                                    </td>
-                                    <td className="py-3 px-4">
-                                        {enableExpanding && hasMetadata && (
-                                            <button
-                                                onClick={() => toggleRow(log.id)}
-                                                className="p-1 hover:bg-admin-primary/10 rounded transition-colors"
-                                            >
-                                                {isExpanded ? (
-                                                    <ChevronDown className="w-4 h-4 text-admin-textMuted" />
-                                                ) : (
-                                                    <ChevronRight className="w-4 h-4 text-admin-textMuted" />
-                                                )}
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                                {isExpanded && hasMetadata && (
-                                    <tr className="bg-admin-surface/30">
-                                        <td colSpan={colSpan} className="py-3 px-4">
-                                            <div className="text-sm">
-                                                <div className="text-admin-textMuted mb-2 font-medium">Metadata:</div>
-                                                <pre className="p-3 bg-admin-background rounded text-xs overflow-auto border border-admin-border">
-                                                    {JSON.stringify(metadata, null, 2)}
-                                                </pre>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </React.Fragment>
-                        );
-                    })}
-                </tbody>
-            </table>
+        <div>
+            <Table
+                headers={headers}
+                data={tableData}
+            />
+            
+            {/* Expanded rows for metadata */}
+            {logs.map((log) => {
+                const isExpanded = expandedRows.has(log.id);
+                const metadata = log.metadata as Record<string, any> | null;
+                const hasMetadata = metadata && typeof metadata === 'object' && metadata !== null && Object.keys(metadata).length > 0;
+                
+                return isExpanded && hasMetadata ? (
+                    <div key={`expanded-${log.id}`} className="bg-admin-surface/30 border-b border-admin-border">
+                        <div className="py-3 px-4">
+                            <div className="text-sm">
+                                <div className="text-admin-textMuted mb-2 font-medium">Metadata:</div>
+                                <pre className="p-3 bg-admin-background rounded text-xs overflow-auto border border-admin-border">
+                                    {JSON.stringify(metadata, null, 2)}
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+                ) : null;
+            })}
 
             {/* Pagination */}
             {pagination && totalCount > 0 && (

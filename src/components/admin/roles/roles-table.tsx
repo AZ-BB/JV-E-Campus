@@ -182,18 +182,18 @@ export default function RolesTable({
               componentKey: "actions",
               cell: (value) => (
                 <div className="flex gap-2">
-                  <Button className="w-8 h-8 flex justify-center items-center bg-admin-secondary hover:bg-admin-secondary/80"
+                  <Button className="inline-flex items-center gap-1 px-2 py-2 text-xs bg-admin-primary/10 text-admin-primary hover:bg-admin-primary/20 rounded transition-colors"
                     onClick={() => {
                       setUpdateRoleData(roles.data?.rows?.find((role) => role.id === Number(value)) || null)
                       setIsUpdateModalOpen(true)
                     }}>
-                    <Pencil className="w-4 h-4" />
+                    <Pencil className="w-3 h-3" />
                   </Button>
                   <Button
-                    className="w-8 h-8 flex justify-center items-center bg-admin-accent hover:bg-admin-accent/80"
+                    className="inline-flex items-center gap-1 px-2 py-2 text-xs bg-admin-accent/10 text-admin-accent hover:bg-admin-accent/20 rounded transition-colors"
                     onClick={(event) => handleDeleteClick(value, event)}
                   >
-                    <Trash className="w-4 h-4" />
+                    <Trash className="w-3 h-3" />
                   </Button>
                 </div>
               ),
