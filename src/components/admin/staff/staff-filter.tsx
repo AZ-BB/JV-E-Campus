@@ -7,11 +7,7 @@ import { getRolesNames } from "@/actions/roles"
 import { getBranchesNames } from "@/actions/branches"
 import { getAdminsNames } from "@/actions/admins"
 
-export default function StaffFilter({
-    children
-}: {
-    children: React.ReactNode
-}) {
+export default function StaffFilter() {
 
     const [initialLoad, setInitialLoad] = useState(false)
 
@@ -87,15 +83,10 @@ export default function StaffFilter({
     }, [search])
 
     return (
-        <div className="flex justify-between items-center gap-4 py-4">
-            <div className="mt-5">
-                {children}
-            </div>
-
-            <div className="flex justify-between items-center gap-4">
-
+        <div className="flex flex-col gap-4 py-4">
+            <div className="flex flex-wrap items-end gap-3 xl:gap-4">
                 <MultipleSelect
-                    className="w-44 h-10"
+                    className="w-full min-w-0 sm:w-44 sm:min-w-44 h-10"
                     options={createdBy.map((admin) => ({ label: admin.label, value: admin.value }))}
                     value={selectedCreatedBy}
                     onValueChange={handleSelectCreatedBy}
@@ -105,7 +96,7 @@ export default function StaffFilter({
                 />
 
                 <MultipleSelect
-                    className="w-44 h-10"
+                    className="w-full min-w-0 sm:w-44 sm:min-w-44 h-10"
                     options={roles.map((role) => ({ label: role.label, value: role.value }))}
                     value={selectedRoles}
                     onValueChange={handleSelectRoles}
@@ -115,7 +106,7 @@ export default function StaffFilter({
                 />
 
                 <MultipleSelect
-                    className="w-44 h-10"
+                    className="w-full min-w-0 sm:w-44 sm:min-w-44 h-10"
                     options={branches.map((branch) => ({ label: branch.label, value: branch.value }))}
                     value={selectedBranches}
                     onValueChange={handleSelectBranches}
@@ -128,7 +119,7 @@ export default function StaffFilter({
                     labelClassName="text-xs"
                     label="Search"
                     placeholder="Search"
-                    className="w-80 bg-admin-surface border-admin-border h-10 text-sm"
+                    className="w-full min-w-0 sm:w-60 lg:w-80 bg-admin-surface border-admin-border h-10 text-sm"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)} />
             </div>

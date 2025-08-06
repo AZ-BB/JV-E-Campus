@@ -30,10 +30,9 @@ export default async function RolesPage({
     orderDirection: order as "asc" | "desc",
   })
   const rolesStats = await getRolesStats()
-  return <div>
-    <RolesStats rolesStats={rolesStats} />
+  return (
     <div className="p-4 pt-0">
-      <RolesTable roles={roles} />
+      <RolesTable roles={roles} rolesStats={rolesStats} />
     </div>
-  </div>
+  )
 }

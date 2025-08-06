@@ -1,7 +1,7 @@
 import { UsersStats as UsersStatsType } from "@/actions/admins"
 import { GeneralActionResponse } from "@/types/general-action-response"
 
-export default function UsersStats({ usersStats }: { usersStats: GeneralActionResponse<UsersStatsType> }) {
+export default function UsersStats({ children, usersStats }: { children: React.ReactNode, usersStats: GeneralActionResponse<UsersStatsType> }) {
   const { data: usersStatsData, error: usersStatsError } = usersStats
 
   const statsItems = [
@@ -56,10 +56,16 @@ export default function UsersStats({ usersStats }: { usersStats: GeneralActionRe
   }
 
   return (
-    <div className="space-y-3 p-4">
-      <div>
-        <h1 className="text-2xl font-bold text-admin-text mb-1">Users Statistics</h1>
-        <p className="text-admin-text-muted text-sm">Overview of your users</p>
+    <div className="space-y-3">
+      <div className="flex flex-col lg:flex-row justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-admin-text mb-1">Admin Management</h1>
+          <p className="text-admin-text-muted text-sm">Overview of your admins</p>
+        </div>
+
+        <div className="flex lg:justify-end items-center gap-4 w-full lg:w-auto">
+          {children}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

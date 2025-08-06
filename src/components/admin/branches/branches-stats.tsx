@@ -1,7 +1,7 @@
 import { BranchesStats as BranchesStatsTypes } from "@/actions/branches"
 import { GeneralActionResponse } from "@/types/general-action-response"
 
-export default function BranchesStats({ branchesStats }: { branchesStats: GeneralActionResponse<BranchesStatsTypes> }) {
+export default function BranchesStats({ children, branchesStats }: { children: React.ReactNode, branchesStats: GeneralActionResponse<BranchesStatsTypes> }) {
   const { data: branchesStatsData, error: branchesStatsError } = branchesStats
 
   const statsItems = [
@@ -56,12 +56,18 @@ export default function BranchesStats({ branchesStats }: { branchesStats: Genera
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-3xl font-bold text-admin-text mb-2">Branches Statistics</h1>
-        <p className="text-admin-text-muted">Overview of your branches</p>
+    <div className="space-y-3">
+      <div className="flex flex-col lg:flex-row justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-admin-text mb-1">Branches</h1>
+          <p className="text-admin-text-muted text-sm">Overview of your branches</p>
+        </div>
+
+        <div className="flex lg:justify-end items-center gap-4 w-full lg:w-auto">
+          {children}
+        </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsItems.map((stat, index) => (
           <div
@@ -76,7 +82,7 @@ export default function BranchesStats({ branchesStats }: { branchesStats: Genera
                 Active
               </div> */}
             </div>
-            
+
             <div className="space-y-2">
               <h3 className="text-admin-text-muted font-medium text-sm uppercase tracking-wide">
                 {stat.title}

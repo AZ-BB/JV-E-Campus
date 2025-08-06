@@ -47,9 +47,11 @@ export default async function StaffPage({
   const staffStats = await getStaffStats()
   return (
     <div>
-      <StaffStats staffStats={staffStats} />
       <div className="p-4 pt-0">
-        <StaffTable staffUsers={staffUsers} />
+        <StaffTable 
+        staffUsers={staffUsers}
+        staffStats={staffStats}
+        />
       </div>
     </div>
   )

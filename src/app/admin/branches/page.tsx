@@ -1,4 +1,4 @@
-import BranchesStats from "@/components/admin/branches/branches-stats"
+
 import BranchesTable from "@/components/admin/branches/branches-table"
 import { Branch, getBranchesStats, getDetailedBranches } from "@/actions/branches"
 
@@ -29,10 +29,9 @@ export default async function BranchesPage({
     orderBy: sort as keyof Branch,
     orderDirection: order as "asc" | "desc",
   })
-  return <div>
-    <BranchesStats branchesStats={branchesStats} />
+  return (
     <div className="p-4 pt-0">
-      <BranchesTable branches={branches} />
+      <BranchesTable branches={branches} branchesStats={branchesStats} />
     </div>
-  </div>
+  )
 }
