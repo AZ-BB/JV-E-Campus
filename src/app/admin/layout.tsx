@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
       <AdminSidebar currentUser={user?.user_metadata} />
 
       {/* Main content */}
-      <main className="flex-1 min-h-0 transition-all duration-300 ease-in-out lg:ml-[var(--sidebar-width,16rem)]">
+      <main className="flex-1 min-h-0 transition-all duration-300 ease-in-out lg:ml-[var(--sidebar-width,16rem)] bg-admin-bg">
         <div className="h-full flex flex-col">
           <div className="lg:hidden h-16 flex-shrink-0" /> {/* Spacer for mobile menu button */}
           <div className="flex-1 min-h-0 p-4">
