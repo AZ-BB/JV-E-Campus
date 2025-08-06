@@ -176,7 +176,7 @@ export default function AdminSidebar({ currentUser }: { currentUser: UserMetadat
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-2 py-4 space-y-1">
+          <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
             {navigationItems.map((item, index) => {
               const Icon = item.icon
               const isActive = pathname === item.href ||
