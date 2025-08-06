@@ -147,7 +147,7 @@ export default async function ModulePage({
                                 <div className="bg-admin-surface p-3 sm:p-4 rounded-lg border border-admin-border hover:bg-admin-border transition-all duration-200">
                                     <Users className="w-5 h-5 mx-auto mb-1 text-admin-primary" />
                                     <div className="text-xs text-admin-textMuted">Enrollments</div>
-                                    <div className="text-lg sm:text-xl font-semibold text-admin-text">0</div>
+                                    <div className="text-lg sm:text-xl font-semibold text-admin-text">5</div>
                                 </div>
                             </div>
                         </div>
