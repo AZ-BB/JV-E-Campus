@@ -23,7 +23,9 @@ export async function getModules({
         roleIds: number[]
     }
 }): Promise<GeneralActionResponse<{
-    rows: typeof modules.$inferSelect[]
+    rows: (typeof modules.$inferSelect & {
+        createdByFullName: string | null
+    })[]
     count: number
     numberOfPages: number
 }>> {

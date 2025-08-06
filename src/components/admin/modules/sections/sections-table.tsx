@@ -1,6 +1,5 @@
 "use client"
 import {
-    TableRoot,
     TableHeader,
     TableBody,
     TableRow,
@@ -27,12 +26,6 @@ const levelColors = {
     BEGINNER: "bg-green-100 text-green-800 border-green-200",
     INTERMEDIATE: "bg-yellow-100 text-yellow-800 border-yellow-200",
     EXPERT: "bg-red-100 text-red-800 border-red-200"
-}
-
-const levelIcons = {
-    BEGINNER: "🌱",
-    INTERMEDIATE: "📚",
-    EXPERT: "🎓"
 }
 
 export default function SectionsTable({
@@ -76,109 +69,107 @@ export default function SectionsTable({
         <div className="">
             <SectionsFilter />
 
-            <TableRoot>
-                <Table
-                    headers={[
-                        {
-                            label: "ID",
-                            key: "id",
-                            componentKey: "id",
-                            sortable: true,
-                            cell: (value: number) => (
-                                <div className="font-mono text-sm text-admin-textMuted">#{value}</div>
-                            ),
-                            sorted: sort === "id",
-                            order: order === "asc" ? "desc" : "asc",
-                        },
-                        {
-                            label: "Section",
-                            key: "name",
-                            componentKey: "name",
-                            sortable: true,
-                            cell: (value: string, row: any) => (
-                                <div className="flex items-start gap-3">
-                                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-admin-surface border border-admin-border flex items-center justify-center">
-                                        <BookOpen className="w-5 h-5 text-admin-primary" />
+            <Table
+                headers={[
+                    {
+                        label: "ID",
+                        key: "id",
+                        componentKey: "id",
+                        sortable: true,
+                        cell: (value: number) => (
+                            <div className="font-mono text-sm text-admin-textMuted">#{value}</div>
+                        ),
+                        sorted: sort === "id",
+                        order: order === "asc" ? "desc" : "asc",
+                    },
+                    {
+                        label: "Section",
+                        key: "name",
+                        componentKey: "name",
+                        sortable: true,
+                        cell: (value: string, row: any) => (
+                            <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-admin-surface border border-admin-border flex items-center justify-center">
+                                    <BookOpen className="w-5 h-5 text-admin-primary" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <div className="font-medium text-admin-text truncate">
+                                        {value}
                                     </div>
-                                    <div className="min-w-0 flex-1">
-                                        <div className="font-medium text-admin-text truncate">
-                                            {value}
+                                    {row.description && (
+                                        <div className="text-sm text-admin-textMuted mt-1 line-clamp-2">
+                                            {row.description}
                                         </div>
-                                        {row.description && (
-                                            <div className="text-sm text-admin-textMuted mt-1 line-clamp-2">
-                                                {row.description}
-                                            </div>
-                                        )}
-                                    </div>
+                                    )}
                                 </div>
-                            ),
-                            sorted: sort === "name",
-                            order: order === "asc" ? "desc" : "asc",
-                        },
-                        {
-                            label: "Level",
-                            key: "level",
-                            componentKey: "level",
-                            sortable: false,
-                            cell: (value: any) => {
-                                if (!value) {
-                                    return (
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-gray-100 text-gray-600 border-gray-200">
-                                            Not set
-                                        </span>
-                                    )
-                                }
+                            </div>
+                        ),
+                        sorted: sort === "name",
+                        order: order === "asc" ? "desc" : "asc",
+                    },
+                    {
+                        label: "Level",
+                        key: "level",
+                        componentKey: "level",
+                        sortable: false,
+                        cell: (value: any) => {
+                            if (!value) {
                                 return (
-                                    <div className="flex items-center gap-2">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[value as keyof typeof levelColors]}`}>
-                                            {value.charAt(0) + value.slice(1).toLowerCase()}
-                                        </span>
-                                    </div>
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-gray-100 text-gray-600 border-gray-200">
+                                        Not set
+                                    </span>
                                 )
-                            },
-                            sorted: sort === "level",
-                            order: order === "asc" ? "desc" : "asc",
-                        },
-                        {
-                            label: "Created",
-                            key: "createdAt",
-                            componentKey: "createdAt",
-                            sortable: true,
-                            cell: (value: string | null) => (
-                                <div className="flex items-center gap-2 text-sm text-admin-textMuted">
-                                    <Calendar className="w-4 h-4" />
-                                    <span>{value ? new Date(value).toLocaleDateString() : "N/A"}</span>
+                            }
+                            return (
+                                <div className="flex items-center gap-2">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${levelColors[value as keyof typeof levelColors]}`}>
+                                        {value.charAt(0) + value.slice(1).toLowerCase()}
+                                    </span>
                                 </div>
-                            ),
-                            sorted: sort === "createdAt",
-                            order: order === "asc" ? "desc" : "asc",
+                            )
                         },
-                        {
-                            label: "Last Updated",
-                            key: "updatedAt",
-                            componentKey: "updatedAt",
-                            sortable: true,
-                            cell: (value: string | null) => (
-                                <div className="flex items-center gap-2 text-sm text-admin-textMuted">
-                                    <Clock className="w-4 h-4" />
-                                    <span>{value ? new Date(value).toLocaleDateString() : "Not updated"}</span>
-                                </div>
-                            ),
-                            sorted: sort === "updatedAt",
-                            order: order === "asc" ? "desc" : "asc",
-                        },
-                    ]
-                    }
-                    data={sections.data.rows}
-                    onSort={(column) => {
-                        const newOrder = order === "asc" ? "desc" : "asc"
-                        const newQuery = new URLSearchParams(query)
-                        newQuery.set("sort", column)
-                        newQuery.set("order", newOrder)
-                        router.push(`?${newQuery.toString()}`)
-                    }}
-                />
-            </TableRoot>
+                        sorted: sort === "level",
+                        order: order === "asc" ? "desc" : "asc",
+                    },
+                    {
+                        label: "Created",
+                        key: "createdAt",
+                        componentKey: "createdAt",
+                        sortable: true,
+                        cell: (value: string | null) => (
+                            <div className="flex items-center gap-2 text-sm text-admin-textMuted">
+                                <Calendar className="w-4 h-4" />
+                                <span>{value ? new Date(value).toLocaleDateString() : "N/A"}</span>
+                            </div>
+                        ),
+                        sorted: sort === "createdAt",
+                        order: order === "asc" ? "desc" : "asc",
+                    },
+                    {
+                        label: "Last Updated",
+                        key: "updatedAt",
+                        componentKey: "updatedAt",
+                        sortable: true,
+                        cell: (value: string | null) => (
+                            <div className="flex items-center gap-2 text-sm text-admin-textMuted">
+                                <Clock className="w-4 h-4" />
+                                <span>{value ? new Date(value).toLocaleDateString() : "Not updated"}</span>
+                            </div>
+                        ),
+                        sorted: sort === "updatedAt",
+                        order: order === "asc" ? "desc" : "asc",
+                    },
+                ]
+                }
+                data={sections.data.rows}
+                onSort={(column) => {
+                    const newOrder = order === "asc" ? "desc" : "asc"
+                    const newQuery = new URLSearchParams(query)
+                    newQuery.set("sort", column)
+                    newQuery.set("order", newOrder)
+                    router.push(`?${newQuery.toString()}`)
+                }}
+            />
 
             {sections.data.numberOfPages > 1 && (
                 <div className="px-4 py-3 border-t border-admin-border">
