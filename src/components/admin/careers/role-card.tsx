@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { Users, ArrowRight, ChefHat, UserCheck, Crown } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface Role {
     id: number
@@ -76,7 +77,7 @@ function getRoleGradient(roleName: string): string {
 function getRoleIcon(roleName: string): React.ReactNode {
     const name = roleName.toUpperCase()
     const iconClass = "w-12 h-12 text-white/90"
-    
+
     switch (name) {
         case 'FOH':
             return <UserCheck className={iconClass} />
@@ -90,27 +91,27 @@ function getRoleIcon(roleName: string): React.ReactNode {
 }
 
 export default function RoleCard({ role }: RoleCardProps) {
+    const router = useRouter()
     const handleRoleClick = () => {
-        // TODO: Navigate to role modules page
-        console.log(`Clicked on role: ${role.name}`)
+        router.push(`/admin/careers/${role.id}`)
     }
 
     return (
-        <div 
+        <div
             onClick={handleRoleClick}
             className="group bg-admin-surface rounded-lg border border-admin-border overflow-hidden hover:border-admin-primary transition-all duration-300 cursor-pointer hover:shadow-lg"
         >
             {/* Cover Image */}
             <div className={`relative h-48 overflow-hidden ${getRoleGradient(role.name)}`}>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
-                
+
                 {/* Background pattern */}
                 <div className="absolute inset-0 opacity-20">
                     <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent" />
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12" />
                 </div>
-                
+
                 {/* Role icon and title */}
                 <div className="absolute inset-0 flex items-center justify-center z-20">
                     <div className="text-center flex flex-col items-center">

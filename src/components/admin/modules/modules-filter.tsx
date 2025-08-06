@@ -11,10 +11,12 @@ import { TableIcon, Grid3X3, LayoutGrid } from "lucide-react"
 
 export default function ModulesFilter({
     view,
-    onViewChange
+    onViewChange,
+    showRoleFilter = false
 }: {
     view: 'table' | 'grid'
     onViewChange: (view: 'table' | 'grid') => void
+    showRoleFilter?: boolean
 }) {
 
     const router = useRouter()
@@ -74,15 +76,17 @@ export default function ModulesFilter({
                     value={search}
                     onChange={(e) => setSearch(e.target.value)} />
 
-                <MultipleSelect
-                    className="w-44 h-10"
-                    options={roles}
-                    value={roleIds}
-                    onValueChange={handleSelectRoleIds}
-                    labelClassName="text-xs"
-                    label="Role"
-                    placeholder="Select Role.."
-                />
+                {showRoleFilter && (
+                    <MultipleSelect
+                        className="w-44 h-10"
+                        options={roles}
+                        value={roleIds}
+                        onValueChange={handleSelectRoleIds}
+                        labelClassName="text-xs"
+                        label="Role"
+                        placeholder="Select Role.."
+                    />
+                )}
             </div>
 
             {/* View Toggle */}

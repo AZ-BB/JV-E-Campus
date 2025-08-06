@@ -53,6 +53,13 @@ export default function ModulesGrid({
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 py-4">
+            {
+                data.data?.rows.length === 0 && (
+                    <div className="flex justify-center items-center h-full col-span-full">
+                        <p className="text-admin-textMuted">No modules found</p>
+                    </div>
+                )
+            }
             {data.data?.rows.map((module) => {
                 const moduleWithCreator = module as ModuleWithCreator
                 return (

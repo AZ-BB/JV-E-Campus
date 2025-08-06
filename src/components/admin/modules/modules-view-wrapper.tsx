@@ -11,10 +11,12 @@ import { modules } from '@/db/schema/schema'
 
 export default function ModulesViewWrapper({
     initialView,
-    modulesData
+    modulesData,
+    showRoleFilter = true
 }: {
     initialView: 'table' | 'grid'
     modulesData: GeneralActionResponse<{ rows: (typeof modules.$inferSelect & { createdByFullName: string | null })[], count: number, numberOfPages: number }>
+    showRoleFilter?: boolean
 }) {
     const [view, setView] = useState<'table' | 'grid'>(initialView)
     const router = useRouter()
@@ -37,6 +39,7 @@ export default function ModulesViewWrapper({
             <ModulesFilter
                 view={view}
                 onViewChange={handleViewChange}
+                showRoleFilter={showRoleFilter}
             />
 
             {view === 'table' ? (
