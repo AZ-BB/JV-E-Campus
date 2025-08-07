@@ -87,7 +87,7 @@ export default function SignIn() {
         if (role === "ADMIN") {
           router.push("/admin")
         } else if (role === "STAFF") {
-          router.push("/staff")
+          router.push("/")
         } else {
           router.push("/")
         }
@@ -145,7 +145,7 @@ export default function SignIn() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-white/50 backdrop-blur-sm"
+                className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-white/50 backdrop-blur-sm"
                 placeholder="Enter your email"
               />
             </div>
@@ -165,7 +165,7 @@ export default function SignIn() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-white/50 backdrop-blur-sm"
+                className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 bg-white/50 backdrop-blur-sm"
                 placeholder="Enter your password"
               />
             </div>
