@@ -59,3 +59,19 @@ export async function getLessons(sectionId: number, {
         }
     }
 }
+
+export async function getLesson(lessonId: number): Promise<GeneralActionResponse<typeof lessons.$inferSelect>> {
+    try {
+        const lesson = await db.select().from(lessons).where(eq(lessons.id, lessonId))
+        return {
+            data: lesson[0],
+            error: null
+        }
+    } catch (error) {
+        console.error(error)
+        return {
+            data: null,
+            error: error instanceof Error ? error.message : "An unknown error occurred"
+        }
+    }
+}
