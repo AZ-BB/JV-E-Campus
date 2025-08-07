@@ -9,6 +9,7 @@ import {
 import { lessons } from "@/db/schema/schema"
 import Logout from "@/components/logout"
 import Image from 'next/image'
+import Link from "next/link"
 
 interface SectionData {
     id: number
@@ -53,10 +54,11 @@ function getLessonIcon(type: string) {
     }
 }
 
-function CourseSection({ section, isExpanded, onToggle }: {
+function CourseSection({ section, isExpanded, onToggle, moduleId }: {
     section: SectionData
     isExpanded: boolean
     onToggle: () => void
+    moduleId: string
 }) {
     const totalDuration = section.lessons.reduce((acc, lesson) => acc + (lesson.duration || 0), 0)
     
@@ -86,7 +88,8 @@ function CourseSection({ section, isExpanded, onToggle }: {
             {isExpanded && (
                 <div className="section-content bg-gray-50">
                     {section.lessons.map((lesson) => (
-                        <div 
+                        <Link 
+                            href={`/modules/${moduleId}/lessons/${lesson.id}`}
                             key={lesson.id}
                             className="lesson-item flex items-center p-4 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 hover:translate-x-1 transition-all duration-200 cursor-pointer"
                         >
@@ -107,7 +110,7 @@ function CourseSection({ section, isExpanded, onToggle }: {
                             <span className="lesson-duration text-sm text-gray-600 min-w-16 text-right font-medium">
                                 {formatDuration(lesson.duration)}
                             </span>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             )}
@@ -268,6 +271,7 @@ export default function CourseContent({ module, sections }: CourseContentProps) 
                                 section={section}
                                 isExpanded={expandedSections.has(section.id)}
                                 onToggle={() => toggleSection(section.id)}
+                                moduleId={module?.id.toString() || ''}
                             />
                         ))}
                     </div>
