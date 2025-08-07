@@ -8,7 +8,7 @@ type ModuleWithCreator = typeof modules.$inferSelect & {
 }
 import Avatar from "@/components/ui/avatar"
 import Button from "@/components/ui/button"
-import { mapAvatarImageUrl } from "@/utils/utils"
+import { mapAvatarImageUrl, mapIconUrl } from "@/utils/utils"
 import { Pencil, Trash, MoreVertical } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useEffect, useRef } from "react"
@@ -105,7 +105,7 @@ export default function ModulesGrid({
                         {/* Module Icon */}
                         <div className="flex justify-center mb-4 min-h-16 min-w-16">
                             <Avatar
-                                src={mapAvatarImageUrl(moduleWithCreator.iconUrl || "")}
+                                src={mapIconUrl(moduleWithCreator.iconUrl || "")}
                                 alt={`${moduleWithCreator.name} icon`}
                                 className="w-16 h-16"
                                 fallback={moduleWithCreator.name.split(" ").slice(0, 2).map((name: string) => name[0]).join("") || "M"}
