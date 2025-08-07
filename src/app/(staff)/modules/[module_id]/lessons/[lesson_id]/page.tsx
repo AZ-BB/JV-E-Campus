@@ -2,7 +2,7 @@ import { getLesson, getLessons } from "@/actions/lessons"
 import { getModule } from "@/actions/modules"
 import { getSections } from "@/actions/sections"
 import { lessons } from "@/db/schema/schema"
-import LessonPlayer from "./lesson-player"
+import LessonPlayer from "../../../../../../components/staff/lesson-player"
 
 export default async function Lesson({
     params
