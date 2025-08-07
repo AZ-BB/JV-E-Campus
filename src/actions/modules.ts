@@ -1,6 +1,8 @@
 import { db } from "@/db"
 import { modules, modulesRoles, staffRoles, users } from "@/db/schema/schema"
 import { GeneralActionResponse } from "@/types/general-action-response"
+import responses from "@/responses/responses"
+import { getCurrentUser } from "@/utils/utils"
 import { aliasedTable, and, asc, count, desc, eq, ilike, inArray, sql, SQL } from "drizzle-orm"
 
 // GET
@@ -94,6 +96,25 @@ export async function getModules({
     }
 
     catch (error) {
+        console.error(error)
+        return {
+            data: null,
+            error: error instanceof Error ? error.message : "An unknown error occurred"
+        }
+    }
+}
+
+
+// Get my modules (staff view)
+export const getMyModules = async (): Promise<GeneralActionResponse<{
+    modules: typeof modules.$inferSelect[]
+}>> => {
+    try {
+        const currentUser = await getCurrentUser()
+        const result = await db.select().from(modules).where(eq(modules.id, currentUser?.user?.user_metadata?.db_user_id))
+
+        return { data: { modules: result }, error: null }
+    } catch (error) {
         console.error(error)
         return {
             data: null,
