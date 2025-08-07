@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-Campus Juicer Training</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#2D9944", secondary: "#6b7280" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f5f5f5;
+      }
+      .nav-text {
+      font-size: 12px;
+      line-height: 1.2;
+      text-align: center;
+      display: block;
+      margin-left: 0.5rem;
+      }
+      .nav-item {
+      position: relative;
+      }
+      .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: white;
+      }
+      .progress-circle {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      }
+      .progress-circle svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+      }
+      .progress-circle .background {
+      fill: none;
+      stroke: #e5e7eb;
+      stroke-width: 4;
+      }
+      .progress-circle .progress {
+      fill: none;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-dasharray: 125.66;
+      stroke-dashoffset: 125.66;
+      transition: stroke-dashoffset 0.5s ease;
+      }
+      .progress-circle .progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px;
+      font-weight: 600;
+      color: #4b5563;
+      }
+      .progress-orange .progress { stroke: #ea580c; }
+      .progress-pink .progress { stroke: #dc2626; }
+      .progress-yellow .progress { stroke: #d97706; }
+      .progress-gray .progress { stroke: #6b7280; }
+      .progress-green .progress { stroke: #059669; }
+      .progress-blue .progress { stroke: #2563eb; }
+      .progress-purple .progress { stroke: #7c3aed; }
+      .training-card {
+      transition: all 0.3s ease-in-out;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      cursor: pointer;
+      }
+      .training-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--card-color), var(--card-color-light));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+      border-radius: 12px 12px 0 0;
+      }
+      .training-card:hover::before {
+      transform: scaleX(1);
+      }
+      .training-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--card-color);
+      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+      }
+      .training-card .icon-container {
+      transition: all 0.3s ease;
+      }
+      .training-card:hover .icon-container {
+      transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Navigation -->
+    <nav class="shadow-md px-12 py-2" style="background-color: #01A252;">
+      <div class="flex items-center justify-between">
+                 <!-- Logo -->
+         <div class="flex items-center">
+           <img src="../image/Jon+&+Vinny's+Sign.jpg" alt="Jon & Vinny's" class="h-14 w-auto object-contain">
+         </div>
+        
+        <!-- Navigation Items -->
+        <div class="flex items-center space-x-8">
+          <a href="index.html" class="nav-item text-white hover:text-white flex items-center">
+            <i class="ri-home-line text-lg"></i>
+            <span class="nav-text uppercase">HOME</span>
+          </a>
+          <a href="index.html" class="nav-item text-white hover:text-white flex items-center">
+            <i class="ri-book-open-line text-lg"></i>
+            <span class="nav-text uppercase">TRAINING</span>
+          </a>
+          <a href="products.html" class="nav-item text-white hover:text-white flex items-center">
+            <i class="ri-store-2-line text-lg"></i>
+            <span class="nav-text uppercase">PRODUCTS</span>
+          </a>
+          <a href="#" class="nav-item text-white hover:text-white flex items-center">
+            <i class="ri-file-list-3-line text-lg"></i>
+            <span class="nav-text uppercase">RESOURCES</span>
+          </a>
+          <a href="#" class="nav-item text-white hover:text-white flex items-center">
+            <i class="ri-user-settings-line text-lg"></i>
+            <span class="nav-text uppercase">GUIDE</span>
+          </a>
+          <a href="#" class="nav-item text-white hover:text-white flex items-center">
+            <i class="ri-error-warning-line text-lg"></i>
+            <span class="nav-text uppercase">HELP</span>
+          </a>
+        </div>
+        
+        <!-- Search Button -->
+        <button class="w-10 h-10 flex items-center justify-center text-white hover:text-white rounded-none">
+          <i class="ri-search-line ri-lg"></i>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="bg-white min-h-screen">
+      <!-- Header Section -->
+      <div class="px-12 py-12">
+        <h1 class="text-4xl font-bold text-gray-800 mb-4">Juicer</h1>
+        <p class="text-lg text-gray-700 mb-6">
+          The Juicer journey at Jon & the Juice starts here!
+        </p>
+        <p class="text-gray-600 leading-relaxed mb-12">
+          Throughout this training, the Juicer will acquire knowledge and skills in product making, hygiene procedures, creating great guest experiences, and much more.
+        </p>
+
+        <!-- Introduction Section -->
+        <div class="mb-12">
+          <div class="training-card flex items-center p-6 border border-gray-200" style="--card-color: #2563eb; --card-color-light: #60a5fa;">
+            <div class="flex-shrink-0 w-16 h-16 mr-6">
+              <div class="icon-container w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="ri-information-line text-2xl text-blue-600"></i>
+              </div>
+            </div>
+            <div class="flex-1">
+              <p class="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">INTRODUCTION</p>
+              <h3 class="text-lg font-bold text-gray-800 mb-2">Training Introduction</h3>
+              <p class="text-gray-600">Our training material, platforms and journey explained.</p>
+            </div>
+                          <div class="flex-shrink-0 ml-6">
+                <div class="progress-circle progress-blue">
+                  <svg viewBox="0 0 50 50">
+                    <circle class="background" cx="25" cy="25" r="20"></circle>
+                    <circle class="progress" cx="25" cy="25" r="20" style="stroke-dashoffset: 31.41;"></circle>
+                  </svg>
+                  <div class="progress-text">75%</div>
+                </div>
+              </div>
+          </div>
+        </div>
+
+        <!-- Training Modules Section -->
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-8">Training Modules</h2>
+          
+          <div class="space-y-6">
+            <!-- Food Station -->
+            <div class="training-card flex items-center p-6 border border-gray-200" style="--card-color: #ea580c; --card-color-light: #fb923c;">
+              <div class="flex-shrink-0 w-16 h-16 mr-6">
+                <div class="icon-container w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center">
+                  <i class="ri-cake-2-line text-2xl text-orange-600"></i>
+                </div>
+              </div>
+              <div class="flex-1">
+                <p class="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">BASIC JUICER TRAINING</p>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Food Station</h3>
+                <p class="text-gray-600">How to make Sandwiches, Salads & Breakfast products.</p>
+              </div>
+              <div class="flex-shrink-0 ml-6">
+                <div class="progress-circle progress-orange">
+                  <svg viewBox="0 0 50 50">
+                    <circle class="background" cx="25" cy="25" r="20"></circle>
+                    <circle class="progress" cx="25" cy="25" r="20" style="stroke-dashoffset: 87.96;"></circle>
+                  </svg>
+                  <div class="progress-text">30%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Juice Station -->
+            <div class="training-card flex items-center p-6 border border-gray-200" style="--card-color: #dc2626; --card-color-light: #f87171;">
+              <div class="flex-shrink-0 w-16 h-16 mr-6">
+                <div class="icon-container w-16 h-16 bg-pink-100 rounded-lg flex items-center justify-center">
+                  <i class="ri-drop-line text-2xl text-pink-600"></i>
+                </div>
+              </div>
+              <div class="flex-1">
+                <p class="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">BASIC JUICER TRAINING</p>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Juice Station</h3>
+                <p class="text-gray-600">The essentials of working at the Juicer Station!</p>
+              </div>
+              <div class="flex-shrink-0 ml-6">
+                <div class="progress-circle progress-pink">
+                  <svg viewBox="0 0 50 50">
+                    <circle class="background" cx="25" cy="25" r="20"></circle>
+                    <circle class="progress" cx="25" cy="25" r="20" style="stroke-dashoffset: 62.83;"></circle>
+                  </svg>
+                  <div class="progress-text">50%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coffee Station -->
+            <div class="training-card flex items-center p-6 border border-gray-200" style="--card-color: #d97706; --card-color-light: #fbbf24;">
+              <div class="flex-shrink-0 w-16 h-16 mr-6">
+                <div class="icon-container w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <i class="ri-cup-line text-2xl text-yellow-600"></i>
+                </div>
+              </div>
+              <div class="flex-1">
+                <p class="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">BASIC JUICER TRAINING</p>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Coffee Station</h3>
+                <p class="text-gray-600">All the basics needed to work on the Coffee Station making!</p>
+              </div>
+              <div class="flex-shrink-0 ml-6">
+                <div class="progress-circle progress-yellow">
+                  <svg viewBox="0 0 50 50">
+                    <circle class="background" cx="25" cy="25" r="20"></circle>
+                    <circle class="progress" cx="25" cy="25" r="20" style="stroke-dashoffset: 100.53;"></circle>
+                  </svg>
+                  <div class="progress-text">20%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Till Station -->
+            <div class="training-card flex items-center p-6 border border-gray-200" style="--card-color: #6b7280; --card-color-light: #9ca3af;">
+              <div class="flex-shrink-0 w-16 h-16 mr-6">
+                <div class="icon-container w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <i class="ri-cash-line text-2xl text-gray-600"></i>
+                </div>
+              </div>
+              <div class="flex-1">
+                <p class="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">BASIC JUICER TRAINING</p>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Till Station</h3>
+                <p class="text-gray-600">The general knowledge of working at the Till & how to take an order!</p>
+              </div>
+              <div class="flex-shrink-0 ml-6">
+                <div class="progress-circle progress-gray">
+                  <svg viewBox="0 0 50 50">
+                    <circle class="background" cx="25" cy="25" r="20"></circle>
+                    <circle class="progress" cx="25" cy="25" r="20" style="stroke-dashoffset: 125.66;"></circle>
+                  </svg>
+                  <div class="progress-text">0%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Till Captain -->
+            <div class="training-card flex items-center p-6 border border-gray-200" style="--card-color: #059669; --card-color-light: #34d399;">
+              <div class="flex-shrink-0 w-16 h-16 mr-6">
+                <div class="icon-container w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center">
+                  <i class="ri-user-star-line text-2xl text-green-600"></i>
+                </div>
+              </div>
+              <div class="flex-1">
+                <p class="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">BASIC JUICER TRAINING</p>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Till Captain</h3>
+                <p class="text-gray-600">How to make recommendations to our guests to cross & upsell.</p>
+              </div>
+              <div class="flex-shrink-0 ml-6">
+                <div class="progress-circle progress-green">
+                  <svg viewBox="0 0 50 50">
+                    <circle class="background" cx="25" cy="25" r="20"></circle>
+                    <circle class="progress" cx="25" cy="25" r="20" style="stroke-dashoffset: 75.40;"></circle>
+                  </svg>
+                  <div class="progress-text">40%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Opening Shift -->
+            <div class="training-card flex items-center p-6 border border-gray-200" style="--card-color: #2563eb; --card-color-light: #60a5fa;">
+              <div class="flex-shrink-0 w-16 h-16 mr-6">
+                <div class="icon-container w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <i class="ri-door-open-line text-2xl text-blue-600"></i>
+                </div>
+              </div>
+              <div class="flex-1">
+                <p class="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">BASIC JUICER TRAINING</p>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Opening Shift</h3>
+                <p class="text-gray-600">How to prepare the store for the day!</p>
+              </div>
+              <div class="flex-shrink-0 ml-6">
+                <div class="progress-circle progress-blue">
+                  <svg viewBox="0 0 50 50">
+                    <circle class="background" cx="25" cy="25" r="20"></circle>
+                    <circle class="progress" cx="25" cy="25" r="20" style="stroke-dashoffset: 50.26;"></circle>
+                  </svg>
+                  <div class="progress-text">60%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Closing Shift -->
+            <div class="training-card flex items-center p-6 border border-gray-200" style="--card-color: #7c3aed; --card-color-light: #a78bfa;">
+              <div class="flex-shrink-0 w-16 h-16 mr-6">
+                <div class="icon-container w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <i class="ri-door-close-line text-2xl text-purple-600"></i>
+                </div>
+              </div>
+              <div class="flex-1">
+                <p class="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">BASIC JUICER TRAINING</p>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Closing Shift</h3>
+                <p class="text-gray-600">How to close the store making it clean and ready for the next day!</p>
+              </div>
+              <div class="flex-shrink-0 ml-6">
+                <div class="progress-circle progress-purple">
+                  <svg viewBox="0 0 50 50">
+                    <circle class="background" cx="25" cy="25" r="20"></circle>
+                    <circle class="progress" cx="25" cy="25" r="20" style="stroke-dashoffset: 87.96;"></circle>
+                  </svg>
+                  <div class="progress-text">30%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script id="navigation-script">
+      document.addEventListener("DOMContentLoaded", function () {
+        const navItems = document.querySelectorAll(".nav-item");
+        navItems.forEach((item) => {
+          item.addEventListener("click", function (e) {
+            navItems.forEach((navItem) => {
+              navItem.classList.remove("active");
+              navItem.classList.add("");
+            });
+            this.classList.add("active");
+            this.classList.remove("");
+          });
+        });
+      });
+    </script>
+  </body>
+</html> 

@@ -2,7 +2,7 @@
 
 import Image from "next/image"
 import { Users, ArrowRight, ChefHat, UserCheck, Crown } from "lucide-react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 interface Role {
     id: number
@@ -91,16 +91,11 @@ function getRoleIcon(roleName: string): React.ReactNode {
 }
 
 export default function RoleCard({ role }: RoleCardProps) {
-    const router = useRouter()
-    const handleRoleClick = () => {
-        router.push(`/admin/careers/${role.id}`)
-    }
-
     return (
-        <div
-            onClick={handleRoleClick}
-            className="group bg-admin-surface rounded-lg border border-admin-border overflow-hidden hover:border-admin-primary transition-all duration-300 cursor-pointer hover:shadow-lg"
-        >
+        <Link href={`/admin/careers/${role.id}`}>
+            <div
+                className="group bg-admin-surface rounded-lg border border-admin-border overflow-hidden hover:border-admin-primary transition-all duration-300 cursor-pointer hover:shadow-lg"
+            >
             {/* Cover Image */}
             <div className={`relative h-48 overflow-hidden ${getRoleGradient(role.name)}`}>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent z-10" />
@@ -153,6 +148,7 @@ export default function RoleCard({ role }: RoleCardProps) {
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </Link>
     )
 }
