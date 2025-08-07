@@ -240,7 +240,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                                          return (
                                              <a
                                                  key={sectionLesson.id}
-                                                 href={`/${moduleId}/lessons/${sectionLesson.id}`}
+                                                 href={`/modules/${moduleId}/lessons/${sectionLesson.id}`}
                                                  onClick={() => handleLessonClick(sectionLesson.id)}
                                                  className={`flex items-center p-3 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-gray-100 ${
                                                      isActive 
@@ -280,7 +280,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                         {/* Breadcrumb */}
                         <div className="mb-4">
                             <nav className="flex items-center space-x-2 text-sm">
-                                <a href={`/${moduleId}`} className="text-gray-600 hover:text-gray-800">
+                                <a href={`/modules/${moduleId}`} className="text-gray-600 hover:text-gray-800">
                                     {module?.name || 'Training'}
                                 </a>
                                 <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -410,7 +410,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                          <div className="flex items-center gap-4 mb-6">
                              {previousLesson ? (
                                  <a 
-                                     href={`/${moduleId}/lessons/${previousLesson.id}`}
+                                     href={`/modules/${moduleId}/lessons/${previousLesson.id}`}
                                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
                                  >
                                      <ArrowLeft className="w-4 h-4 mr-2" />
@@ -428,7 +428,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                              
                              {nextLesson ? (
                                  <a 
-                                     href={`/${moduleId}/lessons/${nextLesson.id}`}
+                                     href={`/modules/${moduleId}/lessons/${nextLesson.id}`}
                                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
                                  >
                                      Next Lesson
