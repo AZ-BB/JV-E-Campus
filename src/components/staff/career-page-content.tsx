@@ -125,7 +125,7 @@ export default function CareerPageContent({ modulesData, role }: CareerPageConte
         }
       `}</style>
 
-      <div className="bg-white min-h-screen">
+      <div className="bg-white min-h-screen pt-20">
         {/* Header Section */}
         <div className="px-12 py-12">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">{role?.fullName} Training Path</h1>
@@ -165,7 +165,7 @@ export default function CareerPageContent({ modulesData, role }: CareerPageConte
           <div>
             <h2 className="text-2xl font-bold text-gray-800 mb-8">Training Modules</h2>
             
-            <div className="space-y-6">
+            <div className="space-y-4">
               {modulesData.map((module, index) => {
                 const colorScheme = moduleColorSchemes[index % moduleColorSchemes.length]
                 const progressPercentage = 0
@@ -181,26 +181,30 @@ export default function CareerPageContent({ modulesData, role }: CareerPageConte
                   <Link 
                     key={module.id} 
                     href={`/modules/${module.id}`}
-                    className="training-card flex items-center p-6 border border-gray-200" 
-                    style={{"--card-color": colorScheme.primary, "--card-color-light": colorScheme.light} as React.CSSProperties}
+                    className="block w-full"
                   >
-                    <div className="flex-shrink-0 w-16 h-16 mr-6">
-                      <div className={`icon-container w-16 h-16 ${colorScheme.bg} rounded-lg flex items-center justify-center`}>
-                        <i className={`${colorScheme.icon} text-2xl ${colorScheme.text}`}></i>
+                    <div
+                      className="training-card flex items-center p-6 border border-gray-200"
+                      style={{"--card-color": colorScheme.primary, "--card-color-light": colorScheme.light} as React.CSSProperties}
+                    >
+                      <div className="flex-shrink-0 w-16 h-16 mr-6">
+                        <div className={`icon-container w-16 h-16 ${colorScheme.bg} rounded-lg flex items-center justify-center`}>
+                          <i className={`${colorScheme.icon} text-2xl ${colorScheme.text}`}></i>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">TRAINING MODULE</p>
-                      <h3 className="text-lg font-bold text-gray-800 mb-2">{module.name}</h3>
-                      <p className="text-gray-600">{module.description || module.slogan || "Essential training for your role."}</p>
-                    </div>
-                    <div className="flex-shrink-0 ml-6">
-                      <div className={`progress-circle ${progressColorClass}`}>
-                        <svg viewBox="0 0 50 50">
-                          <circle className="background" cx="25" cy="25" r="20"></circle>
-                          <circle className="progress" cx="25" cy="25" r="20" style={{strokeDashoffset: strokeDashoffset.toString()}}></circle>
-                        </svg>
-                        <div className="progress-text">{progressPercentage}%</div>
+                      <div className="flex-1">
+                        <p className="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">TRAINING MODULE</p>
+                        <h3 className="text-lg font-bold text-gray-800 mb-2">{module.name}</h3>
+                        <p className="text-gray-600">{module.description || module.slogan || "Essential training for your role."}</p>
+                      </div>
+                      <div className="flex-shrink-0 ml-6">
+                        <div className={`progress-circle ${progressColorClass}`}>
+                          <svg viewBox="0 0 50 50">
+                            <circle className="background" cx="25" cy="25" r="20"></circle>
+                            <circle className="progress" cx="25" cy="25" r="20" style={{strokeDashoffset: strokeDashoffset.toString()}}></circle>
+                          </svg>
+                          <div className="progress-text">{progressPercentage}%</div>
+                        </div>
                       </div>
                     </div>
                   </Link>

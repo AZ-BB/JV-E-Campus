@@ -2,7 +2,7 @@ import { getLessons } from "@/actions/lessons"
 import { getModule } from "@/actions/modules"
 import { getSections } from "@/actions/sections"
 import { lessons } from "@/db/schema/schema"
-import CourseContent from "./course-content"
+import CourseContent from "../../../../components/staff/course-content"
 
 export default async function Staff({
     params
