@@ -215,11 +215,7 @@ export default function CareerPageContent({ modulesData, role }: CareerPageConte
         </div>
       </div>
 
-      {/* Add Remix Icon CSS */}
-      <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
-      />
+      {/* Remix Icon CSS is loaded globally in the root layout */}
     </>
   )
 }
