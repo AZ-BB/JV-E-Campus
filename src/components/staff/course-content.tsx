@@ -1,15 +1,15 @@
 'use client'
-import { useState } from "react"
-import { 
-    ChevronDown, 
-    PlayCircle, 
-    FileText, 
-    Award
+import { useEffect, useMemo, useState } from "react"
+import {
+    ChevronDown,
+    PlayCircle,
+    FileText,
+    Award,
+    ChevronUp
 } from "lucide-react"
 import { lessons } from "@/db/schema/schema"
-import Logout from "@/components/logout"
-import Image from 'next/image'
 import Link from "next/link"
+import Input from "@/components/ui/input"
 
 interface SectionData {
     id: number
@@ -54,6 +54,8 @@ function getLessonIcon(type: string) {
     }
 }
 
+//
+
 function CourseSection({ section, isExpanded, onToggle, moduleId }: {
     section: SectionData
     isExpanded: boolean
@@ -88,29 +90,31 @@ function CourseSection({ section, isExpanded, onToggle, moduleId }: {
             {isExpanded && (
                 <div className="section-content bg-gray-50">
                     {section.lessons.map((lesson) => (
-                        <Link 
-                            href={`/modules/${moduleId}/lessons/${lesson.id}`}
+                        <div 
                             key={lesson.id}
-                            className="lesson-item flex items-center p-4 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 hover:translate-x-1 transition-all duration-200 cursor-pointer"
+                            className="lesson-item flex items-center p-4 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 hover:translate-x-1 transition-all duration-200"
                         >
                             <div className="lesson-icon mr-4 transition-transform duration-200 hover:scale-110">
                                 {getLessonIcon(lesson.type || 'TEXT')}
                             </div>
-                            <span className="lesson-title flex-1 text-sm text-gray-700 font-medium">
+                            <Link 
+                                href={`/modules/${moduleId}/lessons/${lesson.id}`}
+                                className="flex-1 text-sm text-gray-700 font-medium hover:underline"
+                            >
                                 {lesson.name}
-                            </span>
+                            </Link>
                             {lesson.videoUrl && (
-                                <a 
-                                    href="#" 
+                                <Link
+                                    href={`/modules/${moduleId}/lessons/${lesson.id}`}
                                     className="lesson-preview text-purple-600 text-sm mr-4 font-semibold px-2 py-1 rounded hover:bg-purple-600 hover:text-white transition-all duration-200"
                                 >
                                     Preview
-                                </a>
+                                </Link>
                             )}
                             <span className="lesson-duration text-sm text-gray-600 min-w-16 text-right font-medium">
                                 {formatDuration(lesson.duration)}
                             </span>
-                        </Link>
+                        </div>
                     ))}
                 </div>
             )}
@@ -122,7 +126,9 @@ export default function CourseContent({ module, sections }: CourseContentProps) 
     const [expandedSections, setExpandedSections] = useState<Set<number>>(
         new Set([sections[0]?.id].filter(Boolean))
     )
-    const [activeNav, setActiveNav] = useState('TRAINING')
+    const [search, setSearch] = useState("")
+    const [resumeLessonId, setResumeLessonId] = useState<number | null>(null)
+    
 
     const toggleSection = (sectionId: number) => {
         setExpandedSections(prev => {
@@ -140,18 +146,15 @@ export default function CourseContent({ module, sections }: CourseContentProps) 
         setExpandedSections(new Set(sections.map(s => s.id)))
     }
 
-    const navItems = [
-        { id: 'HOME', icon: 'ri-home-line' },
-        { id: 'TRAINING', icon: 'ri-book-open-line' },
-        { id: 'PRODUCTS', icon: 'ri-store-2-line' },
-        { id: 'RESOURCES', icon: 'ri-file-list-3-line' },
-        { id: 'GUIDE', icon: 'ri-user-settings-line' },
-        { id: 'HELP', icon: 'ri-error-warning-line' }
-    ]
-
-    const handleNavClick = (navId: string) => {
-        setActiveNav(navId)
-    }
+    useEffect(() => {
+        const moduleKey = `ecampus.module.${module?.id}.lastLessonId`
+        try {
+            const lastIdRaw = typeof window !== 'undefined' ? window.localStorage.getItem(moduleKey) : null
+            if (lastIdRaw) setResumeLessonId(parseInt(lastIdRaw))
+        } catch (_) {
+            // ignore
+        }
+    }, [module?.id])
 
     const totalLectures = sections.reduce((acc, section) => acc + section.lessons.length, 0)
     const totalDuration = sections.reduce((acc, section) => 
@@ -159,66 +162,8 @@ export default function CourseContent({ module, sections }: CourseContentProps) 
     )
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50" style={{ fontFamily: 'Inter, sans-serif' }}>
-            {/* Remix Icon CSS */}
-            <link 
-                rel="stylesheet" 
-                href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" 
-            />
-            
-            {/* Top Navigation */}
-            <nav className="fixed top-0 left-0 w-full z-50 shadow-lg border-b border-green-600/20 px-12 py-3 backdrop-blur-sm" 
-                 style={{ 
-                   background: 'linear-gradient(135deg, #01A252 0%, #029951 100%)',
-                   boxShadow: '0 10px 40px rgba(1, 162, 82, 0.15)'
-                 }}>
-              <div className="flex items-center justify-between">
-                {/* Logo */}
-                <div className="flex items-center">
-                  <div className="h-12 w-28 rounded-xl flex items-center justify-center ">
-                    <Image src="/logo.jpg" alt="logo" width={180} height={180} className="rounded-lg" />
-                  </div>
-                </div>
-                
-                {/* Navigation Items */}
-                <div className="flex items-center space-x-6">
-                  {navItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleNavClick(item.id)}
-                      className={`group flex flex-col items-center text-white/90 hover:text-white transition-all duration-300 px-4 py-2 rounded-xl relative overflow-hidden ${
-                        activeNav === item.id ? 'active' : ''
-                      }`}
-                      style={{
-                        ...(activeNav === item.id && {
-                          background: 'rgba(255, 255, 255, 0.15)',
-                          backdropFilter: 'blur(10px)',
-                          boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.1)'
-                        })
-                      }}
-                    >
-                      <i className={`${item.icon} text-xl mb-1 transform group-hover:scale-110 transition-transform duration-300`}></i>
-                      <span className="text-xs font-medium uppercase tracking-wide">
-                        {item.id}
-                      </span>
-                      {activeNav === item.id && (
-                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white rounded-full"></div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                
-                {/* Search Button and Logout */}
-                <div className="flex items-center space-x-3">
-                  <button className="w-11 h-11 flex items-center justify-center text-white/90 hover:text-white rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                    <i className="ri-search-line text-lg"></i>
-                  </button>
-                  <Logout />
-                </div>
-              </div>
-            </nav>
-
-            {/* Main Content */}
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
+            {/* Main Content (account for fixed StaffNavbar) */}
             <div className="bg-transparent pt-20">
                 {/* Header Section */}
                 <div className="relative px-12 py-8 overflow-hidden">
@@ -243,38 +188,84 @@ export default function CourseContent({ module, sections }: CourseContentProps) 
                         <p className="text-white/90 text-lg leading-relaxed max-w-2xl font-light">
                             {module?.description || 'Complete training curriculum covering all aspects of your role and responsibilities.'}
                         </p>
+                        {resumeLessonId && (
+                            <div className="mt-6 inline-flex items-center gap-3 bg-white/15 text-white px-4 py-2 rounded-xl backdrop-blur-sm border border-white/20">
+                                <span className="text-sm">Resume where you left off</span>
+                                <Link
+                                    href={`/modules/${module?.id}/lessons/${resumeLessonId}`}
+                                    className="text-sm font-semibold px-3 py-1.5 bg-white text-green-700 rounded-lg hover:bg-gray-100"
+                                >
+                                    Continue
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 {/* Course Structure Section */}
                 <div className="px-12 py-10">
-                    <div className="mb-6">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <span className="text-gray-600">
-                                    {sections.length} sections • {totalLectures} lectures • {formatDuration(totalDuration)} total length
-                                </span>
+                    <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div className="flex items-center gap-3 text-gray-700">
+                            <span className="text-gray-600">
+                                {sections.length} sections • {totalLectures} lectures • {formatDuration(totalDuration)} total length
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="w-72">
+                                <Input
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Search lessons..."
+                                    className="h-10 bg-white border-gray-200"
+                                />
                             </div>
                             <button 
                                 onClick={expandAllSections}
-                                className="text-purple-600 font-medium hover:underline"
+                                className="inline-flex items-center gap-1.5 text-purple-700 font-medium hover:underline"
                             >
-                                Expand all sections
+                                <ChevronDown className="w-4 h-4" />
+                                Expand all
+                            </button>
+                            <button 
+                                onClick={() => setExpandedSections(new Set())}
+                                className="inline-flex items-center gap-1.5 text-purple-700 font-medium hover:underline"
+                            >
+                                <ChevronUp className="w-4 h-4" />
+                                Collapse all
                             </button>
                         </div>
                     </div>
 
-                    <div className="course-sections">
-                        {sections.map((section) => (
-                            <CourseSection
-                                key={section.id}
-                                section={section}
-                                isExpanded={expandedSections.has(section.id)}
-                                onToggle={() => toggleSection(section.id)}
-                                moduleId={module?.id.toString() || ''}
-                            />
-                        ))}
-                    </div>
+                    {useMemo(() => {
+                        const q = search.trim().toLowerCase()
+                        const filtered = q
+                            ? sections
+                                .map((s) => ({
+                                    ...s,
+                                    lessons: s.lessons.filter(l => l.name.toLowerCase().includes(q))
+                                }))
+                                .filter(s => s.lessons.length > 0)
+                            : sections
+                        return (
+                            <div className="course-sections">
+                                {filtered.length === 0 ? (
+                                    <div className="bg-white border border-dashed border-gray-300 rounded-lg p-10 text-center text-gray-600">
+                                        No lessons found for "{search}"
+                                    </div>
+                                ) : (
+                                    filtered.map((section) => (
+                                        <CourseSection
+                                            key={section.id}
+                                            section={section}
+                                            isExpanded={expandedSections.has(section.id)}
+                                            onToggle={() => toggleSection(section.id)}
+                                            moduleId={module?.id.toString() || ''}
+                                        />
+                                    ))
+                                )}
+                            </div>
+                        )
+                    }, [search, sections, expandedSections])}
                 </div>
             </div>
         </div>

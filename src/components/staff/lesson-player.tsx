@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { lessons } from "@/db/schema/schema"
 import Logout from "@/components/logout"
 import Image from 'next/image'
@@ -8,6 +8,7 @@ import {
     FileText, 
     Award,
     ChevronRight,
+    ChevronDown,
     ArrowLeft,
     ArrowRight,
     Bookmark,
@@ -15,7 +16,11 @@ import {
     Calendar,
     Clock,
     CheckCircle,
-    Shield
+    Shield,
+    MapPin,
+    UtensilsCrossed,
+    ClipboardList,
+    ExternalLink
 } from "lucide-react"
 
 interface SectionData {
@@ -101,21 +106,77 @@ function extractYouTubeId(url: string): string | null {
 }
 
 export default function LessonPlayer({ lesson, module, sections, moduleId, lessonId }: LessonPlayerProps) {
-    const [activeNav, setActiveNav] = useState('TRAINING')
     const [currentLessonId, setCurrentLessonId] = useState(parseInt(lessonId))
+    const [completedLessons, setCompletedLessons] = useState<Set<number>>(new Set())
+    const [progressPercent, setProgressPercent] = useState(0)
+    const [expandedSections, setExpandedSections] = useState<Set<number>>(() => {
+        const initial = new Set<number>()
+        const currentSection = sections.find(s => s.lessons.some(l => l.id === parseInt(lessonId)))
+        if (currentSection) initial.add(currentSection.id)
+        else if (sections[0]) initial.add(sections[0].id)
+        return initial
+    })
 
-    const navItems = [
-        { id: 'HOME', icon: 'ri-home-line' },
-        { id: 'TRAINING', icon: 'ri-book-open-line' },
-        { id: 'PRODUCTS', icon: 'ri-store-2-line' },
-        { id: 'RESOURCES', icon: 'ri-file-list-3-line' },
-        { id: 'GUIDE', icon: 'ri-user-settings-line' },
-        { id: 'HELP', icon: 'ri-error-warning-line' }
-    ]
+    // Persist last watched lesson and completed lessons in localStorage
+    useEffect(() => {
+        const moduleKey = `ecampus.module.${moduleId}.lastLessonId`
+        if (typeof window !== 'undefined') {
+            window.localStorage.setItem(moduleKey, String(currentLessonId))
+        }
+    }, [moduleId, currentLessonId])
 
-    const handleNavClick = (navId: string) => {
-        setActiveNav(navId)
+    useEffect(() => {
+        const completedKey = `ecampus.module.${moduleId}.completedLessons`
+        if (typeof window === 'undefined') return
+        try {
+            const raw = window.localStorage.getItem(completedKey)
+            if (raw) {
+                const parsed = JSON.parse(raw) as number[]
+                setCompletedLessons(new Set(parsed))
+            }
+        } catch (_) {
+            // ignore
+        }
+    }, [moduleId])
+
+    const allLessons = useMemo(() => sections.flatMap(section => section.lessons), [sections])
+    useEffect(() => {
+        const total = allLessons.length || 1
+        const done = [...completedLessons].filter(id => allLessons.some(l => l.id === id)).length
+        setProgressPercent(Math.round((done / total) * 100))
+    }, [allLessons, completedLessons])
+
+    const toggleCompleted = (id: number) => {
+        const next = new Set(completedLessons)
+        if (next.has(id)) next.delete(id)
+        else next.add(id)
+        setCompletedLessons(next)
+        const completedKey = `ecampus.module.${moduleId}.completedLessons`
+        if (typeof window !== 'undefined') {
+            window.localStorage.setItem(completedKey, JSON.stringify([...next]))
+        }
     }
+
+    const toggleSection = (sectionId: number) => {
+        setExpandedSections(prev => {
+            const next = new Set(prev)
+            if (next.has(sectionId)) next.delete(sectionId)
+            else next.add(sectionId)
+            return next
+        })
+    }
+
+    useEffect(() => {
+        // Ensure section containing current lesson is expanded
+        const container = sections.find(s => s.lessons.some(l => l.id === currentLessonId))
+        if (container && !expandedSections.has(container.id)) {
+            setExpandedSections(prev => new Set(prev).add(container.id))
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentLessonId])
+
+    const getSectionDuration = (section: SectionData) =>
+        section.lessons.reduce((acc, l) => acc + (l.duration || 0), 0)
 
     const handleLessonClick = (lessonId: number) => {
         setCurrentLessonId(lessonId)
@@ -123,7 +184,6 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
     }
 
     // Get all lessons in order for previous/next navigation
-    const allLessons = sections.flatMap(section => section.lessons)
     const currentLessonIndex = allLessons.findIndex(l => l.id === currentLessonId)
     const previousLesson = currentLessonIndex > 0 ? allLessons[currentLessonIndex - 1] : null
     const nextLesson = currentLessonIndex < allLessons.length - 1 ? allLessons[currentLessonIndex + 1] : null
@@ -134,144 +194,133 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
         acc + section.lessons.reduce((sectionAcc, lesson) => sectionAcc + (lesson.duration || 0), 0), 0
     )
 
-    // Mock completed lessons (you'd get this from your backend)
-    const completedLessons = new Set([1, 2]) // Example completed lesson IDs
+    const isCurrentCompleted = completedLessons.has(currentLessonId)
+    const currentSection = useMemo(() => sections.find(s => s.lessons.some(l => l.id === currentLessonId)), [sections, currentLessonId])
+
+    // Static demo data for sidebar (can be swapped with real data later)
+    const stationArea = {
+        area: 'Kitchen - Prep Area',
+        station: 'Hot Line / Equipment Station',
+        sectionLabel: currentSection?.name || 'General'
+    }
+    const equipmentList = [
+        'Chef Knife',
+        'Cutting Board',
+        'Food Thermometer',
+        'Heat-resistant Gloves',
+        'Sanitizing Towels'
+    ]
+    const ingredientsList = [
+        'Tomatoes',
+        'Olive Oil',
+        'Garlic',
+        'Basil',
+        'Salt & Pepper'
+    ]
 
     // Extract YouTube video ID from lesson's videoUrl
     const youtubeVideoId = lesson?.videoUrl ? extractYouTubeId(lesson.videoUrl) : null
 
     return (
-        <div className="min-h-screen bg-gray-50" style={{ fontFamily: 'Inter, sans-serif' }}>
-            {/* Remix Icon CSS */}
-            <link 
-                rel="stylesheet" 
-                href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" 
-            />
-            
-            {/* Top Navigation */}
-            <nav className="fixed top-0 left-0 w-full z-50 shadow-lg border-b border-green-600/20 px-12 py-3 backdrop-blur-sm" 
-                 style={{ 
-                   background: 'linear-gradient(135deg, #01A252 0%, #029951 100%)',
-                   boxShadow: '0 10px 40px rgba(1, 162, 82, 0.15)'
-                 }}>
-              <div className="flex items-center justify-between">
-                {/* Logo */}
-                <div className="flex items-center">
-                  <div className="h-12 w-28 rounded-xl flex items-center justify-center ">
-                    <Image src="/logo.jpg" alt="logo" width={180} height={180} className="rounded-lg" />
-                  </div>
-                </div>
-                
-                {/* Navigation Items */}
-                <div className="flex items-center space-x-6">
-                  {navItems.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => handleNavClick(item.id)}
-                      className={`group flex flex-col items-center text-white/90 hover:text-white transition-all duration-300 px-4 py-2 rounded-xl relative overflow-hidden ${
-                        activeNav === item.id ? 'active' : ''
-                      }`}
-                      style={{
-                        ...(activeNav === item.id && {
-                          background: 'rgba(255, 255, 255, 0.15)',
-                          backdropFilter: 'blur(10px)',
-                          boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.1)'
-                        })
-                      }}
-                    >
-                      <i className={`${item.icon} text-xl mb-1 transform group-hover:scale-110 transition-transform duration-300`}></i>
-                      <span className="text-xs font-medium uppercase tracking-wide">
-                        {item.id}
-                      </span>
-                      {activeNav === item.id && (
-                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-white rounded-full"></div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                
-                {/* Search Button and Logout */}
-                <div className="flex items-center space-x-3">
-                  <button className="w-11 h-11 flex items-center justify-center text-white/90 hover:text-white rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                    <i className="ri-search-line text-lg"></i>
-                  </button>
-                  <Logout />
-                </div>
-              </div>
-            </nav>
-
+        <div className=" bg-gray-50">
             {/* Main Content */}
             <div className="pt-20 bg-white min-h-screen">
                 <div className="flex">
                     {/* Course Sidebar */}
                     <div className="w-80 bg-gray-50 border-r border-gray-200" style={{ height: 'calc(100vh - 80px)', overflowY: 'auto' }}>
                         {/* Course Header */}
-                        <div className="p-4 bg-white border-b">
-                            <h3 className="font-bold text-gray-800 mb-1">{module?.name || 'Training Course'}</h3>
+                        <div className="p-4 bg-white border-b sticky top-0 z-10">
+                            <h3 className="font-bold text-gray-800 mb-1 truncate">{module?.name || 'Training Course'}</h3>
                             <p className="text-sm text-gray-600">
                                 {sections.length} sections • {totalLectures} lectures • {formatDuration(totalDuration)}
                             </p>
                             <div className="mt-3">
                                 <div className="flex justify-between text-xs text-gray-600 mb-1">
                                     <span>Progress</span>
-                                    <span>25%</span>
+                                    <span>{progressPercent}%</span>
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div className="bg-green-600 h-2 rounded-full" style={{ width: '25%' }}></div>
+                                    <div className="bg-green-600 h-2 rounded-full" style={{ width: `${progressPercent}%` }}></div>
+                                </div>
+                                <div className="mt-3 flex gap-2">
+                                    <button
+                                        onClick={() => setExpandedSections(new Set(sections.map(s => s.id)))}
+                                        className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                    >
+                                        Expand all
+                                    </button>
+                                    <button
+                                        onClick={() => setExpandedSections(new Set())}
+                                        className="text-xs px-2 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                    >
+                                        Collapse all
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Course Sections */}
-                        <div>
-                            {sections.map((section) => (
-                                <div key={section.id}>
-                                    {/* Section Header */}
-                                    <div className="px-4 py-3 bg-gray-100 border-b border-gray-200 font-semibold text-sm text-gray-700 flex items-center">
-                                        {getSectionIcon(section.name)}
-                                        {section.name}
+                        {/* Course Sections (Accordion) */}
+                        <div className="pb-8">
+                            {sections.map((section) => {
+                                const isOpen = expandedSections.has(section.id)
+                                const sectionDuration = getSectionDuration(section)
+                                return (
+                                    <div key={section.id} className="border-b border-gray-200">
+                                        <button
+                                            onClick={() => toggleSection(section.id)}
+                                            className="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 flex items-center justify-between text-sm font-semibold text-gray-700"
+                                        >
+                                            <span className="flex items-center text-sm">
+                                                {getSectionIcon(section.name)}
+                                                {section.name}
+                                            </span>
+                                            <span className="flex items-center gap-3 text-gray-600 font-normal">
+                                                <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                                            </span>
+                                        </button>
+                                        {isOpen && (
+                                            <div className="animate-[accordion-down_200ms_ease-out]">
+                                                {section.lessons.map((sectionLesson) => {
+                                                    const isActive = sectionLesson.id === currentLessonId
+                                                    const isCompleted = completedLessons.has(sectionLesson.id)
+                                                    return (
+                                                        <a
+                                                            key={sectionLesson.id}
+                                                            href={`/modules/${moduleId}/lessons/${sectionLesson.id}`}
+                                                            onClick={() => handleLessonClick(sectionLesson.id)}
+                                                            className={`flex items-center p-3 border-t border-gray-100 cursor-pointer transition-all duration-200 hover:bg-gray-100 ${
+                                                                isActive
+                                                                    ? isCompleted
+                                                                        ? 'bg-green-50 border-l-4 border-green-500'
+                                                                        : 'bg-blue-50 border-l-4 border-blue-500'
+                                                                    : isCompleted
+                                                                        ? 'bg-green-50'
+                                                                        : ''
+                                                            }`}
+                                                        >
+                                                            <div className="mr-3">
+                                                                {getLessonIcon(sectionLesson.type || 'TEXT', isCompleted)}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className={`text-sm font-medium truncate ${
+                                                                    isCompleted ? 'text-gray-600' : 'text-gray-800'
+                                                                }`}>
+                                                                    {sectionLesson.name}
+                                                                </div>
+                                                            </div>
+                                                            {sectionLesson.duration && (
+                                                                <div className="text-xs text-gray-500 ml-2">
+                                                                    {formatDuration(sectionLesson.duration)}
+                                                                </div>
+                                                            )}
+                                                        </a>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
-                                    
-                                                                         {/* Section Lessons */}
-                                     {section.lessons.map((sectionLesson) => {
-                                         const isActive = sectionLesson.id === currentLessonId
-                                         const isCompleted = completedLessons.has(sectionLesson.id)
-                                         
-                                         return (
-                                             <a
-                                                 key={sectionLesson.id}
-                                                 href={`/modules/${moduleId}/lessons/${sectionLesson.id}`}
-                                                 onClick={() => handleLessonClick(sectionLesson.id)}
-                                                 className={`flex items-center p-3 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-gray-100 ${
-                                                     isActive 
-                                                         ? isCompleted 
-                                                             ? 'bg-green-50 border-l-4 border-green-500' 
-                                                             : 'bg-blue-50 border-l-4 border-blue-500'
-                                                         : isCompleted 
-                                                             ? 'bg-green-50' 
-                                                             : ''
-                                                 }`}
-                                             >
-                                                 <div className="mr-3">
-                                                     {getLessonIcon(sectionLesson.type || 'TEXT', isCompleted)}
-                                                 </div>
-                                                 <div className="flex-1">
-                                                     <div className={`text-sm font-medium ${
-                                                         isCompleted ? 'text-gray-600' : 'text-gray-800'
-                                                     }`}>
-                                                         {sectionLesson.name}
-                                                     </div>
-                                                 </div>
-                                                 {sectionLesson.duration && (
-                                                     <div className="text-xs text-gray-500">
-                                                         {formatDuration(sectionLesson.duration)}
-                                                     </div>
-                                                 )}
-                                             </a>
-                                         )
-                                     })}
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     </div>
 
@@ -292,7 +341,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                             </nav>
                         </div>
 
-                                                 {/* Content Display based on lesson type */}
+                        {/* Content Display based on lesson type */}
                          {lesson?.type === 'VIDEO' ? (
                              /* Video Player */
                              <div className="bg-black rounded-lg overflow-hidden mb-6 relative max-w-4xl" style={{ aspectRatio: '16/9', height: '400px' }}>
@@ -393,11 +442,11 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                             <div className="flex items-center gap-4 text-sm text-gray-500">
                                 <span className="flex items-center">
                                     <Clock className="w-4 h-4 mr-1" />
-                                                                         Duration: {formatDuration(lesson?.duration || null) || 'N/A'}
+                                    Duration: {formatDuration(lesson?.duration || null) || 'N/A'}
                                 </span>
                                 <span className="flex items-center">
                                     <Eye className="w-4 h-4 mr-1" />
-                                    Progress: 60%
+                                    Progress: {progressPercent}%
                                 </span>
                                 <span className="flex items-center">
                                     <Calendar className="w-4 h-4 mr-1" />
@@ -406,7 +455,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                             </div>
                         </div>
 
-                                                 {/* Action Buttons */}
+                        {/* Action Buttons */}
                          <div className="flex items-center gap-4 mb-6">
                              {previousLesson ? (
                                  <a 
@@ -448,7 +497,62 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                                  <Bookmark className="w-4 h-4 mr-2" />
                                  Bookmark
                              </button>
+
+                              <button
+                                  onClick={() => toggleCompleted(currentLessonId)}
+                                  className={`${isCurrentCompleted ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} px-4 py-2 rounded-lg font-medium transition-colors`}
+                              >
+                                  {isCurrentCompleted ? 'Marked Completed' : 'Mark as Completed'}
+                              </button>
                          </div>
+                    </div>
+ 
+                    {/* Right Sidebar (static info) */}
+                    <div className="w-80 border-l border-gray-200 bg-gray-50 p-4 hidden lg:block">
+                        <div className="space-y-4">
+                            <div className="bg-white border border-gray-200 rounded-lg p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <MapPin className="w-4 h-4 text-green-600" />
+                                    <h4 className="text-sm font-semibold text-gray-800">Station & Area</h4>
+                                </div>
+                                <div className="text-sm text-gray-700 space-y-1">
+                                    <p><span className="font-medium text-gray-800">Area:</span> {stationArea.area}</p>
+                                    <p><span className="font-medium text-gray-800">Station:</span> {stationArea.station}</p>
+                                    <p><span className="font-medium text-gray-800">Section:</span> {stationArea.sectionLabel}</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-white border border-gray-200 rounded-lg p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <UtensilsCrossed className="w-4 h-4 text-green-600" />
+                                    <h4 className="text-sm font-semibold text-gray-800">Equipment Needed</h4>
+                                </div>
+                                <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+                                    {equipmentList.map(item => (
+                                        <li key={item}>{item}</li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            <div className="bg-white border border-gray-200 rounded-lg p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <ClipboardList className="w-4 h-4 text-green-600" />
+                                    <h4 className="text-sm font-semibold text-gray-800">Ingredients</h4>
+                                </div>
+                                <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 mb-3">
+                                    {ingredientsList.map(item => (
+                                        <li key={item}>{item}</li>
+                                    ))}
+                                </ul>
+                                <a
+                                    href="/ingredients"
+                                    className="inline-flex items-center gap-1 text-sm text-green-700 hover:text-green-800 font-semibold"
+                                >
+                                    View ingredients page
+                                    <ExternalLink className="w-4 h-4" />
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
