@@ -67,20 +67,20 @@ function CourseSection({ section, isExpanded, onToggle, moduleId }: {
     return (
         <div className="course-section border border-gray-200 mb-0.5 bg-white overflow-hidden first:rounded-t-lg last:rounded-b-lg">
             <div 
-                className="section-header p-6 cursor-pointer flex items-center justify-between bg-gradient-to-br from-gray-50 to-gray-100 border-b border-gray-200 hover:from-gray-100 hover:to-gray-200 transition-all duration-200"
+                className="section-header p-4 sm:p-6 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between bg-gradient-to-br from-gray-50 to-gray-100 border-b border-gray-200 hover:from-gray-100 hover:to-gray-200 transition-all duration-200 gap-3 sm:gap-0"
                 onClick={onToggle}
             >
-                <div>
-                    <div className="section-title font-semibold text-base text-gray-800">
+                <div className="flex-1">
+                    <div className="section-title font-semibold text-base sm:text-lg text-gray-800 pr-4 sm:pr-0">
                         {section.name}
                     </div>
                 </div>
-                <div className="flex items-center">
-                    <span className="section-meta text-sm text-gray-600 font-medium mr-4">
+                <div className="flex items-center justify-between w-full sm:w-auto">
+                    <span className="section-meta text-xs sm:text-sm text-gray-600 font-medium sm:mr-4">
                         {section.lessons.length} lectures • {formatDuration(totalDuration)}
                     </span>
                     <ChevronDown 
-                        className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+                        className={`w-5 h-5 text-gray-600 transition-transform duration-300 flex-shrink-0 ${
                             isExpanded ? 'rotate-180' : ''
                         }`}
                     />
@@ -92,28 +92,54 @@ function CourseSection({ section, isExpanded, onToggle, moduleId }: {
                     {section.lessons.map((lesson) => (
                         <div 
                             key={lesson.id}
-                            className="lesson-item flex items-center p-4 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 hover:translate-x-1 transition-all duration-200"
+                            className="lesson-item flex flex-col sm:flex-row items-start sm:items-center p-3 sm:p-4 border-b border-gray-100 last:border-b-0 hover:bg-gradient-to-br hover:from-gray-50 hover:to-gray-100 hover:translate-x-1 transition-all duration-200 gap-3 sm:gap-0"
                         >
-                            <div className="lesson-icon mr-4 transition-transform duration-200 hover:scale-110">
-                                {getLessonIcon(lesson.type || 'TEXT')}
+                            {/* Mobile: Top row with icon and duration */}
+                            <div className="flex items-center justify-between w-full sm:w-auto">
+                                <div className="flex items-center gap-3 flex-1">
+                                    <div className="lesson-icon transition-transform duration-200 hover:scale-110">
+                                        {getLessonIcon(lesson.type || 'TEXT')}
+                                    </div>
+                                    <Link 
+                                        href={`/modules/${moduleId}/lessons/${lesson.id}`}
+                                        className="flex-1 text-sm text-gray-700 font-medium hover:underline"
+                                    >
+                                        {lesson.name}
+                                    </Link>
+                                </div>
+                                
+                                {/* Duration - visible on mobile */}
+                                <span className="lesson-duration text-xs sm:hidden text-gray-600 font-medium ml-2">
+                                    {formatDuration(lesson.duration)}
+                                </span>
                             </div>
-                            <Link 
-                                href={`/modules/${moduleId}/lessons/${lesson.id}`}
-                                className="flex-1 text-sm text-gray-700 font-medium hover:underline"
-                            >
-                                {lesson.name}
-                            </Link>
+
+                            {/* Mobile: Bottom row with preview button (if exists) */}
                             {lesson.videoUrl && (
-                                <Link
-                                    href={`/modules/${moduleId}/lessons/${lesson.id}`}
-                                    className="lesson-preview text-purple-600 text-sm mr-4 font-semibold px-2 py-1 rounded hover:bg-purple-600 hover:text-white transition-all duration-200"
-                                >
-                                    Preview
-                                </Link>
+                                <div className="sm:hidden w-full">
+                                    <Link
+                                        href={`/modules/${moduleId}/lessons/${lesson.id}`}
+                                        className="inline-flex items-center text-purple-600 text-xs font-semibold px-3 py-1.5 rounded-md bg-purple-50 hover:bg-purple-600 hover:text-white transition-all duration-200"
+                                    >
+                                        Preview Lesson
+                                    </Link>
+                                </div>
                             )}
-                            <span className="lesson-duration text-sm text-gray-600 min-w-16 text-right font-medium">
-                                {formatDuration(lesson.duration)}
-                            </span>
+
+                            {/* Desktop: Preview and duration */}
+                            <div className="hidden sm:flex items-center gap-4 ml-auto">
+                                {lesson.videoUrl && (
+                                    <Link
+                                        href={`/modules/${moduleId}/lessons/${lesson.id}`}
+                                        className="lesson-preview text-purple-600 text-sm font-semibold px-2 py-1 rounded hover:bg-purple-600 hover:text-white transition-all duration-200"
+                                    >
+                                        Preview
+                                    </Link>
+                                )}
+                                <span className="lesson-duration text-sm text-gray-600 min-w-16 text-right font-medium">
+                                    {formatDuration(lesson.duration)}
+                                </span>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -128,6 +154,7 @@ export default function CourseContent({ module, sections }: CourseContentProps) 
     )
     const [search, setSearch] = useState("")
     const [resumeLessonId, setResumeLessonId] = useState<number | null>(null)
+    const [isClient, setIsClient] = useState(false)
     
 
     const toggleSection = (sectionId: number) => {
@@ -146,15 +173,21 @@ export default function CourseContent({ module, sections }: CourseContentProps) 
         setExpandedSections(new Set(sections.map(s => s.id)))
     }
 
+    // Set client-side flag to prevent hydration mismatches
     useEffect(() => {
-        const moduleKey = `ecampus.module.${module?.id}.lastLessonId`
+        setIsClient(true)
+    }, [])
+
+    useEffect(() => {
+        if (!isClient || !module?.id) return
+        const moduleKey = `ecampus.module.${module.id}.lastLessonId`
         try {
-            const lastIdRaw = typeof window !== 'undefined' ? window.localStorage.getItem(moduleKey) : null
+            const lastIdRaw = window.localStorage.getItem(moduleKey)
             if (lastIdRaw) setResumeLessonId(parseInt(lastIdRaw))
         } catch (_) {
-            // ignore
+            // ignore localStorage errors
         }
-    }, [module?.id])
+    }, [module?.id, isClient])
 
     const totalLectures = sections.reduce((acc, section) => acc + section.lessons.length, 0)
     const totalDuration = sections.reduce((acc, section) => 
@@ -164,9 +197,9 @@ export default function CourseContent({ module, sections }: CourseContentProps) 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
             {/* Main Content (account for fixed StaffNavbar) */}
-            <div className="bg-transparent pt-20">
+            <div className="bg-transparent pt-14 md:pt-20">
                 {/* Header Section */}
-                <div className="relative px-12 py-8 overflow-hidden">
+                <div className="relative px-4 md:px-12 py-8 overflow-hidden">
                     <div className="absolute inset-0">
                         <div 
                             className="w-full h-full bg-cover bg-center bg-no-repeat"
@@ -203,36 +236,42 @@ export default function CourseContent({ module, sections }: CourseContentProps) 
                 </div>
 
                 {/* Course Structure Section */}
-                <div className="px-12 py-10">
-                    <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex items-center gap-3 text-gray-700">
-                            <span className="text-gray-600">
-                                {sections.length} sections • {totalLectures} lectures • {formatDuration(totalDuration)} total length
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-72">
-                                <Input
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Search lessons..."
-                                    className="h-10 bg-white border-gray-200"
-                                />
+                <div className="px-4 md:px-12 py-10">
+                    <div className="mb-6 flex flex-col gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div className="flex items-center gap-3 text-gray-700">
+                                <span className="text-sm sm:text-base text-gray-600">
+                                    {sections.length} sections • {totalLectures} lectures • {formatDuration(totalDuration)} total length
+                                </span>
                             </div>
-                            <button 
-                                onClick={expandAllSections}
-                                className="inline-flex items-center gap-1.5 text-purple-700 font-medium hover:underline"
-                            >
-                                <ChevronDown className="w-4 h-4" />
-                                Expand all
-                            </button>
-                            <button 
-                                onClick={() => setExpandedSections(new Set())}
-                                className="inline-flex items-center gap-1.5 text-purple-700 font-medium hover:underline"
-                            >
-                                <ChevronUp className="w-4 h-4" />
-                                Collapse all
-                            </button>
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                <div className="w-full sm:w-72">
+                                    <Input
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Search lessons..."
+                                        className="h-10 bg-white border-gray-200"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-3 justify-center sm:justify-start">
+                                    <button 
+                                        onClick={expandAllSections}
+                                        className="inline-flex items-center gap-1.5 text-purple-700 font-medium hover:underline text-sm"
+                                    >
+                                        <ChevronDown className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Expand all</span>
+                                        <span className="sm:hidden">Expand</span>
+                                    </button>
+                                    <button 
+                                        onClick={() => setExpandedSections(new Set())}
+                                        className="inline-flex items-center gap-1.5 text-purple-700 font-medium hover:underline text-sm"
+                                    >
+                                        <ChevronUp className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Collapse all</span>
+                                        <span className="sm:hidden">Collapse</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -249,8 +288,8 @@ export default function CourseContent({ module, sections }: CourseContentProps) 
                         return (
                             <div className="course-sections">
                                 {filtered.length === 0 ? (
-                                    <div className="bg-white border border-dashed border-gray-300 rounded-lg p-10 text-center text-gray-600">
-                                        No lessons found for "{search}"
+                                    <div className="bg-white border border-dashed border-gray-300 rounded-lg p-6 sm:p-10 text-center text-gray-600">
+                                        <div className="text-sm sm:text-base">No lessons found for "{search}"</div>
                                     </div>
                                 ) : (
                                     filtered.map((section) => (

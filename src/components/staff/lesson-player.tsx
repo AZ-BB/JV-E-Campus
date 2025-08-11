@@ -109,6 +109,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
     const [currentLessonId, setCurrentLessonId] = useState(parseInt(lessonId))
     const [completedLessons, setCompletedLessons] = useState<Set<number>>(new Set())
     const [progressPercent, setProgressPercent] = useState(0)
+    const [isClient, setIsClient] = useState(false)
     const [expandedSections, setExpandedSections] = useState<Set<number>>(() => {
         const initial = new Set<number>()
         const currentSection = sections.find(s => s.lessons.some(l => l.id === parseInt(lessonId)))
@@ -117,17 +118,25 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
         return initial
     })
 
+    // Set client-side flag to prevent hydration mismatches
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
+
     // Persist last watched lesson and completed lessons in localStorage
     useEffect(() => {
+        if (!isClient) return
         const moduleKey = `ecampus.module.${moduleId}.lastLessonId`
-        if (typeof window !== 'undefined') {
+        try {
             window.localStorage.setItem(moduleKey, String(currentLessonId))
+        } catch (_) {
+            // ignore localStorage errors
         }
-    }, [moduleId, currentLessonId])
+    }, [moduleId, currentLessonId, isClient])
 
     useEffect(() => {
+        if (!isClient) return
         const completedKey = `ecampus.module.${moduleId}.completedLessons`
-        if (typeof window === 'undefined') return
         try {
             const raw = window.localStorage.getItem(completedKey)
             if (raw) {
@@ -137,7 +146,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
         } catch (_) {
             // ignore
         }
-    }, [moduleId])
+    }, [moduleId, isClient])
 
     const allLessons = useMemo(() => sections.flatMap(section => section.lessons), [sections])
     useEffect(() => {
@@ -151,9 +160,14 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
         if (next.has(id)) next.delete(id)
         else next.add(id)
         setCompletedLessons(next)
-        const completedKey = `ecampus.module.${moduleId}.completedLessons`
-        if (typeof window !== 'undefined') {
-            window.localStorage.setItem(completedKey, JSON.stringify([...next]))
+        
+        if (isClient) {
+            const completedKey = `ecampus.module.${moduleId}.completedLessons`
+            try {
+                window.localStorage.setItem(completedKey, JSON.stringify([...next]))
+            } catch (_) {
+                // ignore localStorage errors
+            }
         }
     }
 
@@ -222,12 +236,12 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
     const youtubeVideoId = lesson?.videoUrl ? extractYouTubeId(lesson.videoUrl) : null
 
     return (
-        <div className=" bg-gray-50">
+        <div className="bg-gray-50">
             {/* Main Content */}
             <div className="pt-20 bg-white min-h-screen">
-                <div className="flex">
-                    {/* Course Sidebar */}
-                    <div className="w-80 bg-gray-50 border-r border-gray-200" style={{ height: 'calc(100vh - 80px)', overflowY: 'auto' }}>
+                <div className="flex flex-col lg:flex-row">
+                    {/* Course Sidebar - Hidden on mobile, shown at bottom */}
+                    <div className="hidden lg:block w-80 bg-gray-50 border-r border-gray-200" style={{ height: 'calc(100vh - 80px)', overflowY: 'auto' }}>
                         {/* Course Header */}
                         <div className="p-4 bg-white border-b sticky top-0 z-10">
                             <h3 className="font-bold text-gray-800 mb-1 truncate">{module?.name || 'Training Course'}</h3>
@@ -325,30 +339,30 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                     </div>
 
                     {/* Video Player Section */}
-                    <div className="flex-1 p-6">
+                    <div className="flex-1 p-4 lg:p-6">
                         {/* Breadcrumb */}
                         <div className="mb-4">
-                            <nav className="flex items-center space-x-2 text-sm">
-                                <a href={`/modules/${moduleId}`} className="text-gray-600 hover:text-gray-800">
+                            <nav className="flex items-center space-x-2 text-xs sm:text-sm overflow-x-auto">
+                                <a href={`/modules/${moduleId}`} className="text-gray-600 hover:text-gray-800 whitespace-nowrap">
                                     {module?.name || 'Training'}
                                 </a>
-                                <ChevronRight className="w-4 h-4 text-gray-400" />
-                                <a href="#" className="text-gray-600 hover:text-gray-800">
+                                <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                                <a href="#" className="text-gray-600 hover:text-gray-800 whitespace-nowrap">
                                     {sections.find(s => s.lessons.some(l => l.id === currentLessonId))?.name || 'Section'}
                                 </a>
-                                <ChevronRight className="w-4 h-4 text-gray-400" />
-                                <span className="text-gray-800 font-medium">{lesson?.name}</span>
+                                <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                                <span className="text-gray-800 font-medium truncate">{lesson?.name}</span>
                             </nav>
                         </div>
 
                         {/* Content Display based on lesson type */}
                          {lesson?.type === 'VIDEO' ? (
                              /* Video Player */
-                             <div className="bg-black rounded-lg overflow-hidden mb-6 relative max-w-4xl" style={{ aspectRatio: '16/9', height: '400px' }}>
+                             <div className="bg-black rounded-lg overflow-hidden mb-6 relative w-full max-w-4xl" style={{ aspectRatio: '16/9' }}>
                                  {youtubeVideoId ? (
                                      <iframe
                                          className="w-full h-full"
-                                         src={`https://www.youtube.com/embed/${youtubeVideoId}?enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`}
+                                         src={`https://www.youtube.com/embed/${youtubeVideoId}?enablejsapi=1${isClient ? `&origin=${window.location.origin}` : ''}`}
                                          title={lesson?.name || 'Training Video'}
                                          frameBorder="0"
                                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -369,7 +383,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                              </div>
                          ) : lesson?.type === 'TEXT' ? (
                              /* Text Content */
-                             <div className="bg-white rounded-lg border border-gray-200 p-8 mb-6 max-w-4xl">
+                             <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-8 mb-6 w-full max-w-4xl">
                                  <div className="flex items-center mb-4">
                                      <FileText className="w-6 h-6 text-blue-500 mr-3" />
                                      <span className="text-sm font-medium text-gray-600 bg-blue-50 px-3 py-1 rounded-full">
@@ -406,7 +420,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                              </div>
                          ) : lesson?.type === 'QUIZ' ? (
                              /* Quiz Content */
-                             <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg border border-yellow-200 p-8 mb-6 max-w-4xl">
+                             <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg border border-yellow-200 p-4 sm:p-8 mb-6 w-full max-w-4xl">
                                  <div className="flex items-center mb-4">
                                      <Award className="w-6 h-6 text-yellow-600 mr-3" />
                                      <span className="text-sm font-medium text-yellow-700 bg-yellow-100 px-3 py-1 rounded-full">
@@ -424,7 +438,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                              </div>
                          ) : (
                              /* Default/Unknown Type */
-                             <div className="bg-gray-50 rounded-lg border border-gray-200 p-8 mb-6 max-w-4xl">
+                             <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 sm:p-8 mb-6 w-full max-w-4xl">
                                  <div className="text-center py-12">
                                      <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                                      <p className="text-gray-500 text-lg">Content type not recognized</p>
@@ -435,11 +449,11 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
 
                         {/* Video Info */}
                         <div className="mb-6">
-                            <h1 className="text-2xl font-bold text-gray-800 mb-2">{lesson?.name}</h1>
-                            <p className="text-gray-600 mb-4">
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">{lesson?.name}</h1>
+                            <p className="text-sm sm:text-base text-gray-600 mb-4">
                                 {lesson?.description || 'Learn the essential skills and knowledge for this training module.'}
                             </p>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500">
                                 <span className="flex items-center">
                                     <Clock className="w-4 h-4 mr-1" />
                                     Duration: {formatDuration(lesson?.duration || null) || 'N/A'}
@@ -456,59 +470,167 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                         </div>
 
                         {/* Action Buttons */}
-                         <div className="flex items-center gap-4 mb-6">
-                             {previousLesson ? (
-                                 <a 
-                                     href={`/modules/${moduleId}/lessons/${previousLesson.id}`}
-                                     className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
-                                 >
-                                     <ArrowLeft className="w-4 h-4 mr-2" />
-                                     Previous Lesson
-                                 </a>
-                             ) : (
-                                 <button 
-                                     disabled 
-                                     className="bg-gray-50 text-gray-400 px-4 py-2 rounded-lg font-medium flex items-center cursor-not-allowed"
-                                 >
-                                     <ArrowLeft className="w-4 h-4 mr-2" />
-                                     Previous Lesson
-                                 </button>
-                             )}
+                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-6">
+                             <div className="flex gap-3 sm:gap-4">
+                                 {previousLesson ? (
+                                     <a 
+                                         href={`/modules/${moduleId}/lessons/${previousLesson.id}`}
+                                         className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
+                                     >
+                                         <ArrowLeft className="w-4 h-4 mr-1 sm:mr-2" />
+                                         <span className="hidden sm:inline">Previous Lesson</span>
+                                         <span className="sm:hidden">Previous</span>
+                                     </a>
+                                 ) : (
+                                     <button 
+                                         disabled 
+                                         className="bg-gray-50 text-gray-400 px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center cursor-not-allowed text-sm"
+                                     >
+                                         <ArrowLeft className="w-4 h-4 mr-1 sm:mr-2" />
+                                         <span className="hidden sm:inline">Previous Lesson</span>
+                                         <span className="sm:hidden">Previous</span>
+                                     </button>
+                                 )}
+                                 
+                                 {nextLesson ? (
+                                     <a 
+                                         href={`/modules/${moduleId}/lessons/${nextLesson.id}`}
+                                         className="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm"
+                                     >
+                                         <span className="hidden sm:inline">Next Lesson</span>
+                                         <span className="sm:hidden">Next</span>
+                                         <ArrowRight className="w-4 h-4 ml-1 sm:ml-2" />
+                                     </a>
+                                 ) : (
+                                     <button 
+                                         disabled 
+                                         className="bg-gray-50 text-gray-400 px-3 sm:px-4 py-2 rounded-lg font-medium flex items-center cursor-not-allowed text-sm"
+                                     >
+                                         <span className="hidden sm:inline">Next Lesson</span>
+                                         <span className="sm:hidden">Next</span>
+                                         <ArrowRight className="w-4 h-4 ml-1 sm:ml-2" />
+                                     </button>
+                                 )}
+                             </div>
                              
-                             {nextLesson ? (
-                                 <a 
-                                     href={`/modules/${moduleId}/lessons/${nextLesson.id}`}
-                                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center"
-                                 >
-                                     Next Lesson
-                                     <ArrowRight className="w-4 h-4 ml-2" />
-                                 </a>
-                             ) : (
-                                 <button 
-                                     disabled 
-                                     className="bg-gray-50 text-gray-400 px-4 py-2 rounded-lg font-medium flex items-center cursor-not-allowed"
-                                 >
-                                     Next Lesson
-                                     <ArrowRight className="w-4 h-4 ml-2" />
+                             <div className="flex gap-3 sm:gap-4">
+                                 <button className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors flex items-center text-sm">
+                                     <Bookmark className="w-4 h-4 mr-1 sm:mr-2" />
+                                     <span className="hidden sm:inline">Bookmark</span>
+                                     <span className="sm:hidden">Save</span>
                                  </button>
-                             )}
-                             
-                             <button className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg font-medium transition-colors flex items-center">
-                                 <Bookmark className="w-4 h-4 mr-2" />
-                                 Bookmark
-                             </button>
 
-                              <button
-                                  onClick={() => toggleCompleted(currentLessonId)}
-                                  className={`${isCurrentCompleted ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} px-4 py-2 rounded-lg font-medium transition-colors`}
-                              >
-                                  {isCurrentCompleted ? 'Marked Completed' : 'Mark as Completed'}
-                              </button>
+                                  <button
+                                      onClick={() => toggleCompleted(currentLessonId)}
+                                      className={`${isCurrentCompleted ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-sm`}
+                                  >
+                                      <span className="hidden sm:inline">{isCurrentCompleted ? 'Marked Completed' : 'Mark as Completed'}</span>
+                                      <span className="sm:hidden">{isCurrentCompleted ? 'Completed' : 'Complete'}</span>
+                                  </button>
+                             </div>
                          </div>
+                    </div>
+
+                    {/* Mobile Course Sidebar - Shown at bottom on mobile */}
+                    <div className="lg:hidden bg-gray-50 border-t border-gray-200">
+                        {/* Course Header */}
+                        <div className="p-4 bg-white border-b">
+                            <h3 className="font-bold text-gray-800 mb-1 text-lg">{module?.name || 'Training Course'}</h3>
+                            <p className="text-sm text-gray-600">
+                                {sections.length} sections • {totalLectures} lectures • {formatDuration(totalDuration)}
+                            </p>
+                            <div className="mt-3">
+                                <div className="flex justify-between text-xs text-gray-600 mb-1">
+                                    <span>Progress</span>
+                                    <span>{progressPercent}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className="bg-green-600 h-2 rounded-full" style={{ width: `${progressPercent}%` }}></div>
+                                </div>
+                                <div className="mt-3 flex gap-2 justify-center">
+                                    <button
+                                        onClick={() => setExpandedSections(new Set(sections.map(s => s.id)))}
+                                        className="text-xs px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                    >
+                                        Expand all
+                                    </button>
+                                    <button
+                                        onClick={() => setExpandedSections(new Set())}
+                                        className="text-xs px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700"
+                                    >
+                                        Collapse all
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Course Sections (Accordion) */}
+                        <div className="pb-4">
+                            {sections.map((section) => {
+                                const isOpen = expandedSections.has(section.id)
+                                const sectionDuration = getSectionDuration(section)
+                                return (
+                                    <div key={section.id} className="border-b border-gray-200">
+                                        <button
+                                            onClick={() => toggleSection(section.id)}
+                                            className="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 flex items-center justify-between text-sm font-semibold text-gray-700"
+                                        >
+                                            <span className="flex items-center text-sm">
+                                                {getSectionIcon(section.name)}
+                                                {section.name}
+                                            </span>
+                                            <span className="flex items-center gap-3 text-gray-600 font-normal">
+                                                <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                                            </span>
+                                        </button>
+                                        {isOpen && (
+                                            <div className="animate-[accordion-down_200ms_ease-out]">
+                                                {section.lessons.map((sectionLesson) => {
+                                                    const isActive = sectionLesson.id === currentLessonId
+                                                    const isCompleted = completedLessons.has(sectionLesson.id)
+                                                    return (
+                                                        <a
+                                                            key={sectionLesson.id}
+                                                            href={`/modules/${moduleId}/lessons/${sectionLesson.id}`}
+                                                            onClick={() => handleLessonClick(sectionLesson.id)}
+                                                            className={`flex items-center p-3 border-t border-gray-100 cursor-pointer transition-all duration-200 hover:bg-gray-100 ${
+                                                                isActive
+                                                                    ? isCompleted
+                                                                        ? 'bg-green-50 border-l-4 border-green-500'
+                                                                        : 'bg-blue-50 border-l-4 border-blue-500'
+                                                                    : isCompleted
+                                                                        ? 'bg-green-50'
+                                                                        : ''
+                                                            }`}
+                                                        >
+                                                            <div className="mr-3">
+                                                                {getLessonIcon(sectionLesson.type || 'TEXT', isCompleted)}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className={`text-sm font-medium truncate ${
+                                                                    isCompleted ? 'text-gray-600' : 'text-gray-800'
+                                                                }`}>
+                                                                    {sectionLesson.name}
+                                                                </div>
+                                                            </div>
+                                                            {sectionLesson.duration && (
+                                                                <div className="text-xs text-gray-500 ml-2">
+                                                                    {formatDuration(sectionLesson.duration)}
+                                                                </div>
+                                                            )}
+                                                        </a>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </div>
  
                     {/* Right Sidebar (static info) */}
-                    <div className="w-80 border-l border-gray-200 bg-gray-50 p-4 hidden lg:block">
+                    {/* <div className="w-80 border-l border-gray-200 bg-gray-50 p-4 hidden lg:block">
                         <div className="space-y-4">
                             <div className="bg-white border border-gray-200 rounded-lg p-4">
                                 <div className="flex items-center gap-2 mb-3">
@@ -553,7 +675,7 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                                 </a>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>
