@@ -55,6 +55,10 @@ export default function CareerPageContent({ modulesData, role }: CareerPageConte
           width: 60px;
           height: 60px;
         }
+        .progress-circle.w-12 {
+          width: 48px;
+          height: 48px;
+        }
         .progress-circle svg {
           width: 100%;
           height: 100%;
@@ -127,29 +131,47 @@ export default function CareerPageContent({ modulesData, role }: CareerPageConte
 
       <div className="bg-white min-h-screen pt-20">
         {/* Header Section */}
-        <div className="px-12 py-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">{role?.fullName} Training Path</h1>
-          <p className="text-lg text-gray-700 mb-6">
+        <div className="px-4 md:px-12 py-8 md:py-12">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4">{role?.fullName} Training Path</h1>
+          <p className="text-base sm:text-lg text-gray-700 mb-6">
             Your journey at Jon & Vinny's as a {role?.fullName} starts here!
           </p>
-          <p className="text-gray-600 leading-relaxed mb-12">
+          <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-8 md:mb-12">
             Throughout this training, you will acquire knowledge and skills in {role?.fullName}, hygiene procedures, creating great guest experiences, and much more.
           </p>
 
           {/* Introduction Section */}
           <div className="mb-12">
-            <div className="training-card flex items-center p-6 border border-gray-200" style={{"--card-color": "#2563eb", "--card-color-light": "#60a5fa"} as React.CSSProperties}>
-              <div className="flex-shrink-0 w-16 h-16 mr-6">
-                <div className="icon-container w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <i className="ri-information-line text-2xl text-blue-600"></i>
+            <div className="training-card flex flex-col sm:flex-row items-start sm:items-center p-4 sm:p-6 border border-gray-200" style={{"--card-color": "#2563eb", "--card-color-light": "#60a5fa"} as React.CSSProperties}>
+              {/* Mobile: Header row with icon and progress */}
+              <div className="flex items-center justify-between w-full sm:w-auto sm:justify-start mb-4 sm:mb-0">
+                <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 sm:mr-6">
+                  <div className="icon-container w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i className="ri-information-line text-xl sm:text-2xl text-blue-600"></i>
+                  </div>
+                </div>
+                
+                {/* Progress circle - visible on mobile */}
+                <div className="flex-shrink-0 sm:hidden">
+                  <div className="progress-circle progress-blue w-12 h-12">
+                    <svg viewBox="0 0 50 50" className="w-12 h-12">
+                      <circle className="background" cx="25" cy="25" r="20"></circle>
+                      <circle className="progress" cx="25" cy="25" r="20" style={{strokeDashoffset: "31.41"}}></circle>
+                    </svg>
+                    <div className="progress-text text-xs">75%</div>
+                  </div>
                 </div>
               </div>
-              <div className="flex-1">
+
+              {/* Content section */}
+              <div className="flex-1 sm:mr-6">
                 <p className="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">INTRODUCTION</p>
-                <h3 className="text-lg font-bold text-gray-800 mb-2">Training Introduction</h3>
-                <p className="text-gray-600">Our training material, platforms and journey explained.</p>
+                <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2">Training Introduction</h3>
+                <p className="text-sm sm:text-base text-gray-600">Our training material, platforms and journey explained.</p>
               </div>
-              <div className="flex-shrink-0 ml-6">
+
+              {/* Desktop progress circle */}
+              <div className="flex-shrink-0 hidden sm:block">
                 <div className="progress-circle progress-blue">
                   <svg viewBox="0 0 50 50">
                     <circle className="background" cx="25" cy="25" r="20"></circle>
@@ -163,7 +185,7 @@ export default function CareerPageContent({ modulesData, role }: CareerPageConte
 
           {/* Training Modules Section */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-8">Training Modules</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 sm:mb-8">Training Modules</h2>
             
             <div className="space-y-4">
               {modulesData.map((module, index) => {
@@ -184,20 +206,38 @@ export default function CareerPageContent({ modulesData, role }: CareerPageConte
                     className="block w-full"
                   >
                     <div
-                      className="training-card flex items-center p-6 border border-gray-200"
+                      className="training-card flex flex-col sm:flex-row items-start sm:items-center p-4 sm:p-6 border border-gray-200"
                       style={{"--card-color": colorScheme.primary, "--card-color-light": colorScheme.light} as React.CSSProperties}
                     >
-                      <div className="flex-shrink-0 w-16 h-16 mr-6">
-                        <div className={`icon-container w-16 h-16 ${colorScheme.bg} rounded-lg flex items-center justify-center`}>
-                          <i className={`${colorScheme.icon} text-2xl ${colorScheme.text}`}></i>
+                      {/* Mobile: Header row with icon and progress */}
+                      <div className="flex items-center justify-between w-full sm:w-auto sm:justify-start mb-4 sm:mb-0">
+                        <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 sm:mr-6">
+                          <div className={`icon-container w-12 h-12 sm:w-16 sm:h-16 ${colorScheme.bg} rounded-lg flex items-center justify-center`}>
+                            <i className={`${colorScheme.icon} text-xl sm:text-2xl ${colorScheme.text}`}></i>
+                          </div>
+                        </div>
+                        
+                        {/* Progress circle - visible on mobile */}
+                        <div className="flex-shrink-0 sm:hidden">
+                          <div className={`progress-circle ${progressColorClass} w-12 h-12`}>
+                            <svg viewBox="0 0 50 50" className="w-12 h-12">
+                              <circle className="background" cx="25" cy="25" r="20"></circle>
+                              <circle className="progress" cx="25" cy="25" r="20" style={{strokeDashoffset: strokeDashoffset.toString()}}></circle>
+                            </svg>
+                            <div className="progress-text text-xs">{progressPercentage}%</div>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex-1">
+
+                      {/* Content section */}
+                      <div className="flex-1 sm:mr-6">
                         <p className="text-blue-600 text-xs font-semibold uppercase tracking-wide mb-1">TRAINING MODULE</p>
-                        <h3 className="text-lg font-bold text-gray-800 mb-2">{module.name}</h3>
-                        <p className="text-gray-600">{module.description || module.slogan || "Essential training for your role."}</p>
+                        <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2">{module.name}</h3>
+                        <p className="text-sm sm:text-base text-gray-600">{module.description || module.slogan || "Essential training for your role."}</p>
                       </div>
-                      <div className="flex-shrink-0 ml-6">
+
+                      {/* Desktop progress circle */}
+                      <div className="flex-shrink-0 hidden sm:block">
                         <div className={`progress-circle ${progressColorClass}`}>
                           <svg viewBox="0 0 50 50">
                             <circle className="background" cx="25" cy="25" r="20"></circle>

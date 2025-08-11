@@ -30,9 +30,9 @@ export default async function Staff() {
 
 
   return (
-    <div className="bg-transparent">
+    <div className="bg-transparent pt-10">
       {/* Header Section */}
-      <div className="relative px-12 py-10 overflow-hidden">
+      <div className="relative px-4 md:px-12 py-16">
         <div className="absolute inset-0">
           {/* Food Background Image */}
           <div 
@@ -61,7 +61,7 @@ export default async function Staff() {
       </div>
 
       {/* Training Cards Section */}
-      <div className="px-12 py-16 relative">
+      <div className="px-4 md:px-12 py-16 relative">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-50 to-purple-50 rounded-full blur-3xl opacity-50"></div>
@@ -69,9 +69,9 @@ export default async function Staff() {
         </div>
         
         <div className="relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Choose Your Learning Path</h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          <div className="md:text-center text-left mb-12">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Choose Your Learning Path</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
               Select a career path to begin your journey. Each path is designed to build expertise 
               and prepare you for your next career milestone.
             </p>
