@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { lessons } from "@/db/schema/schema"
 import Logout from "@/components/logout"
 import Image from 'next/image'
+import Markdown from "@/components/ui/markdown"
 import { 
     PlayCircle, 
     FileText, 
@@ -391,19 +392,18 @@ export default function LessonPlayer({ lesson, module, sections, moduleId, lesso
                                      </span>
                                  </div>
                                  <div className="prose prose-lg max-w-none">
-                                     {lesson?.text ? (
-                                         <div 
-                                             className="text-gray-700 leading-relaxed whitespace-pre-wrap"
-                                             dangerouslySetInnerHTML={{ __html: lesson.text.replace(/\n/g, '<br />') }}
-                                         />
-                                     ) : (
-                                         <div className="text-center py-12">
-                                             <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                                             <p className="text-gray-500 text-lg">No text content available</p>
-                                             <p className="text-gray-400 text-sm">This lesson content is being prepared</p>
-                                         </div>
-                                     )}
-                                 </div>
+                                    {lesson?.text ? (
+                                        <div className="text-gray-700 leading-relaxed overflow-y-auto h-[calc(100vh-30rem)]">
+                                            <Markdown content={lesson.text} />
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12">
+                                            <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                            <p className="text-gray-500 text-lg">No text content available</p>
+                                            <p className="text-gray-400 text-sm">This lesson content is being prepared</p>
+                                        </div>
+                                    )}
+                                </div>
                                  {lesson?.documentUrl && (
                                      <div className="mt-6 pt-6 border-t border-gray-200">
                                          <a 
