@@ -1,0 +1,6 @@
+ALTER TABLE action_logs ALTER COLUMN actor_id DROP NOT NULL;
+
+ALTER TABLE action_logs ADD CONSTRAINT fk_actor_id
+FOREIGN KEY (actor_id)
+REFERENCES users(id)
+ON DELETE CASCADE;

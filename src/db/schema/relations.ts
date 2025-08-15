@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { modules, modulesRoles, staffRoles, usersInAuth, users, branches, staff, sections, actionLogs, lessons, bookmarks, progress } from "./schema";
+import { modules, modulesRoles, staffRoles, usersInAuth, users, branches, staff, sections, lessons, bookmarks, progress, actionLogs } from "./schema";
 
 export const modulesRolesRelations = relations(modulesRoles, ({one}) => ({
 	module: one(modules, {
@@ -58,7 +58,6 @@ export const usersRelations = relations(users, ({one, many}) => ({
 	sections_updatedBy: many(sections, {
 		relationName: "sections_updatedBy_users_id"
 	}),
-	actionLogs: many(actionLogs),
 	lessons_createdBy: many(lessons, {
 		relationName: "lessons_createdBy_users_id"
 	}),
@@ -67,6 +66,7 @@ export const usersRelations = relations(users, ({one, many}) => ({
 	}),
 	bookmarks: many(bookmarks),
 	progresses: many(progress),
+	actionLogs: many(actionLogs),
 }));
 
 export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
@@ -110,13 +110,6 @@ export const sectionsRelations = relations(sections, ({one, many}) => ({
 	lessons: many(lessons),
 }));
 
-export const actionLogsRelations = relations(actionLogs, ({one}) => ({
-	user: one(users, {
-		fields: [actionLogs.actorId],
-		references: [users.id]
-	}),
-}));
-
 export const lessonsRelations = relations(lessons, ({one, many}) => ({
 	user_createdBy: one(users, {
 		fields: [lessons.createdBy],
@@ -149,6 +142,13 @@ export const bookmarksRelations = relations(bookmarks, ({one}) => ({
 export const progressRelations = relations(progress, ({one}) => ({
 	user: one(users, {
 		fields: [progress.userId],
+		references: [users.id]
+	}),
+}));
+
+export const actionLogsRelations = relations(actionLogs, ({one}) => ({
+	user: one(users, {
+		fields: [actionLogs.actorId],
 		references: [users.id]
 	}),
 }));

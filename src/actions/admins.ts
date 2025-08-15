@@ -249,7 +249,7 @@ export const createAdminUser = async (
           role: UserRole.ADMIN,
           fullName: user.fullName,
           authUserId: authData.user.id,
-          createdBy: currentUser?.user?.user_metadata?.db_user_id || 1,
+          createdBy: currentUser?.user?.user_metadata?.db_user_id || 3,
           language: "en",
           profilePictureUrl: user.profilePictureUrl || "",
         })
@@ -303,7 +303,7 @@ export const createAdminUser = async (
 
     createLog({
       type: "CREATE_ADMIN_USER",
-      actorId: currentUser?.user?.user_metadata?.db_user_id || 1,
+      actorId: currentUser?.user?.user_metadata?.db_user_id || 3,
       actedOnId: dbUserId,
       actedOnType: "ADMIN_USER",
       message: "Admin user created with email: " + user.email,
